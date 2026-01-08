@@ -19,11 +19,15 @@ export function create(
     price: p,
     conversion: model.conversion(p),
   }))
-
   return Plot.plot({
     x: { label: 'Price' },
     y: { domain: [0, 1], grid: true, label: 'Conversion Rate' },
-    marks: [Plot.lineY(data, { x: 'price', y: 'conversion' })],
+    marks: [
+      Plot.ruleY([0]),
+      Plot.lineY(data, { x: 'price', y: 'conversion' }),
+      Plot.crosshair(data, { x: 'price', y: 'conversion' }),
+      Plot.tip(data, Plot.pointer({ x: 'price', y: 'conversion' })),
+    ],
     title: title || `${model.constructor.name} for conversion rates`,
     subtitle: subtitle || 'Clamped to [0, 1]',
   })
