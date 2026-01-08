@@ -1,4 +1,4 @@
-import { BaseDemandModel } from './base'
+import { BaseDemandModel } from './base.js'
 
 /**
  * Implements a demand model based on the Weibull distribution's survival function.

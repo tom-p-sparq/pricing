@@ -1,4 +1,4 @@
-import { BaseDemandModel } from './base'
+import { BaseDemandModel } from './base.js'
 
 /**
  * Implements a linear demand model parameterized by price elasticity at a reference point.

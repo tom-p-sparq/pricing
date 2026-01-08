@@ -1,4 +1,4 @@
-import { BaseDemandModel } from './base'
+import { BaseDemandModel } from './base.js'
 
 /**
  * Implements a log-logistic demand model.
