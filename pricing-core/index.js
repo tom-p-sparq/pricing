@@ -4,6 +4,7 @@ import { LogLogisticDemandModel } from './conversion/LogLogistic.js'
 import { LogisticDemandModel } from './conversion/Logistic.js'
 import { WeibullDemandModel } from './conversion/Weibull.js'
 import * as plotting from './plotting/index.js'
+import * as Inputs from 'https://esm.sh/@observablehq/inputs'
 
 /**
  * A namespace containing all available demand model classes.
@@ -16,4 +17,4 @@ const conversion = {
   WeibullDemandModel,
 }
 
-export { conversion, plotting }
+export { conversion, plotting, Inputs }
