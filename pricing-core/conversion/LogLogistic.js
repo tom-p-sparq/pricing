@@ -18,6 +18,15 @@ export class LogLogisticDemandModel extends BaseDemandModel {
    */
   constructor({ price, elasticity, conversion = 0.5 }) {
     super()
+    if (price <= 0) {
+      throw new Error('Price must be positive.')
+    }
+    if (elasticity >= 0) {
+      throw new Error('Elasticity must be negative.')
+    }
+    if (conversion <= 0 || conversion >= 1) {
+      throw new Error('Conversion must be strictly between 0 and 1.')
+    }
     /**
      * The shape parameter of the log-logistic distribution.
      * @protected
