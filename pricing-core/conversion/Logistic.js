@@ -11,35 +11,43 @@ import { BaseDemandModel } from './base.js'
  */
 export class LogisticDemandModel extends BaseDemandModel {
   /**
-   * @param {object} params
-   * @param {number} params.price The reference price (p_ref).
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
-   * @param {number} [params.conversion=0.5] The conversion rate (c_ref) at the reference price.
+   * @param {object} model_params
+   * @param {number} model_params.k The steepness parameter of the logistic function.
+   * @param {number} model_params.p0 The price at the inflection point of the logistic curve.
    */
-  constructor({ price, elasticity, conversion = 0.5 }) {
+  constructor({ k, p0 }) {
     super()
-    if (price <= 0) {
-      throw new Error('Price must be positive.')
-    }
-    if (elasticity >= 0) {
-      throw new Error('Elasticity must be negative.')
-    }
-    if (conversion <= 0 || conversion >= 1) {
-      throw new Error('Conversion must be strictly between 0 and 1.')
-    }
     /**
      * The steepness parameter of the logistic function.
      * @protected
      * @type {number}
      */
-    this.k = -elasticity / (price * (1 - conversion))
-    const logit = Math.log(1 / conversion - 1)
+    this.k = k
     /**
      * The price at the inflection point of the logistic curve (where conversion is 0.5).
      * @protected
      * @type {number}
      */
-    this.p0 = price - (logit / this.k)
+    this.p0 = p0
+  }
+
+  /**
+   * @override
+   */
+  /**
+   * Creates a new model instance from a reference point.
+   * @param {object} params
+   * @param {number} params.price The reference price.
+   * @param {number} params.conversion The conversion rate at the reference price.
+   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
+   * @returns {LogisticDemandModel} A new instance of the demand model.
+   */
+  static from_reference({ price, conversion, elasticity }) {
+    LogisticDemandModel._check_reference(price, conversion, elasticity)
+    const k = -elasticity / (price * (1 - conversion))
+    const logit = Math.log(1 / conversion - 1)
+    const p0 = price - (logit / k)
+    return new LogisticDemandModel({ k, p0 })
   }
 
   /**

@@ -11,36 +11,44 @@ import { BaseDemandModel } from './base.js'
  */
 export class LogLogisticDemandModel extends BaseDemandModel {
   /**
-   * @param {object} params
-   * @param {number} params.price The reference price.
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
-   * @param {number} [params.conversion=0.5] The conversion rate at the reference price.
+   * @param {object} model_params
+   * @param {number} model_params.p_shape The shape parameter of the log-logistic distribution.
+   * @param {number} model_params.K The scale parameter (median) of the log-logistic distribution.
    */
-  constructor({ price, elasticity, conversion = 0.5 }) {
+  constructor({ p_shape, K }) {
     super()
-    if (price <= 0) {
-      throw new Error('Price must be positive.')
-    }
-    if (elasticity >= 0) {
-      throw new Error('Elasticity must be negative.')
-    }
-    if (conversion <= 0 || conversion >= 1) {
-      throw new Error('Conversion must be strictly between 0 and 1.')
-    }
     /**
      * The shape parameter of the log-logistic distribution.
      * @protected
      * @type {number}
      */
-    this.p_shape = -elasticity / (1 - conversion)
-    const odds = conversion / (1 - conversion)
+    this.p_shape = p_shape
     /**
      * The scale parameter (median) of the log-logistic distribution.
      * This is the price at which the conversion rate is exactly 0.5.
      * @protected
      * @type {number}
      */
-    this.K = price * Math.pow(odds, 1 / this.p_shape)
+    this.K = K
+  }
+
+  /**
+   * @override
+   */
+  /**
+   * Creates a new model instance from a reference point.
+   * @param {object} params
+   * @param {number} params.price The reference price.
+   * @param {number} params.conversion The conversion rate at the reference price.
+   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
+   * @returns {LogLogisticDemandModel} A new instance of the demand model.
+   */
+  static from_reference({ price, conversion, elasticity }) {
+    LogLogisticDemandModel._check_reference(price, conversion, elasticity)
+    const p_shape = -elasticity / (1 - conversion)
+    const odds = conversion / (1 - conversion)
+    const K = price * Math.pow(odds, 1 / p_shape)
+    return new LogLogisticDemandModel({ p_shape, K })
   }
 
   /**

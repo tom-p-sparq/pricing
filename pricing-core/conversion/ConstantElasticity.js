@@ -10,22 +10,12 @@ import { BaseDemandModel } from './base.js'
  */
 export class ConstantElasticityDemandModel extends BaseDemandModel {
   /**
-   * @param {object} params
-   * @param {number} params.price The reference price.
-   * @param {number} params.elasticity The constant price elasticity of demand.
-   * @param {number} [params.conversion=0.5] The conversion rate at the reference price.
+   * @param {object} model_params
+   * @param {number} model_params.A The scaling constant for the model.
+   * @param {number} model_params.elasticity The constant price elasticity of demand.
    */
-  constructor({ price, elasticity, conversion = 0.5 }) {
+  constructor({ A, elasticity }) {
     super()
-    if (price <= 0) {
-      throw new Error('Price must be positive.')
-    }
-    if (elasticity >= 0) {
-      throw new Error('Elasticity must be negative.')
-    }
-    if (conversion <= 0 || conversion >= 1) {
-      throw new Error('Conversion must be strictly between 0 and 1.')
-    }
     /**
      * The constant price elasticity of demand (e).
      * @protected
@@ -37,7 +27,24 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
      * @protected
      * @type {number}
      */
-    this.A = conversion * Math.pow(price, -elasticity)
+    this.A = A
+  }
+
+  /**
+   * @override
+   */
+  /**
+   * Creates a new model instance from a reference point.
+   * @param {object} params
+   * @param {number} params.price The reference price.
+   * @param {number} params.conversion The conversion rate at the reference price.
+   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
+   * @returns {ConstantElasticityDemandModel} A new instance of the demand model.
+   */
+  static from_reference({ price, conversion, elasticity }) {
+    ConstantElasticityDemandModel._check_reference(price, conversion, elasticity)
+    const A = conversion * Math.pow(price, -elasticity)
+    return new ConstantElasticityDemandModel({ A, elasticity })
   }
 
   /**

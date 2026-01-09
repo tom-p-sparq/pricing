@@ -10,32 +10,37 @@ import { BaseDemandModel } from './base.js'
  */
 export class LinearDemandModel extends BaseDemandModel {
   /**
-   * @param {object} params
-   * @param {number} params.price The reference price (p0).
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
-   * @param {number} [params.conversion=0.5] The conversion rate (c0) at the reference price.
+   * @param {object} model_params
+   * @param {number} model_params.p0 The reference price.
+   * @param {number} model_params.c0 The conversion rate at the reference price.
+   * @param {number} model_params.b The slope of the linear demand curve.
    */
-  constructor({ price, elasticity, conversion = 0.5 }) {
+  constructor({ p0, c0, b }) {
     super()
-    if (price <= 0) {
-      throw new Error('Price must be positive.')
-    }
-    if (elasticity >= 0) {
-      throw new Error('Elasticity must be negative.')
-    }
-    if (conversion <= 0 || conversion >= 1) {
-      throw new Error('Conversion must be strictly between 0 and 1.')
-    }
-    /** @protected @type {number} */
-    this.p0 = price
-    /** @protected @type {number} */
-    this.c0 = conversion
-    /** @protected @type {number} */
-    this.b = elasticity * (conversion / price)
+    this.p0 = p0
+    this.c0 = c0
+    this.b = b
+  }
+
+  /**
+   * Creates a new model instance from a reference point.
+   * @override
+   * @param {object} params
+   * @param {number} params.price The reference price.
+   * @param {number} params.conversion The conversion rate at the reference price.
+   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
+   * @returns {LinearDemandModel} A new instance of the demand model.
+   */
+  static from_reference({ price, conversion, elasticity }) {
+    LinearDemandModel._check_reference(price, conversion, elasticity)
+    const b = elasticity * (conversion / price)
+
+    return new LinearDemandModel({ p0: price, c0: conversion, b })
   }
 
   /**
    * Calculates the conversion rate using the point-slope form of a linear equation.
+   * @override
    * @protected
    * @param {number} price The price for which to calculate the conversion rate.
    * @returns {number} The calculated conversion rate (before clamping).

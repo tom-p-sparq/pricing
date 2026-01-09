@@ -10,37 +10,45 @@ import { BaseDemandModel } from './base.js'
  */
 export class WeibullDemandModel extends BaseDemandModel {
   /**
-   * @param {object} params
-   * @param {number} params.price The reference price.
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
-   * @param {number} [params.conversion=0.5] The conversion rate at the reference price.
+   * @param {object} model_params
+   * @param {number} model_params.k The shape parameter (k) of the Weibull distribution.
+   * @param {number} model_params.lambda The scale parameter (lambda) of the Weibull distribution.
    */
-  constructor({ price, elasticity, conversion = 0.5 }) {
+  constructor({ k, lambda }) {
     super();
-    if (price <= 0) {
-      throw new Error('Price must be positive.')
-    }
-    if (elasticity >= 0) {
-      throw new Error('Elasticity must be negative.')
-    }
-    if (conversion <= 0 || conversion >= 1) {
-      throw new Error('Conversion must be strictly between 0 and 1.')
-    }
-
-    const logInvC = Math.log(1 / conversion);
     /**
      * The shape parameter (k) of the Weibull distribution.
      * @protected
      * @type {number}
      */
-    this.k = -elasticity / logInvC;
+    this.k = k;
 
     /**
      * The scale parameter (lambda) of the Weibull distribution.
      * @protected
      * @type {number}
      */
-    this.lambda = price / Math.pow(logInvC, 1 / this.k);
+    this.lambda = lambda;
+  }
+
+  /**
+   * @override
+   */
+  /**
+   * Creates a new model instance from a reference point.
+   * @param {object} params
+   * @param {number} params.price The reference price.
+   * @param {number} params.conversion The conversion rate at the reference price.
+   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
+   * @returns {WeibullDemandModel} A new instance of the demand model.
+   */
+  static from_reference({ price, conversion, elasticity }) {
+    WeibullDemandModel._check_reference(price, conversion, elasticity)
+    const logInvC = Math.log(1 / conversion);
+    const k = -elasticity / logInvC;
+    const lambda = price / Math.pow(logInvC, 1 / k);
+
+    return new WeibullDemandModel({ k, lambda });
   }
 
   /**

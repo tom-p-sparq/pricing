@@ -54,7 +54,7 @@
           elasticity: elasticitySlider.value,
           conversion: conversionSlider.value,
         }
-        const model = new conversion.WeibullDemandModel(reference)
+        const model = conversion.WeibullDemandModel.from_reference(reference)
         const plot = plotting.create(model, {
           title: 'Weibull Model (Standalone & Interactive)',
         })

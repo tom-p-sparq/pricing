@@ -23,4 +23,40 @@ export class BaseDemandModel {
   _conversion(price) {
     throw new Error("Define the conversion rate at this price in `_conversion`")
   }
+
+  /**
+   * Creates a new model instance from a reference point.
+   * This is a factory method.
+   * @abstract
+   * @param {object} params
+   * @param {number} params.price The reference price.
+   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
+   * @param {number} params.conversion The conversion rate at the reference price.
+   * @returns {BaseDemandModel} A new instance of the demand model.
+   */
+  static from_reference({price, conversion, elasticity}) {
+    throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `from_reference`")
+  }
+
+  /**
+   * Checks the validity of parameters for creating a model from a reference point.
+   * @protected
+   * @param {number} price The reference price. Must be positive.
+   * @param {number} conversion The conversion rate at the reference price. Must be strictly between 0 and 1.
+   * @param {number} elasticity The point price elasticity of demand at the reference price. Must be negative.
+   * @throws {Error} If the price is not positive.
+   * @throws {Error} If the elasticity is not negative.
+   * @throws {Error} If the conversion is not strictly between 0 and 1.
+   */
+  static _check_reference(price, conversion, elasticity) {
+    if (price <= 0) {
+      throw new Error('Price must be positive.')
+    }
+    if (elasticity >= 0) {
+      throw new Error('Elasticity must be negative.')
+    }
+    if (conversion <= 0 || conversion >= 1) {
+      throw new Error('Conversion must be strictly between 0 and 1.')
+    }
+  }
 }
