@@ -1,5 +1,5 @@
-import * as Plot from "https://esm.sh/@observablehq/plot";
-import * as d3 from "https://esm.sh/d3";
+import * as Plot from "@observablehq/plot";
+import * as d3 from "d3";
 
 /**
  * Generates a plot definition for a given demand model using Observable Plot.
@@ -29,6 +29,6 @@ export function create(
       Plot.tip(data, Plot.pointer({ x: 'price', y: 'conversion' })),
     ],
     title: title || `${model.constructor.name} for conversion rates`,
-    subtitle: subtitle || 'Clamped to [0, 1]',
+    subtitle: subtitle,
   })
 }

@@ -1,20 +1,5 @@
-import { LinearDemandModel } from './conversion/Linear.js'
-import { ConstantElasticityDemandModel } from './conversion/ConstantElasticity.js'
-import { LogLogisticDemandModel } from './conversion/LogLogistic.js'
-import { LogisticDemandModel } from './conversion/Logistic.js'
-import { WeibullDemandModel } from './conversion/Weibull.js'
-import * as plotting from './plotting/index.js'
-import * as Inputs from 'https://esm.sh/@observablehq/inputs'
-
-/**
- * A namespace containing all available demand model classes.
- */
-const conversion = {
-  LinearDemandModel,
-  ConstantElasticityDemandModel,
-  LogLogisticDemandModel,
-  LogisticDemandModel,
-  WeibullDemandModel,
-}
+import * as conversion from './conversion'
+import * as plotting from './plotting';
+import * as Inputs from '@observablehq/inputs';
 
 export { conversion, plotting, Inputs }
