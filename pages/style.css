@@ -54,6 +54,16 @@ h3 {
   margin-bottom: 0.5rem;
 }
 
+a {
+  color: var(--coral-base);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
 /* Navigation Styles */
 header {
   background-color: var(--blue-light);
@@ -72,13 +82,13 @@ nav ul {
 }
 
 nav a {
-  text-decoration: none;
-  color: var(--white-base);
   font-weight: 700;
+  color: var(--white-base);
 }
 
 nav a:hover {
-  text-decoration: underline;
+  text-decoration: none;  
+  color: var(--coral-base);
 }
 
 /* Footer Styles */
