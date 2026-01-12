@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+      };
+      </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+    <title>🚧</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="main-container">
+      <h1>Pricing Model Visualizations</h1>
+
+      <div>
+        <p>Here is a simple MathJax example: $E = mc^2$</p>
+        <p>To write a dollar sign in text, you need to escape it with a backslash. For example, an item might cost \$10.</p>
+      </div>
+
+      <!-- The controls will be appended here -->
+      <div id="controls-container"></div>
+
+      <div><p>And here is some more text.</p></div>
+
+      <!-- The plots will be appended here -->
+      <div id="plot-container"></div>
+    </div>
+
+    <!-- Use the library to create and render plots -->
+    <script type="module">
+      import { conversion, plotting, Inputs } from './compiled-pricing-core.js'
+
+      // 1. Create the interactive inputs
+      const elasticitySlider = Inputs.range([-5, -0.1], {
+        step: 0.1,
+        value: -2.5,
+        label: 'Elasticity',
+      })
+      const conversionSlider = Inputs.range([0.01, 0.99], {
+        step: 0.01,
+        value: 0.3,
+        label: 'Conversion at reference',
+      })
+
+      // 2. Add the inputs to the page
+      document.getElementById('controls-container').append(elasticitySlider, conversionSlider)
+
+      // 3. Define a function to render the plot based on current input values
+      function render() {
+        const reference = {
+          price: 150,
+          elasticity: elasticitySlider.value,
+          conversion: conversionSlider.value,
+        }
+        const model = conversion.WeibullDemandModel.from_reference(reference)
+        const plot = plotting.create(model, {
+          title: 'Weibull Model (Standalone & Interactive)',
+          subtitle: 'Look at me!'
+        })
+        document.getElementById('plot-container').replaceChildren(plot)
+      }
+
+      // 4. Listen for changes and re-render
+      elasticitySlider.addEventListener('input', render)
+      conversionSlider.addEventListener('input', render)
+
+      // 5. Render the initial plot
+      render()
+    </script>
+
+    <footer>
+      <p>&copy; 2026 Datasparq. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
