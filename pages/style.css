@@ -1,0 +1,123 @@
+/* Import Inter and Lora font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lora:wght@700&display=swap');
+
+/* https://brand.datasparq.ai/ */
+:root {
+  --blue-base: #121A3D;
+  --blue-light: #2A3150;
+  --blue-lighter: #595F77;
+  --blue-lightest: #888C9E;
+  --coral-base: #FF8774;
+  --white-base: #F7F7F7;
+  --white-dark: #EBEBEB;
+
+  --text-color: var(--blue-base);
+  --bg-color: var(--white-base);
+  --container-width: 700px;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  /* 
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  */
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  box-sizing: border-box;
+  flex-grow: 1;
+}
+
+h1, h2, h3 {
+  font-family: 'Lora', serif;
+}
+
+h1 {
+  margin-bottom: 2rem;
+}
+
+h2 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.1rem;
+}
+
+h3 {
+  margin-top: 0.1rem;
+  margin-bottom: 0.5rem;
+}
+
+a {
+  /* color: var(--coral-base); */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+/* Navigation Styles */
+header {
+  /* background-color: var(--blue-light);
+  border-bottom: 1px solid var(--blue-base); */
+  padding: 1rem 0;
+  width: 100%;
+}
+
+nav ul {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 2rem;
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav a {
+  font-weight: 700;
+  /* color: var(--white-base); */
+}
+
+nav a:hover {
+  text-decoration: none;  
+  /* color: var(--coral-base); */
+}
+
+/* Footer Styles */
+footer {
+  /* background-color: var(--blue-light);
+  border-top: 1px solid var(--blue-base); */
+  padding: 2rem 0;
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.9rem;
+  /* color: var(--blue-lightest); */
+  width: 100%;
+}
+
+/* Responsive styles for phones */
+@media (max-width: 600px) {
+  .main-container {
+    padding: 1rem;
+  }
+
+  nav ul {
+    padding: 0 1rem;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+}
