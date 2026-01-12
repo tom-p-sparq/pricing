@@ -1,13 +1,19 @@
 /* Import Inter and Lora font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lora:wght@700&display=swap');
 
+/* https://brand.datasparq.ai/ */
 :root {
-  --text-color: #212529;
-  --bg-color: #f8f9fa;
-  --link-color: #0056b3;
-  --border-color: #dee2e6;
+  --blue-base: #121A3D;
+  --blue-light: #2A3150;
+  --blue-lighter: #595F77;
+  --blue-lightest: #888C9E;
+  --coral-base: #FF8774;
+  --white-base: #F7F7F7;
+  --white-dark: #EBEBEB;
+
+  --text-color: var(--blue-base);
+  --bg-color: var(--white-base);
   --container-width: 700px;
-  --white: #fff;
 }
 
 body {
@@ -50,8 +56,8 @@ h3 {
 
 /* Navigation Styles */
 header {
-  background-color: var(--white);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--blue-light);
+  border-bottom: 1px solid var(--blue-base);
   padding: 1rem 0;
   width: 100%;
 }
@@ -67,7 +73,7 @@ nav ul {
 
 nav a {
   text-decoration: none;
-  color: var(--link-color);
+  color: var(--white-base);
   font-weight: 700;
 }
 
@@ -77,13 +83,13 @@ nav a:hover {
 
 /* Footer Styles */
 footer {
-  background-color: var(--white);
-  border-top: 1px solid var(--border-color);
+  background-color: var(--blue-light);
+  border-top: 1px solid var(--blue-base);
   padding: 2rem 0;
   margin-top: 3rem;
   text-align: center;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--blue-lightest);
   width: 100%;
 }
 
