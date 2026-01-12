@@ -59,6 +59,7 @@
         const model = conversion.WeibullDemandModel.from_reference(reference)
         const plot = plotting.create(model, {
           title: 'Weibull Model (Standalone & Interactive)',
+          subtitle: 'Look at me!'
         })
         document.getElementById('plot-container').replaceChildren(plot)
       }

@@ -38,6 +38,16 @@ h1 {
   margin-bottom: 2rem;
 }
 
+h2 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.1rem;
+}
+
+h3 {
+  margin-top: 0.1rem;
+  margin-bottom: 0.5rem;
+}
+
 /* Navigation Styles */
 header {
   background-color: var(--white);
