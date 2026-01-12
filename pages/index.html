@@ -3,30 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pricing Model Plots</title>
-    <style>
-      body {
-        font-family: system-ui, sans-serif;
-        line-height: 1.5;
-        padding: 1rem;
-      }
-      h1 {
-        margin-bottom: 2rem;
-      }
-    </style>
+    <title>Pricing Models</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
   </head>
   <body>
-    <h1>Pricing Model Visualizations</h1>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+        </ul>
+      </nav>
+    </header>
 
-    <div><p>Here is some text.</p></div>
+    <div class="main-container">
+      <h1>Pricing Model Visualizations</h1>
 
-    <!-- The controls will be appended here -->
-    <div id="controls-container"></div>
+      <div><p>Here is some text.</p></div>
 
-    <div><p>And here is some more text.</p></div>
+      <!-- The controls will be appended here -->
+      <div id="controls-container"></div>
 
-    <!-- The plots will be appended here -->
-    <div id="plot-container"></div>
+      <div><p>And here is some more text.</p></div>
+
+      <!-- The plots will be appended here -->
+      <div id="plot-container"></div>
+    </div>
 
     <!-- Use the library to create and render plots -->
     <script type="module">
@@ -68,5 +70,9 @@
       // 5. Render the initial plot
       render()
     </script>
+
+    <footer>
+      <p>&copy; 2026 Datasparq. All rights reserved.</p>
+    </footer>
   </body>
 </html>
