@@ -5,9 +5,9 @@ on:
   # Runs on pushes targeting main
   push:
     branches: ["main"]
-  # Dry run on pull requests targeting main
+  # Dry run on pull requests targeting main and dev
   pull_request:
-    branches: ["main"]
+    branches: ["main", "dev"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -47,6 +47,7 @@ jobs:
 
   # Deployment job
   deploy:
+    if: github.event_name == 'push'
     # Add a dependency to the build job
     needs: build
 
@@ -56,8 +57,6 @@ jobs:
       id-token: write
 
     # Deploy to the github-pages environment
-    # Only run on a push to the main branch
-    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
