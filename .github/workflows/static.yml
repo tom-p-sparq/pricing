@@ -56,8 +56,6 @@ jobs:
       id-token: write
 
     # Deploy to the github-pages environment
-    # Only run on a push to the main branch
-    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -66,4 +64,5 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
+        if: github.event_name == 'push'
         uses: actions/deploy-pages@v4
