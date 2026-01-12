@@ -7,7 +7,7 @@ on:
     branches: ["main"]
   # Dry run on pull requests targeting main
   pull_request:
-    branches: ["main"]
+    branches: ["main", "dev"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
