@@ -42,16 +42,16 @@
         </p>
         <p>
           As the vendor, we have a question that we are aiming to answer:
-          <b>"What price should we be setting for our products to get the best possible return?"</b>
-          This is an optimisation problem.
+          <b>"What price should we set for our products to achieve the best possible return?"</b>
+          This is an optimisation problem: a search for the "sweet spot" that balances what customers are willing to pay with our own revenue goals.
         </p>
         <p>
           One vital ingredient for solving this problem is to have an understanding of the effect of price on whether a customer decides to purchase.
-          We're going to talk about how we can use mathematical models to quantify the likelihood that a potential customer becomes an actual customer.
+          We're going to explore how mathematical models can quantify the likelihood that a potential customer becomes a paying customer.
         </p>
         <p>
           For now, let's focus on the simplest case:
-          we have a very large inventory of one product line that we sell.
+          we have a large inventory of a single product line that we sell.
           And, if they buy, customers will only buy one of our products at a time.
           What price should we set our product line at? 
         </p>
@@ -60,21 +60,20 @@
       <div>
         <h2>Conversion and willingness to pay</h2>
         <p>
-          We'll be thinking about our optimisation problem in terms of <i>probabilities</i>.
-          When a customer arrives at our site, let's say (for now) we don't yet know who they are, nor what they're willing to pay for our product.
-          So we can think of them as being a random draw from a <i>population</i> of potential customers.
+          We will be thinking about our optimisation problem in terms of <i>probabilities</i>.
+          When a customer arrives at our site, we don't know exactly what they're willing to pay for our product.
+          We can think of them as a random draw from a <i>population</i> of potential customers.
           Some of those potential customers are willing to pay a lot; some, less.
         </p>
         <p>          
-          Let's write $V$ as the random variable corresponding to the willingness to pay of a randomly selected customer.
+          Let's use $V$ to represent the maximum price a randomly chosen customer is willing to pay for our product.
           Then, that customer will purchase at a price $p$ if $V \geq p$. 
-          That is, if the customer is willing to pay at least that price.
+          In other words, a sale happens if our price is less than or equal to their willingness to pay.
         </p>
         <p>
           So we now have the concept of a <i>conversion probability</i>. 
           If we model how willingness to pay is distributed across the population of potential customers,
-          then we are equivalently modelling the probability that the randomly selected customer 
-          (that is, the arrival at our site)
+          then we are, in effect, modeling the probability that the next customer who arrives
           will make a purchase.
         </p>
       
@@ -82,7 +81,7 @@
         <p>
           Below is a simple example of a typical conversion model.
           Along the $x$ axis is the price,
-          and along the $y$ axis is the conversion probability.
+          and along the $y$ axis is the conversion probability at that price.
           That is, the $y$ axis is the fraction of the population whose willingness to pay, $V$, is at least that price.
         </p>
       </div>
@@ -92,17 +91,16 @@
       <div>
         <p>
           In this example, we're modelling the population with a median willingness to pay of \$150,
-          such that 50% of potential customers are not willing to pay that much, while 50% will pay at least that amount.
-          So, when a customer arrives on the site, <i>to our knowledge</i>
-          there is a probability of 0.5 that they will purchase at that price.
+          meaning that if we set the price at \$150, we'd expect about half of our potential customers to buy.
+          So, when a new customer arrives on the site, <i>to the best of our knowledge</i>,
+          there is a 50% chance they will purchase at that price.
         </p>
         <p>
           This plot demonstrates some typical characteristics of a conversion model based on the idea of willingness to pay. 
           <ul>
             <li>Monotonically decreasing: as prices increase, we filter out more of the population, until (almost) nobody is willing to pay that much.
-            <li>Conversely, at low, low prices, everyone <i>will</i> buy!
-            <li>Sigmoid shape: most of the population has a similar willingness to pay, 
-              at the prices where the rate of decrease in conversion is greatest. 
+            <li>Conversely, at very low prices, nearly everyone who wants the product <i>will</i> buy.
+            <li>Sigmoid ("S") shape: the curve is steepest near the middle, suggesting that many customers have a similar willingness to pay around a central point.
           </ul>
           Like any model, we can think of various ways in which this approach is a rough approximation of reality.
           Two that readily spring to mind are
@@ -115,18 +113,18 @@
       <div>
         <h2>Conversion and incremental revenue</h2>
         <p>
-          Now we have a conversion model, how does that actually help us?
+          Now that we have a conversion model, how does it help us?
         </p>
         <p>
           When our potential customer arrives and sees a price $p$, 
-          we now have an idea of the probability that the potential customer makes a purchase at that price.
-          This means that we have a handle on the distribution of the random variable 
-          corresponding to the amount of incremental revenue
+          we now have a model for the probability that they will make a purchase.
+          This gives us a handle on the expected financial outcome of that visit.
+          Specifically, we can model the <i>incremental revenue</i>
           (that is, revenue less marginal cost of sale)
-          that the customer may provide.
+          that this customer might provide.
         </p>
         <p>
-          Let's write $\phi(p)$ for the conversion probability at price $p$:
+          Let's write $\phi(p)$ for the conversion probability at a given price $p$:
           this is what was plotted in the figure above, as $p$ varied.
           This means that with probability $\phi(p)$ we make an incremental revenue of $p - c$,
           where $c$ is the marginal cost of sale.
@@ -134,7 +132,7 @@
         </p>
         <p>
           Therefore the <i>expected incremental revenue</i> at price $p$ is given by the function
-          $$R(p) = (p-c) \cdot \phi(p).$$
+          $$R(p) = (p - c) \cdot \phi(p).$$
           In the figure below, using the conversion model $\phi$ we plotted above, we show $R(p)$ as a function of $p$.
         </p>
       </div>
@@ -147,7 +145,7 @@
       <p>
         As we vary the incremental cost, we can see how 
         the expected incremental revenue on the $y$ axis varies with price along the $x$ axis.
-        <ul>
+        <ul style="list-style-type: '→  ';">
           <li>When the price is below cost, we would expect to make a loss.
           <li>As the price increases above cost, we begin to make a profit.
           <li>At some critical price level, for any further increase in price, 
@@ -158,15 +156,15 @@
         That critical price is where the expected incremental revenue is maximised: the peak in the figure above.
       </p>
       <p>
-        Now, our optimisation problem that we initially described was (deliberately) vaguely worded.
+        Our optimisation problem, as initially described, was deliberately vague.
         We talked about finding a price to "get the best possible return".
-        If we're explicit that we're defining the best possible return to be 
-        "the largest expected incremental revenue per potential customer",
+        If we are explicit that "best return" is defined as
+        "the largest expected incremental revenue per visitor,"
         then the peak in our figure is the solution to our optimisation problem.
         In other words, we can read off the optimal price, <i>according to this conversion model</i>, directly from this figure.
       </p>
       <p>
-        And so we will have used a conversion model to make a pricing decision!
+        And so, we have used a conversion model to make a pricing decision.
       </p>
       <p>
         And we can already answer some nice questions.
@@ -180,25 +178,30 @@
       <div>
         <h2>Where do we go from here?</h2>
         <p>
-          This was the first of a series of notes on pricing and conversion modelling.
-          We've looked at an example of a conversion model and how it can be used to help decide price,
-          under a very specific understanding of optimal pricing.
-          For now, we will park the question of how to price and deep-dive into modelling conversion probabilities.
-          The current plan is to look at:
-          <ul>
-            <li>Parametric conversion models: a zoo of conversion models</li>
-            <li>Fitting conversion models to data</li>
-            <li>Extrapolating from local data</li>
-            <li>Using conversion models to simulate markets</li>
-          </ul>
-          There are all sorts of directions to go in though, even just on conversion modelling and ignoring price optimisation.
-          What about multiple product lines, and multiple purchases?
-          What about time-varying markets and dynamics?
-          What about non-parametric models?
-          What about market segmentation?
+          We've taken our first step into the world of conversion modelling, 
+          seeing how a simple model can help us reason about one of the most fundamental questions in business: 
+          "What price should we set?"
         </p>
         <p>
-          Lots to do and little time!
+          But this is just the beginning of the journey. 
+          Now that we have the foundational concepts of willingness-to-pay and expected revenue, 
+          we can explore the richer, more detailed landscape of pricing strategy. 
+          For now, we will park the broader question of price optimisation and dive further into the science of modelling conversion itself.
+        </p>
+        <p>
+          Here is the path we'll take in upcoming posts:
+          <ul>
+            <li><b>A "Zoo" of Parametric Models:</b> We'll meet a whole family of conversion models, each with its own personality and assumptions about customer behavior.</li>
+            <li><b>Bringing Models to Life with Data:</b> We'll learn how to take these abstract models and fit them to actual sales data, turning theory into a practical tool.</li>
+            <li><b>From Data to Decisions:</b> Once we have a fitted model, what can we do with it? We'll explore how to use our models to predict, forecast, and even simulate entire market scenarios.</li>
+          </ul>
+        </p>
+        <p>
+          And beyond that, the horizon is wide open. We'll be equipped to tackle even more complex and realistic questions:
+          How do we price multiple products that might compete with or complement each other? 
+          How do we account for a market that changes over time? 
+          What if we want to tailor prices for different customer segments? 
+          These are the challenges where modelling truly shines.
         </p>
       </div>
       
