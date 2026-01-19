@@ -203,40 +203,29 @@
       import { conversion, plotting, Inputs } from './compiled-pricing-core.js'
 
       // Static plot
+      const plotConfigs = [
+        { modelClass: conversion.LinearDemandModel, title: 'Linear conversion model', containerId: 'linear-conversion-container' },
+        { modelClass: conversion.LogisticDemandModel, title: 'Logistic conversion model', containerId: 'logistic-conversion-container' },
+        { modelClass: conversion.LogLogisticDemandModel, title: 'Log-logistic conversion model', containerId: 'log-logistic-conversion-container' },
+        { modelClass: conversion.WeibullDemandModel, title: 'Weibull conversion model', containerId: 'weibull-conversion-container' },
+        { modelClass: conversion.ConstantElasticityDemandModel, title: 'Constant elasticity conversion model', containerId: 'constant-elasticity-conversion-container' },
+      ];
+
       const reference = {
         price: 150,
         elasticity: -2,
         conversion: 0.5,
       };
-      // Models
-      const linearModel = conversion.LinearDemandModel.from_reference(reference);
-      const logisticModel = conversion.LogisticDemandModel.from_reference(reference);
-      const logLogisticModel = conversion.LogLogisticDemandModel.from_reference(reference);
-      const weibullModel = conversion.WeibullDemandModel.from_reference(reference);
-      const constantElasticityModel = conversion.ConstantElasticityDemandModel.from_reference(reference);
-      // Plots
-      const linearConversionPlot = plotting.createSingleModelConversionPlot(linearModel, {
-        title: 'Linear conversion model',
-      });
-      const logisticConversionPlot = plotting.createSingleModelConversionPlot(logisticModel, {
-        title: 'Logistic conversion model',
-      });
-      const logLogisticConversionPlot = plotting.createSingleModelConversionPlot(logLogisticModel, {
-        title: 'Log-logistic conversion model',
-      });
-      const weibullConversionPlot = plotting.createSingleModelConversionPlot(weibullModel, {
-        title: 'Weibull conversion model',
-      });
-      const constantElasticityConversionPlot = plotting.createSingleModelConversionPlot(constantElasticityModel, {
-        title: 'Constant elasticity conversion model',
+
+      plotConfigs.forEach(({ modelClass, title, containerId }) => {        
+        const model = modelClass.from_reference(reference);
+        const plot = plotting.createSingleModelConversionPlot(model, { title });
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.replaceChildren(plot);
+        }
       });
 
-      // Render plots
-      document.getElementById('linear-conversion-container').replaceChildren(linearConversionPlot)
-      document.getElementById('logistic-conversion-container').replaceChildren(logisticConversionPlot)
-      document.getElementById('log-logistic-conversion-container').replaceChildren(logLogisticConversionPlot)
-      document.getElementById('weibull-conversion-container').replaceChildren(weibullConversionPlot)
-      document.getElementById('constant-elasticity-conversion-container').replaceChildren(constantElasticityConversionPlot)
     </script>
 
     <footer>
