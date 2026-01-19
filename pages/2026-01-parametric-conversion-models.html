@@ -184,7 +184,7 @@
         and the resulting curves are plotted for comparison.
       </p>
 
-      <div id="reference-controls-container"></div>
+      <div id="controls-container"></div>
 
       <div id="conversion-comparison-container"></div>
 
@@ -229,11 +229,11 @@
 
       // Static plot
       const plotConfigs = [
-        { modelClass: conversion.LinearDemandModel, title: 'Linear conversion model', containerId: 'linear-conversion-container' },
-        { modelClass: conversion.LogisticDemandModel, title: 'Logistic conversion model', containerId: 'logistic-conversion-container' },
-        { modelClass: conversion.LogLogisticDemandModel, title: 'Log-logistic conversion model', containerId: 'log-logistic-conversion-container' },
-        { modelClass: conversion.WeibullDemandModel, title: 'Weibull conversion model', containerId: 'weibull-conversion-container' },
-        { modelClass: conversion.ConstantElasticityDemandModel, title: 'Constant elasticity conversion model', containerId: 'constant-elasticity-conversion-container' },
+        { modelClass: conversion.LinearDemandModel, title: 'Linear', containerId: 'linear-conversion-container' },
+        { modelClass: conversion.LogisticDemandModel, title: 'Logistic', containerId: 'logistic-conversion-container' },
+        { modelClass: conversion.LogLogisticDemandModel, title: 'Log-logistic', containerId: 'log-logistic-conversion-container' },
+        { modelClass: conversion.WeibullDemandModel, title: 'Weibull', containerId: 'weibull-conversion-container' },
+        { modelClass: conversion.ConstantElasticityDemandModel, title: 'Constant elasticity', containerId: 'constant-elasticity-conversion-container' },
       ];
 
       const reference = {
@@ -257,7 +257,7 @@
         elasticity: Inputs.range([-5, -0.1], {step: 0.1, value: -2, label: "Reference elasticity"}),
         conversion: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Reference conversion"})
       });
-      document.getElementById('reference-controls-container').replaceChildren(interactiveReference);
+      document.getElementById('controls-container').replaceChildren(interactiveReference);
 
       function render() {
         const models = plotConfigs.map(({ modelClass, title }) => ({
