@@ -175,7 +175,7 @@
         Comparing parametric models
       </h1>
       <p>
-        The interactive plot below plots all of the models describe above on a single axis.
+        The interactive plot below plots all of the models described above on a single axis.
         By playing around with the model parameters, we can see how the models compare
         in their extrapolation away from a common local behaviour.
         We specify a reference price,
@@ -225,6 +225,29 @@
           container.replaceChildren(plot);
         }
       });
+
+      // Interactive plot
+      const interactiveReference = Inputs.form({
+        price: Inputs.range([50, 250], {step: 1, value: 150, label: "Reference price"}),
+        elasticity: Inputs.range([-5, -0.1], {step: 0.1, value: -2, label: "Reference elasticity"}),
+        conversion: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Reference conversion"})
+      });
+      document.getElementById('reference-controls-container').replaceChildren(interactiveReference);
+
+      function render() {
+        const models = plotConfigs.map(({ modelClass, title }) => ({
+          model: modelClass.from_reference(interactiveReference.value),
+          name: title,
+        }));
+        const comparisonPlot = plotting.createMultiModelConversionPlot(models, {
+          title: 'The Conversion Model Zoo',
+          subtitle: 'Comparing conversion probability models',
+        });
+        document.getElementById('conversion-comparison-container').replaceChildren(comparisonPlot);
+      }
+
+      interactiveReference.addEventListener('input', render);
+      render();
 
     </script>
 
