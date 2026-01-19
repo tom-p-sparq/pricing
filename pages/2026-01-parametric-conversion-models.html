@@ -184,9 +184,8 @@
         and the resulting curves are plotted for comparison.
       </p>
 
-      <div id="controls-container"></div>
-
       <div id="conversion-comparison-container"></div>
+      <div id="controls-container"></div>
 
       <p>
         The interactive plot above shows how the structural choice of model family means that 
@@ -225,7 +224,7 @@
 
     <!-- Use the library to create and render plots -->
     <script type="module">
-      import { conversion, plotting, Inputs } from './compiled-pricing-core.js'
+      import { conversion, plotting, Inputs, html } from './compiled-pricing-core.js'
 
       // Static plot
       const plotConfigs = [
@@ -252,11 +251,17 @@
       });
 
       // Interactive plot
-      const interactiveReference = Inputs.form({
-        price: Inputs.range([50, 250], {step: 1, value: 150, label: "Reference price"}),
-        elasticity: Inputs.range([-5, -0.1], {step: 0.1, value: -2, label: "Reference elasticity"}),
-        conversion: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Reference conversion"})
-      });
+      const interactiveReference = Inputs.form(
+        {
+          price: Inputs.range([50, 250], {step: 1, value: 150, label: "Reference price"}),
+          elasticity: Inputs.range([-5, -0.1], {step: 0.1, value: -2, label: "Reference elasticity"}),
+          conversion: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Reference conversion"})
+        },
+        {
+          template: ({price, elasticity, conversion}) =>
+            html`<div style="display: flex; align-items: center; justify-content:-space-around; gap: 1em;">${price}${elasticity}${conversion}</div>`
+        }
+      );
       document.getElementById('controls-container').replaceChildren(interactiveReference);
 
       function render() {
