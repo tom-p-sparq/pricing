@@ -226,7 +226,7 @@
         conversion: 0.5,
       };
       const model = conversion.WeibullDemandModel.from_reference(reference);
-      const conversionPlot = plotting.createConversionPlot(model, {
+      const conversionPlot = plotting.createSingleModelConversionPlot(model, {
         title: 'Example conversion model',
       });
       document.getElementById('conversion-container').replaceChildren(conversionPlot)

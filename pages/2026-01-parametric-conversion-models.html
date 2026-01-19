@@ -215,19 +215,19 @@
       const weibullModel = conversion.WeibullDemandModel.from_reference(reference);
       const constantElasticityModel = conversion.ConstantElasticityDemandModel.from_reference(reference);
       // Plots
-      const linearConversionPlot = plotting.createConversionPlot(linearModel, {
+      const linearConversionPlot = plotting.createSingleModelConversionPlot(linearModel, {
         title: 'Linear conversion model',
       });
-      const logisticConversionPlot = plotting.createConversionPlot(logisticModel, {
+      const logisticConversionPlot = plotting.createSingleModelConversionPlot(logisticModel, {
         title: 'Logistic conversion model',
       });
-      const logLogisticConversionPlot = plotting.createConversionPlot(logLogisticModel, {
+      const logLogisticConversionPlot = plotting.createSingleModelConversionPlot(logLogisticModel, {
         title: 'Log-logistic conversion model',
       });
-      const weibullConversionPlot = plotting.createConversionPlot(weibullModel, {
+      const weibullConversionPlot = plotting.createSingleModelConversionPlot(weibullModel, {
         title: 'Weibull conversion model',
       });
-      const constantElasticityConversionPlot = plotting.createConversionPlot(constantElasticityModel, {
+      const constantElasticityConversionPlot = plotting.createSingleModelConversionPlot(constantElasticityModel, {
         title: 'Constant elasticity conversion model',
       });
 

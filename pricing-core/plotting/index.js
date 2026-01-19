@@ -1,2 +1,5 @@
-export { createConversionPlot } from "./conversion.js";
+export {
+  createMultiModelConversionPlot,
+  createSingleModelConversionPlot,
+} from "./conversion.js";
 export { createIncrementalRevenuePlot } from "./revenue.js";
