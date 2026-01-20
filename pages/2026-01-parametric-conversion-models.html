@@ -31,19 +31,19 @@
       <p>
         In our <a href="./2026-00-intro-conversion-models.html">previous post</a>
         we introduced the idea of conversion modelling:
-        the specification of a curve mapping prices to the probability that a customer would convert at that price.
+        the specification of a curve that maps prices to the probability that a customer will convert at that price.
         We talked about how this would form the basis of predicting incremental revenue,
         and being able to simulate markets.
         Typically, these curves would be decreasing with increasing price,
         starting from a near-1 conversion probability at low prices and decreasing to zero at high prices.
       </p>
       <p>
-        What we didn't talk about were the details of how we would go about drawing those curves.
+        What we did not talk about were the details of how we would go about specifying those curves.
       </p>
       <hr>
       <p>
         In this post, we'll consider some possible parametric forms that a conversion model might take.
-        By 'parametric form', we mean families of curves that can be defined by just a couple of economically meaningful values.
+        By 'parametric form', we mean families of curves that can be defined by just a couple of economically meaningful parameters.
         We'll show these families first, before exploring how changing parameters can move those shapes around.
         The (non-exhaustive) list of conversion probability families we will consider is:
         <ul>
@@ -59,8 +59,8 @@
       <h2 id="linear-model">Linear model</h2>
       <p>
         Perhaps the simplest model, conversion is modelled as depending on price 
-        such that a change in price by some delta 
-        maps to a change in conversion probability proportional to that delta. 
+        such that a change in price by some amount 
+        maps to a change in conversion probability proportional to that amount. 
         For positive parameters $a$ and $b$, we can specify the linear form, $$\tilde \phi(p) = a - bp$$
         as our first model.
       </p>
@@ -70,10 +70,10 @@
       <div id="linear-conversion-container"></div>
       <p>
         What are the characteristics of this linear model? 
-        For every \$15 price increase (or decrease),
+        For every £15 price increase (or decrease),
         the conversion probability is decreased (or increased) by 10 percentage points.
-        According to this model, this means that beyond \$225 the conversion probability is modelled as zero;
-        similarly, for prices less than \$75, <i>every</i> potential customer will purchase. 
+        According to this model, this means that beyond £225 the conversion probability is modelled as zero;
+        similarly, for prices less than £75, <i>every</i> potential customer will purchase. 
       </p>
 
       <h2 id="logistic-model">Logistic model</h2>
@@ -105,7 +105,7 @@
       <p>
         When considering the response of markets to price shifts, 
         relative values are often more important than absolute values.
-        In the two models above, we use a linear form inside either a "clamp" or sigmoid operator,
+        In the two models above, we use a linear form inside either a "clamp" or sigmoid function,
         in the sense of being linear in price.
         If we want to model behaviour based on <i>relative</i> prices,
         we can use a quasi-linear form of $a - b\log(p)$ instead.
@@ -113,7 +113,7 @@
         $$\log\left(\frac{\phi(p)}{1 - \phi(p)}\right) = a - b\log(p).$$
         With some algebraic manipulation, this is equivalent to the model
         $$\phi(p) = \frac{1}{1 + \left( p / p_0 \right)^b},$$
-        where the new parameter $p_0$ can be written in terms of $a$ and $b$.
+        where the new parameter $p_0$, the price at which conversion is 50%, can be written in terms of $a$ and $b$.
       </p>
       <p>
         Below, we plot the conversion probability $\phi$ as a function of $p$
@@ -125,7 +125,7 @@
         For lower prices, the log-logistic model is much faster to approach 1;
         for higher prices, the log-logistic model is much slower to approach 0.
         The heavier tails of this model mean that it is well suited for markets where
-        there are a small number of customers willing to pay <i>particularly</i> high prices versus the majority.
+        there are a small number of customers willing to pay <i>particularly</i> high prices compared to the majority.
       </p>
 
       <h2 id="weibull-model">Weibull model</h2>
@@ -144,7 +144,7 @@
         this is equivalent to the survival function of a Weibull distribution,
         $$\phi(p) = \exp\left(-\left(\frac{p}{p_0}\right)^b\right),$$
         where, as with the log-logistic model, $p_0$ is a function of $a$ and $b$.
-        The parameter $b$ is known as the <i>shape</i> parameter,
+        The parameter $b$ is known as the <i>shape</i> parameter of the distribution,
         and it controls how sharp the drop-off in conversion is.
         For larger $b$, we would see a much more pronounced "cliff-edge".
       </p>
@@ -153,22 +153,20 @@
       <h2 id="constant-elasticity-model">Constant elasticity model</h2>
       <p>
         Finally, we consider a slightly different model to all of the others above.
-        This is not sigmoidal, and does not tend to 1 at low prices.
+        This model is not sigmoidal and does not tend towards 1 at low prices.
         This model is particularly simple as it is linear in log-log space:
-        $$\log(\phi(p)) = a - b \log(p).$$
+        $$\log(\tilde \phi(p)) = a - b \log(p).$$
         When manipulating this to write $\phi$ as a function of $p$, 
         we have the constant elasticity model of the form
-        $$\phi(p) = c p^{-\eta},$$
+        $$\tilde \phi(p) = c p^{-\eta},$$
         where $\eta > 0$ is known as the elasticity of demand.
         The constants $c$ and $\eta$ can be written in terms of $a$ and $b$ from the linear representation above.
       </p>
       <p>
         This model is often used in economics for its simplicity and clear interpretation.
-        However, it has some drawbacks for general-purpose conversion modeling.
-        It predicts that conversion probability goes to infinity as price approaches zero,
-        and it never reaches zero for any finite price.
-        Therefore, it's most useful over a specific range of prices where this approximation is reasonable.
-        Below, we clamp the conversion probability to be at most 1.
+        However, it has some drawbacks for general-purpose conversion modelling.
+        It's most useful over a specific range of prices where a constant-elasticity approximation is reasonable.
+        Below, we clamp the conversion probability to be at most 1 (recalling <a href="#fn1" id="ref1">footnote 1</a>).
       </p>
       <div id="constant-elasticity-conversion-container"></div>
 
@@ -179,7 +177,7 @@
         The interactive plot below plots all of the models described above on a single axis.
         By playing around with the model parameters, we can see how the models compare
         in their extrapolation away from a common local behaviour.
-        We specify a reference price,
+        We specify a reference price point,
         and the conversion and price sensitivity (known as <i>elasticity</i>) at that price.
         All of the models are uniquely determined by this specification,
         and the resulting curves are plotted for comparison.
@@ -191,7 +189,7 @@
       <p>
         The interactive plot above shows how the structural choice of model family means that 
         if we know behaviour of conversion locally around some price,
-        then we are able to extrapolate different behaviours globally.
+        we can extrapolate different behaviours globally.
         For example, we can see the strange global behaviour of the constant elasticity model;
         the extreme consequences of the clamped linear model;
         the heavy tails of the log-logistic model;
