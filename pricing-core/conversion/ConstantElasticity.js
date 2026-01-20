@@ -31,10 +31,8 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
   }
 
   /**
-   * @override
-   */
-  /**
    * Creates a new model instance from a reference point.
+   * @override
    * @param {object} params
    * @param {number} params.price The reference price.
    * @param {number} params.conversion The conversion rate at the reference price.
@@ -45,6 +43,30 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
     ConstantElasticityDemandModel._check_reference(price, conversion, elasticity)
     const A = conversion * Math.pow(price, -elasticity)
     return new ConstantElasticityDemandModel({ A, elasticity })
+  }
+
+  /**
+   * Creates a new model instance by interpolating between two points.
+   * This method calculates the shape of the constant elasticity demand curve that passes
+   * through two given points (p0, c0) and (p1, c1), and then creates a new
+   * `ConstantElasticityDemandModel` instance.
+   * @override
+   * @param {object} point0 An object representing the first point, with `price` and `conversion` properties.
+   * @param {number} point0.price The price at the first point.
+   * @param {number} point0.conversion The conversion rate at the first point.
+   * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
+   * @param {number} point1.price The price at the second point.
+   * @param {number} point1.conversion The conversion rate at the second point.
+   * @returns {ConstantElasticityDemandModel} A new instance of the demand model.
+   */
+  static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
+    const logPrice0 = Math.log(price0);
+    const logPrice1 = Math.log(price1)
+    const logConv0 = Math.log(conversion0);
+    const logConv1 = Math.log(conversion1);
+    const elasticity = (logConv1 - logConv0) / (logPrice1 - logPrice0);
+    const A = conversion0 * Math.pow(price0, -elasticity)
+    return new ConstantElasticityDemandModel({ A, elasticity });
   }
 
   /**
