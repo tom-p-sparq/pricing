@@ -121,10 +121,3 @@ footer {
     font-size: 1.8rem;
   }
 }
-
-/* Align Observable inputs with plots by centering them */
-#controls-container,
-#cost-container {
-  display: flex;
-  justify-content: center;
-}
