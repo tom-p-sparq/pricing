@@ -144,7 +144,8 @@
         this is equivalent to the survival function of a Weibull distribution,
         $$\phi(p) = \exp\left(-\left(\frac{p}{p_0}\right)^b\right),$$
         where, as with the log-logistic model, $p_0$ is a function of $a$ and $b$.
-        The parameter $b$ is known as the <i>shape</i> parameter of the distribution,
+        Here, $p_0$ is the price at which conversion probability is approximately 36.8% (i.e., $e^{-1}$).
+        The parameter $b$ is known as the <i>shape</i> parameter,
         and it controls how sharp the drop-off in conversion is.
         For larger $b$, we would see a much more pronounced "cliff-edge".
       </p>
@@ -158,9 +159,9 @@
         $$\log(\tilde \phi(p)) = a - b \log(p).$$
         When manipulating this to write $\phi$ as a function of $p$, 
         we have the constant elasticity model of the form
-        $$\tilde \phi(p) = c p^{-\eta},$$
+        $$\tilde \phi(p) = k p^{-\eta},$$
         where $\eta > 0$ is known as the elasticity of demand.
-        The constants $c$ and $\eta$ can be written in terms of $a$ and $b$ from the linear representation above.
+        The constants $k$ and $\eta$ can be written in terms of $a$ and $b$ from the linear representation above.
       </p>
       <p>
         This model is often used in economics for its simplicity and clear interpretation.
@@ -258,7 +259,7 @@
         },
         {
           template: ({price, elasticity, conversion}) =>
-            html`<div style="display: flex; align-items: center; justify-content:-space-around; gap: 1em;">${price}${elasticity}${conversion}</div>`
+            html`<div style="display: flex; align-items: center; justify-content: space-around; gap: 1em;">${price}${elasticity}${conversion}</div>`
         }
       );
       document.getElementById('controls-container').replaceChildren(interactiveReference);
