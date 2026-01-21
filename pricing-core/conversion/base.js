@@ -14,6 +14,27 @@ export class BaseDemandModel {
   }
 
   /**
+   * 
+   * @param {object} dataRow
+   * @param {number} dataRow.price The price point at which we have a datapoint
+   * @param {number} dataRow.looks The number of looks we've observed at that price point
+   * @param {number} dataRow.books The number of books (conversions) we've observed at that price point  
+   * @param {*} epsilon 
+   * @returns 
+   */
+  gradLogLikelihood({ price, looks, books }, epsilon = 1e-3) {
+    const unclipped = this._conversion(price)
+    const phi = Math.min(Math.max(unclipped, epsilon), 1 - epsilon)
+    const scaleFactor = (books / phi) - ((looks - books) / (1 - phi))
+    const unscaledGrad = this._gradient(price)
+    return Object.fromEntries(
+      Object.entries(unscaledGrad).map(
+        ([parameterName, parameterValue]) => [parameterName, scaleFactor * parameterValue]
+      )
+    )
+  }
+
+  /**
    * @abstract
    * @protected
    * @param {number} price The price at which to calculate the conversion rate.
