@@ -31,8 +31,13 @@
       <p>
         So far, we've <a href="2026-00-intro-conversion-models.html">introduced</a> conversion modelling,
         and explored a <a href="2026-01-parametric-conversion-models.html">few</a> example parametric forms that conversion models might take.
-        In this post we'll go a little deeper into how we might specify those models, 
-        in the sense of selecting the parameters.
+        Having a zoo of potential models is a great start, but to make them useful, we need to make them concrete by setting their parameters.
+        This process turns an abstract model family (like "logistic") into a specific curve that reflects a specific market.
+      </p>
+      <p>
+        In this post, we'll go deeper into how we specify those models by selecting their parameters.
+        We'll explore two practical methods: defining a model based on its local behaviour at a single price,
+        and defining it by making it pass through two known points.
       </p>
       <hr>
       <h2>Local definition</h1>
@@ -49,13 +54,17 @@
         The key observation here is that once a conversion model form (e.g. logistic) has been chosen,
         it's not enough to specify the conversion rate at a particular reference price.
         There are many logistic conversion curves that give <i>that</i> conversion probability at <i>that</i> price.
-      </p>
-      <p>
         If, however, we also specify the local behaviour of the conversion curve around that price,
         then we uniquely specify the shape of the curve across the entire range of prices.
+      </p>
+      <p>
+        What do we mean by "local behaviour" in this context?
+        We in addition to specifying the conversion probability itself,
+        we can also specify the slope of the curve relating conversion probability to price at this point,
+        via a quantity known as the "elasticity" of the curve.
         Parametric modellers often refer to the "degrees of freedom" in their model. In our case, 
         all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a> have two degrees of freedom: 
-        specifying a location (via a price/conversion pair) and a shape (via elasticity at that point)
+        specifying a location (via a price/conversion pair) and a local behaviour (via elasticity at that point)
         is sufficient to determine the entire curve.
       </p>
 
@@ -63,23 +72,30 @@
       <p>
         We have mentioned the word "elasticity" in this post and previously.
         It is a description of the conversion probability curve in terms of how fast conversion is changing with price.
-        We <i>could</i> use the more classical and accessible derivative, $\mathrm d\phi(p) / \mathrm dp$, for this description.
-        One problem with this quantity is that it is dimensional:
-        it tells us the percentage point change in conversion rate per unit currency.
+        We <i>could</i> use the more classical (and accessible) derivative, $\mathrm d\phi(p) / \mathrm dp$, for this description.
+        However, one problem with this quantity is that it is dimensional:
+        it tells us the percentage point change in conversion rate per unit change in currency.
         However, a £1 price increase is a very different concept at $p=1$ versus $p=100$.
-        Similarly, a 5% percentage <i>point</i> change in conversion rate is a very different concept at $\phi=0.05$ versus $\phi=0.5$.
+        Similarly, a 5% percentage <i>point</i> change in conversion rate is a very different concept
+        at $\phi=0.05$ (where it's a 100% relative change)
+        compared to $\phi=0.5$ (where it's only a 10% relative change).
       </p>
       <p>
-        In response to this dimensionality in the derivative,
-        using <i>elasticity</i> to quantify the sensitivity of conversion probability to price becomes useful.
-        Mathematically, it is defined as
-        $$\epsilon(p) = \frac{\mathrm d\log(\phi(p))}{\mathrm d\log(p)} = \frac{p}{\phi(p)} \frac{\mathrm d\phi(p)}{\mathrm dp},$$
-        whereby the derivative is normalised by $p/\phi$.
-        This normalisation means that elasticity is non-dimensional:
-        it describes the percentage change in conversion probability that our model predicts from a percentage change in price.
-        For example, say conversion at price $p=100$ was $\phi(100) = 0.5$.
-        An elasticity of $\epsilon(100) = -2$ would then correspond to a model predicting
-        conversion at price $p=101$ of $\phi(101) \approx (1 - 0.02) \times \phi(100) = 0.49$.
+        To address this, economists use a concept called <i>price elasticity of demand</i>.
+        Instead of looking at absolute changes, elasticity measures the <em>percentage</em> change in conversion for a one percent change in price.
+        This makes it a standardized, "apples-to-apples" measure of sensitivity that can be compared across different prices.
+        For the mathematically curious, it is defined as:
+        $$\epsilon(p) = \frac{\mathrm d\log(\phi(p))}{\mathrm d\log(p)} = \frac{p}{\phi(p)} \frac{\mathrm d\phi(p)}{\mathrm dp}.$$
+        This formula standardizes the raw derivative by the price and conversion level, making it unitless.
+      </p>
+      <p>
+        Let's make this concrete with an example.
+        Suppose at a price of $p=£100$, the conversion probability is $\phi(100) = 0.5$ (or 50%).
+        If the elasticity at this price is $\epsilon(100) = -2$,
+        it means that for a 1% increase in price, we expect a 2% decrease in the conversion probability.
+        So, if we increase the price by 1% to $p=£101$, our model predicts the new conversion probability will be
+        approximately $0.5 \times (1 - 0.02) = 0.49$ (or 49%).
+        This gives us a much more intuitive way to think about how sensitive customers are to price changes.
       </p>
       <p>
         The key consequence of normalisation is that
@@ -87,6 +103,16 @@
         In other words,
         elasticity is an economically meaningful value,
         and we don't need to know its contextual price and corresponding conversion probability to interpret it.
+      </p>
+      <p>
+        A crucial point to bear in mind is that, while we can specify a model from the elasticity at one point,
+        the elasticity of most models is <em>not</em> constant.
+        As you move along the curve, the elasticity changes.
+        For example, in the logistic model, demand is typically most elastic around the 50% conversion mark and less elastic at the extremes.
+        This variation is what gives each model its unique character
+        and makes the choice of model family so important for extrapolating behaviour across a wide range of prices.
+        The "Constant Elasticity" model we saw previously is the exception that proves the rule:
+        its defining feature is that this value does not change.
       </p>
 
       <h2>An alternative specification: interpolation</h2>
@@ -114,12 +140,16 @@
         our models demonstrate very significant differences in behaviour.
       </p>
       <p>
-        Before further investigating this local/global problem further,
-        we will next consider how we can fit our models to data.
-        Suppose we have more than two price points in our data,
-        so that we can estimate conversion probabilities at each.
-        Unless we're very lucky, none of our curves will perfectly interpolate through all of those.
-        We will show how we can best fit our parametric conversion probability curves to observed conversion data.
+        This brings us to a critical question: what do we do when we have conversion data from <em>more</em> than two prices?
+        This is the common scenario when we analyze historical sales data.
+        Unless we are incredibly lucky, it's impossible to draw a two-parameter curve that passes perfectly through three or more data points.
+        Our specification methods (local definition and interpolation) are no longer sufficient.
+      </p>
+      <p>
+        To solve this, we need to move from exact specification to model fitting.
+        In the next post, we will explore how to <b>fit</b> our models to data,
+        finding the parameters that create a curve that best represents all of our observations,
+        even if it doesn't pass exactly through any of them.
       </p>
     </div>
 
