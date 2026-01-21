@@ -32,10 +32,8 @@ export class LogisticDemandModel extends BaseDemandModel {
   }
 
   /**
-   * @override
-   */
-  /**
    * Creates a new model instance from a reference point.
+   * @override
    * @param {object} params
    * @param {number} params.price The reference price.
    * @param {number} params.conversion The conversion rate at the reference price.
@@ -48,6 +46,28 @@ export class LogisticDemandModel extends BaseDemandModel {
     const logit = Math.log(1 / conversion - 1)
     const p0 = price - (logit / k)
     return new LogisticDemandModel({ k, p0 })
+  }
+
+  /**
+   * Creates a new model instance by interpolating between two points.
+   * This method calculates the shape of the logistic demand curve that passes
+   * through two given points (p0, c0) and (p1, c1), and then creates a new
+   * `LogisticDemandModel` instance.
+   * @override
+   * @param {object} point0 An object representing the first point, with `price` and `conversion` properties.
+   * @param {number} point0.price The price at the first point.
+   * @param {number} point0.conversion The conversion rate at the first point.
+   * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
+   * @param {number} point1.price The price at the second point.
+   * @param {number} point1.conversion The conversion rate at the second point.
+   * @returns {LogisticDemandModel} A new instance of the demand model.
+   */
+  static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
+    const logit0 = Math.log(conversion0 / (1 - conversion0));
+    const logit1 = Math.log(conversion1 / (1 - conversion1));
+    const k = -(logit1 - logit0) / (price1 - price0);
+    const p0 = (price0*logit1 - price1*logit0) / (logit1 - logit0);
+    return new LogisticDemandModel({ k , p0 });
   }
 
   /**

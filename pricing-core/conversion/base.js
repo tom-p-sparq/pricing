@@ -39,6 +39,22 @@ export class BaseDemandModel {
   }
 
   /**
+   * Creates a new model instance by interpolating between two points.
+   * This is a factory method.
+   * @abstract
+   * @param {object} point0 An object representing the first point, with `price` and `conversion` properties.
+   * @param {number} point0.price The price at the first point.
+   * @param {number} point0.conversion The conversion rate at the first point.
+   * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
+   * @param {number} point1.price The price at the second point.
+   * @param {number} point1.conversion The conversion rate at the second point.
+   * @returns {BaseDemandModel} A new instance of the demand model.
+   */
+  static interpolate(point0, point1) {
+    throw new Error("Define the constructor of the model parameterised by two points in `interpolate`")
+  }
+
+  /**
    * Checks the validity of parameters for creating a model from a reference point.
    * @protected
    * @param {number} price The reference price. Must be positive.

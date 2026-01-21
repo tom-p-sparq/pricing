@@ -243,7 +243,7 @@
 
       plotConfigs.forEach(({ modelClass, title, containerId }) => {        
         const model = modelClass.from_reference(reference);
-        const plot = plotting.createSingleModelConversionPlot(model, { title });
+        const plot = plotting.createSingleModelConversionPlot({model: model, options: { title }});
         const container = document.getElementById(containerId);
         if (container) {
           container.replaceChildren(plot);
@@ -269,9 +269,13 @@
           model: modelClass.from_reference(interactiveReference.value),
           name: title,
         }));
-        const comparisonPlot = plotting.createMultiModelConversionPlot(models, {
-          title: 'The Conversion Model Zoo',
-          subtitle: 'Comparing conversion probability models',
+        const comparisonPlot = plotting.createMultiModelConversionPlot({
+          models: models,
+          points: [interactiveReference.value],
+          options: {
+            title: 'The Conversion Model Zoo',
+            subtitle: 'Comparing conversion probability models',
+          }
         });
         document.getElementById('conversion-comparison-container').replaceChildren(comparisonPlot);
       }
