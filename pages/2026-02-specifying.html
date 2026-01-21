@@ -1,52 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
-    <script>
-      window.MathJax = {
-        tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']]
-        }
-      };
-      </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
-    <title>Parametric Conversion Modelling</title>
-  </head>
-  <body>
-    <header>
-      <nav>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-        </ul>
-      </nav>
-    </header>
 
-    <div class="main-container">
-      <h1>Specifying Conversion Model Parameters</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <title>Parametric Conversion Modelling</title>
+</head>
 
-      <p>
-        So far, we've <a href="2026-00-intro-conversion-models.html">introduced</a> conversion modelling,
-        and explored a <a href="2026-01-parametric-conversion-models.html">few</a> example parametric forms that conversion models might take.
-        Having a zoo of potential models is a great start, but to make them useful, we need to make them concrete by setting their parameters.
-        This process turns an abstract model family (like "logistic") into a specific curve that reflects a specific market.
-      </p>
-      <p>
-        In this post, we'll go deeper into how we specify those models by selecting their parameters.
-        We'll explore two practical methods: defining a model based on its local behaviour at a single price,
-        and defining it by making it pass through two known points.
-      </p>
-      <hr>
-      <h2>Local definition</h1>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="main-container">
+    <h1>Specifying Conversion Model Parameters</h1>
+
+    <p>
+      So far, we've <a href="2026-00-intro-conversion-models.html">introduced</a> conversion modelling,
+      and explored a <a href="2026-01-parametric-conversion-models.html">few</a> example parametric forms that
+      conversion models might take.
+      Having a zoo of potential models is a great start, but to make them useful, we need to make them concrete by
+      setting their parameters.
+      This process turns an abstract model family (like "logistic") into a specific curve that reflects a specific
+      market.
+    </p>
+    <p>
+      In this post, we'll go deeper into how we specify those models by selecting their parameters.
+      We'll explore two practical methods: defining a model based on its local behaviour at a single price,
+      and defining it by making it pass through two known points.
+    </p>
+    <hr>
+    <h2>Local definition</h1>
       <p>
         In our <a href="2026-01-parametric-conversion-models.html">conversion modelling zoo</a>
         we compared all of our species against one another in a single plot.
         For a fair comparison we gave them all the same behaviour at one specific <i>reference price</i>.
       </p>
-      
+
       <div id="reference-comparison-container"></div>
       <div id="reference-controls-container"></div>
 
@@ -62,9 +68,11 @@
         In addition to specifying the conversion probability itself,
         we can also specify the slope of the curve relating conversion probability to price at this point,
         via a quantity known as the "elasticity" of the curve.
-        Parametric modellers often refer to the "degrees of freedom" in their model. In our case, 
-        all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a> have two degrees of freedom. 
-        So, specifying both a location (via a price/conversion pair) and a local behaviour (via elasticity at that point)
+        Parametric modellers often refer to the "degrees of freedom" in their model. In our case,
+        all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a> have two
+        degrees of freedom.
+        So, specifying both a location (via a price/conversion pair) and a local behaviour (via elasticity at that
+        point)
         fixes those two degrees of freedom, and is sufficient to uniquely determine the entire curve.
       </p>
 
@@ -72,7 +80,8 @@
       <p>
         We have mentioned the word "elasticity" in this post and previously.
         It is a description of the conversion probability curve in terms of how fast conversion is changing with price.
-        We <i>could</i> use the more classical (and accessible) derivative, $\mathrm d\phi(p) / \mathrm dp$, for this description.
+        We <i>could</i> use the more classical (and accessible) derivative, $\mathrm d\phi(p) / \mathrm dp$, for this
+        description.
         However, one problem with this quantity is that it is dimensional:
         it tells us the percentage point change in conversion rate per unit change in currency.
         However, a £1 price increase is a very different concept at $p=1$ versus $p=100$.
@@ -82,10 +91,13 @@
       </p>
       <p>
         To address this, economists use a concept called <i>price elasticity of demand</i>.
-        Instead of looking at absolute changes, elasticity measures the <em>percentage</em> change in conversion for a one percent change in price.
-        This makes it a standardized, "apples-to-apples" measure of sensitivity that can be compared across different prices.
+        Instead of looking at absolute changes, elasticity measures the <em>percentage</em> change in conversion for a
+        one percent change in price.
+        This makes it a standardized, "apples-to-apples" measure of sensitivity that can be compared across different
+        prices.
         For the mathematically curious, it is defined as:
-        $$\epsilon(p) = \frac{\mathrm d\log(\phi(p))}{\mathrm d\log(p)} = \frac{p}{\phi(p)} \frac{\mathrm d\phi(p)}{\mathrm dp}.$$
+        $$\epsilon(p) = \frac{\mathrm d\log(\phi(p))}{\mathrm d\log(p)} = \frac{p}{\phi(p)} \frac{\mathrm
+        d\phi(p)}{\mathrm dp}.$$
         This formula standardizes the raw derivative by the price and conversion level, making it unitless.
       </p>
       <p>
@@ -108,7 +120,8 @@
         A crucial point to bear in mind is that, while we can specify a model from the elasticity at one point,
         the elasticity of most models is <em>not</em> constant.
         As you move along the curve, the elasticity changes.
-        For example, in the logistic model, demand is typically most elastic around the 50% conversion mark and less elastic at the extremes.
+        For example, in the logistic model, demand is typically most elastic around the 50% conversion mark and less
+        elastic at the extremes.
         This variation is what gives each model its unique character,
         and makes the choice of model family so important for extrapolating behaviour across a wide range of prices.
         The "Constant Elasticity" model we saw previously is the exception that proves the rule:
@@ -124,26 +137,31 @@
       </p>
       <p>
         Above, we used elasticity to nail down the other degree of freedom.
-        Alternatively, we can uniquely determine a conversion curve by specifying another point it has to travel through.
+        Alternatively, we can uniquely determine a conversion curve by specifying another point it has to travel
+        through.
         If we have estimates of the conversion rate at two different prices,
         then that fixes our two degrees of freedom.
-        So, that's enough to specify the global behaviour of each conversion probability curve across the entire price range.
+        So, that's enough to specify the global behaviour of each conversion probability curve across the entire price
+        range.
       </p>
-      
+
       <div id="interpolants-comparison-container"></div>
       <div id="interpolants-controls-container"></div>
 
       <p>
         From playing around with the two methods for specifying the models in our zoo,
-        it becomes clear that the differences between models can only be made very small in small regions of the price range.
+        it becomes clear that the differences between models can only be made very small in small regions of the price
+        range.
         As we extrapolate further from our reference price(s),
         and as our interpolants move far apart in price space,
         our models demonstrate very significant differences in behaviour.
       </p>
       <p>
-        This brings us to a critical question: what do we do when we have conversion data from <em>more</em> than two prices?
+        This brings us to a critical question: what do we do when we have conversion data from <em>more</em> than two
+        prices?
         This is the common scenario when we analyze historical sales data.
-        Unless we are incredibly lucky, it's impossible to draw a two-parameter curve that passes perfectly through three or more data points.
+        Unless we are incredibly lucky, it's impossible to draw a two-parameter curve that passes perfectly through
+        three or more data points.
         Our specification methods (local definition and interpolation) are no longer sufficient.
       </p>
       <p>
@@ -152,101 +170,14 @@
         finding the parameters that create a curve that best represents all of our observations,
         even if it doesn't pass exactly through any of them.
       </p>
-    </div>
+  </div>
 
-    <!-- Use the library to create and render plots -->
-    <script type="module">
-      import { conversion, plotting, Inputs, html } from './compiled-pricing-core.js'
+  <!-- Use the library to create and render plots -->
+  <script type="module" src="2026-02-specifying.js"></script>
 
-      // Static plot
-      const plotConfigs = [
-        { modelClass: conversion.LinearDemandModel, title: 'Linear' },
-        { modelClass: conversion.LogisticDemandModel, title: 'Logistic' },
-        { modelClass: conversion.LogLogisticDemandModel, title: 'Log-logistic' },
-        { modelClass: conversion.WeibullDemandModel, title: 'Weibull' },
-        { modelClass: conversion.ConstantElasticityDemandModel, title: 'Constant elasticity' },
-      ];
+  <footer>
+    <p>&copy; 2026 TP Prescott</p>
+  </footer>
+</body>
 
-      // Interactive plots
-      const interactiveReference = Inputs.form(
-        {
-          price: Inputs.range([50, 250], {step: 1, value: 150, label: "Reference price"}),
-          elasticity: Inputs.range([-5, -0.1], {step: 0.1, value: -2, label: "Reference elasticity"}),
-          conversion: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Reference conversion"})
-        },
-        {
-          template: ({price, elasticity, conversion}) =>
-            html`<div style="display: flex; align-items: center; justify-content: space-around; gap: 1em;">${price}${elasticity}${conversion}</div>`
-        }
-      );
-      const interactiveInterpolants = Inputs.form(
-        {
-          price0: Inputs.range([50, 250], {step: 1, value: 100, label: "Price 1"}),
-          conversion0: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.7, label: "Conversion 1"}),
-          price1: Inputs.range([50, 250], {step: 1, value: 150, label: "Price 2"}),
-          conversion1: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Conversion 2"}),
-        },
-        {
-          template: (inputs) => html`<div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 1em;">
-            <div>${inputs.price0}</div>
-            <div>${inputs.price1}</div>
-            <div>${inputs.conversion0}</div>
-            <div>${inputs.conversion1}</div>
-          </div>`
-        }
-      );
-      // Place controls
-      document.getElementById('reference-controls-container').replaceChildren(interactiveReference);
-      document.getElementById('interpolants-controls-container').replaceChildren(interactiveInterpolants);
-
-      function renderReference() {
-        const models = plotConfigs.map(({ modelClass, title }) => ({
-          model: modelClass.from_reference(interactiveReference.value),
-          name: title,
-        }));
-        const comparisonPlot = plotting.createMultiModelConversionPlot({
-          models: models,
-          points: [interactiveReference.value],
-          options: {
-            title: 'The Conversion Model Zoo',
-            subtitle: 'Specified by behaviour at a single reference price',
-          }
-        });
-        document.getElementById('reference-comparison-container').replaceChildren(comparisonPlot);
-      }
-      
-      function renderInterpolants() {
-        // Get points
-        let { price0, conversion0, price1, conversion1 } = interactiveInterpolants.value;
-        const point0 = {price: price0, conversion: conversion0};
-        const point1 = {price: price1, conversion: conversion1};
-        // Create models and plot
-        const models = plotConfigs.map(({ modelClass, title }) => ({
-          model: modelClass.interpolate(point0, point1),
-          name: title,
-        }));
-        const comparisonPlot = plotting.createMultiModelConversionPlot({
-          models: models,
-          points: [point0, point1],
-          options: {
-          title: 'The Conversion Model Zoo',
-          subtitle: 'Specified by interpolation between two points',
-          }
-        });
-        document.getElementById('interpolants-comparison-container').replaceChildren(comparisonPlot);
-      }
-
-      // Set up listeners
-      interactiveInterpolants.addEventListener('input', renderInterpolants);
-      interactiveReference.addEventListener('input', renderReference);
-
-      // Initial renders
-      renderInterpolants();
-      renderReference();
-    </script>
-
-    <footer>
-      <p>&copy; 2026 TP Prescott</p>
-    </footer>
-  </body>
 </html>
