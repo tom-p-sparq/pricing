@@ -78,4 +78,19 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
     if (price <= 0) return 1.0;
     return this.A * Math.pow(price, this.elasticity_param)
   }
+
+  /**
+   * Calculates the gradient of conversion probability w.r.t. constructor parameters.
+   * @override
+   * @protected
+   * @param {number} price The price at which to calculate the gradient of the conversion probability.
+   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
+   */
+  _gradient(price) {
+    const phi = this._conversion(price)
+    return {
+      A: phi / this.A,
+      elasticity: phi * Math.log(price),
+    }
+  }
 }

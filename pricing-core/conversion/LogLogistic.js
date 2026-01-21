@@ -72,10 +72,11 @@ export class LogLogisticDemandModel extends BaseDemandModel {
     const logit1 = Math.log(conversion1 / (1 - conversion1));
     const p_shape = -(logit1 - logit0) / (logPrice1 - logPrice0);
     const K = price0 * Math.pow(conversion0 / (1 - conversion0), 1 / p_shape);
-    return new LogLogisticDemandModel({ p_shape , K });
+    return new LogLogisticDemandModel({ p_shape, K });
   }
 
   /**
+   * @override
    * @protected
    * @param {number} price The price for which to calculate the conversion rate.
    * @returns {number} The calculated conversion rate (before clamping).
@@ -84,5 +85,20 @@ export class LogLogisticDemandModel extends BaseDemandModel {
     if (price <= 0) return 1.0;
     const X = Math.pow(price / this.K, this.p_shape)
     return 1 / (1 + X)
+  }
+
+  /**
+   * Calculates the gradient of conversion probability w.r.t. constructor parameters.
+   * @override
+   * @protected
+   * @param {number} price The price at which to calculate the gradient of the conversion probability.
+   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
+   */
+  _gradient(price) {
+    const phi = this._conversion(price)
+    return {
+      p_shape: -phi * (1 - phi) * (Math.log(price) - Math.log(this.K)),
+      K: phi * (1 - phi) * (this.p_shape / this.K),
+    }
   }
 }

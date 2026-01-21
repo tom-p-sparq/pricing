@@ -69,7 +69,7 @@ export class WeibullDemandModel extends BaseDemandModel {
     const cloglog0 = Math.log(-Math.log(conversion0));
     const cloglog1 = Math.log(-Math.log(conversion1));
     const k = (cloglog1 - cloglog0) / (logPrice1 - logPrice0)
-    const lambda = price0 * Math.pow(-Math.log(conversion0), -1/k)
+    const lambda = price0 * Math.pow(-Math.log(conversion0), -1 / k)
     return new WeibullDemandModel({ k, lambda });
   }
 
@@ -82,5 +82,20 @@ export class WeibullDemandModel extends BaseDemandModel {
     if (price <= 0) return 1.0;
 
     return Math.exp(-Math.pow(price / this.lambda, this.k));
+  }
+
+  /**
+   * Calculates the gradient of conversion probability w.r.t. constructor parameters.
+   * @override
+   * @protected
+   * @param {number} price The price at which to calculate the gradient of the conversion probability.
+   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
+   */
+  _gradient(price) {
+    const phi = this._conversion(price)
+    return {
+      k: phi * Math.log(phi) * (Math.log(price / this.lambda)),
+      lambda: -phi * Math.log(phi) * (this.k / this.lambda),
+    }
   }
 }

@@ -25,6 +25,16 @@ export class BaseDemandModel {
   }
 
   /**
+   * @abstract
+   * @protected
+   * @param {number} price The price at which to calculate the gradient of the conversion probability.
+   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor.
+   */
+  _gradient(price) {
+    throw new Error("Define the gradient of the conversion rate at this price in `_gradient`")
+  }
+
+  /**
    * Creates a new model instance from a reference point.
    * This is a factory method.
    * @abstract
@@ -34,7 +44,7 @@ export class BaseDemandModel {
    * @param {number} params.conversion The conversion rate at the reference price.
    * @returns {BaseDemandModel} A new instance of the demand model.
    */
-  static from_reference({price, conversion, elasticity}) {
+  static from_reference({ price, conversion, elasticity }) {
     throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `from_reference`")
   }
 

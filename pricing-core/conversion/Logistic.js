@@ -66,8 +66,8 @@ export class LogisticDemandModel extends BaseDemandModel {
     const logit0 = Math.log(conversion0 / (1 - conversion0));
     const logit1 = Math.log(conversion1 / (1 - conversion1));
     const k = -(logit1 - logit0) / (price1 - price0);
-    const p0 = (price0*logit1 - price1*logit0) / (logit1 - logit0);
-    return new LogisticDemandModel({ k , p0 });
+    const p0 = (price0 * logit1 - price1 * logit0) / (logit1 - logit0);
+    return new LogisticDemandModel({ k, p0 });
   }
 
   /**
@@ -79,5 +79,20 @@ export class LogisticDemandModel extends BaseDemandModel {
   _conversion(price) {
     const X = this.k * (price - this.p0)
     return 1 / (1 + Math.exp(X))
+  }
+
+  /**
+   * Calculates the gradient of conversion probability w.r.t. constructor parameters.
+   * @override
+   * @protected
+   * @param {number} price The price at which to calculate the gradient of the conversion probability.
+   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
+   */
+  _gradient(price) {
+    const phi = this._conversion(price)
+    return {
+      k: -phi * (1 - phi) * (price - this.p0),
+      p0: phi * (1 - phi) * this.k,
+    }
   }
 }

@@ -66,4 +66,16 @@ export class LinearDemandModel extends BaseDemandModel {
   _conversion(price) {
     return this.c0 + this.b * (price - this.p0)
   }
+
+  /**
+   * Calculate the gradient of conversion probability with respect to the model parameters.
+   * @override
+   * @protected
+   * @param {number} price The price at which to calculate the gradient of the conversion probability.
+   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
+   */
+  _gradient(price) {
+    return { p0: 0, c0: 1, b: price }
+  }
 }
+
