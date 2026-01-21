@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <title>Parametric Conversion Modelling</title>
+</head>
+
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="main-container">
+    <h1>Fitting Conversion Model Parameters</h1>
+
+    <h2>User input.</h2>
+    <div id="data-generation-container"></div>
+
+    <h2>Data to fit.</h2>
+    <div id="data-table-container"></div>
+
+    <p>There's a whole load of text here now. Does this just keep getting moved down?</p>
+
+  </div>
+  <script type="module" src="03-fitting.js"></script>
+
+  <footer>
+    <p>&copy; 2026 TP Prescott</p>
+  </footer>
+</body>
+
+</html>
