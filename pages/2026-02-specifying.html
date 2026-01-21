@@ -32,7 +32,7 @@
         So far, we've <a href="2026-00-intro-conversion-models.html">introduced</a> conversion modelling,
         and explored a <a href="2026-01-parametric-conversion-models.html">few</a> example parametric forms that conversion models might take.
         In this post we'll go a little deeper into how we might specify those models, 
-        in the sense of choosing the parameters.
+        in the sense of selecting the parameters.
       </p>
       <hr>
       <h2>Local definition</h1>
@@ -46,14 +46,79 @@
       <div id="reference-controls-container"></div>
 
       <p>
-        Blah blah
+        The key observation here is that once a conversion model form (e.g. logistic) has been chosen,
+        it's not enough to specify the conversion rate at a particular reference price.
+        There are many logistic conversion curves that give <i>that</i> conversion probability at <i>that</i> price.
+      </p>
+      <p>
+        If, however, you also specify the local behaviour of the conversion curve around that price,
+        you uniquely specify the entire shape of the curve across the entire range of prices.
+        Parametric modellers often refer to the "degrees of freedom" in their model.
+        In our case, all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a>
+        have two degrees of freedom: 
+        specifying a location (via a price/conversion pair)
+        and a shape (via elasticity at that point)
+        is sufficient to determine the entire curve.
+      </p>
+
+      <h3>On Elasticity</h3>
+      <p>
+        We have mentioned the word "elasticity" numerous times.
+        It is a description of the conversion probability curve in terms of how fast conversion is changing with price.
+        We <i>could</i> use the more accessible derivative, $\mathrm d\phi(p) / \mathrm dp$, for this description.
+        One problem with this quantity is that it is dimensional:
+        it tells us the percentage point change in conversion rate per unit currency.
+        However, a £1 price increase is a very different concept at $p=1$ versus $p=100$.
+        Similarly, a 5% percentage <i>point</i> change in conversion rate is a very different concept at $\phi=0.05$ versus $\phi=0.5$.
+      </p>
+      <p>
+        In response to this dimensionality in the derivative,
+        using <i>elasticity</i> to quantify the sensitivity of conversion probability to price becomes useful.
+        Mathematically, it is defined as
+        $$\epsilon(p) = \frac{\mathrm d\log(\phi(p))}{\mathrm d\log(p)} = \frac{p}{\phi(p)} \frac{\mathrm d\phi(p)}{\mathrm dp},$$
+        whereby the derivative is normalised by $p/\phi$.
+        This normalisation means that elasticity is non-dimensional:
+        it describes the percentage change in conversion probability that our model predicts from a percentage change in price.
+        For example, say conversion at price $p=100$ was $\phi(100) = 0.5$.
+        An elasticity of $\epsilon(100) = -2$ would then correspond to a model predicting
+        conversion at price $p=101$ of $\phi(101) \approx (1 - 0.02) \times \phi(100) = 0.49$.
+      </p>
+      <p>
+        The key consequence of normalisation is that elasticity is an economically meaningful value,
+        and we don't need to know its contextual price and corresponding conversion probability to interpret it.
+      </p>
+
+      <h2>An alternative specification: interpolation</h2>
+      <p>
+        We saw above that having an estimate of conversion probability at one reference price point
+        is not sufficient to determine the conversion probability curve.
+        This is because the curves we're dealing with have two degrees of freedom:
+        one point only specifies one of those degrees of freedom.
+      </p>
+      <p>
+        Above, we used elasticity to nail down the other degree of freedom.
+        Alternatively, we can uniquely determine a conversion curve by specifying another point it has to travel through.
+        If we have estimates of the conversion rate at two different prices,
+        then that's enough to specify the global behaviour of each conversion probability curve across the entire price range.
       </p>
       
       <div id="interpolants-comparison-container"></div>
       <div id="interpolants-controls-container"></div>
 
       <p>
-        Blah blah
+        From playing around with the two methods for specifying the models in our zoo,
+        it becomes clear that the differences between models can only be made very small in small regions of the price range.
+        As we extrapolate further from our reference price(s),
+        and as our interpolants move far apart in price space,
+        our models demonstrate very significant differences in behaviour.
+      </p>
+      <p>
+        Before further investigating this local/global problem further,
+        we will next consider how we can fit our models to data.
+        Suppose we have more than two price points in our data,
+        so that we can estimate conversion probabilities at each.
+        Unless we're very lucky, none of our curves will perfectly interpolate through all of those.
+        We will show how we can best fit our parametric conversion probability curves to observed conversion data.
       </p>
     </div>
 
@@ -84,16 +149,16 @@
       );
       const interactiveInterpolants = Inputs.form(
         {
-          price0: Inputs.range([50, 250], {step: 1, value: 100, label: "Price 0"}),
-          conversion0: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.7, label: "Conversion 0"}),
-          price1: Inputs.range([50, 250], {step: 1, value: 150, label: "Price 1"}),
-          conversion1: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Conversion 1"}),
+          price0: Inputs.range([50, 250], {step: 1, value: 100, label: "Price 1"}),
+          conversion0: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.7, label: "Conversion 1"}),
+          price1: Inputs.range([50, 250], {step: 1, value: 150, label: "Price 2"}),
+          conversion1: Inputs.range([0.01, 0.99], {step: 0.01, value: 0.5, label: "Conversion 2"}),
         },
         {
           template: (inputs) => html`<div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 1em;">
             <div>${inputs.price0}</div>
-            <div>${inputs.conversion0}</div>
             <div>${inputs.price1}</div>
+            <div>${inputs.conversion0}</div>
             <div>${inputs.conversion1}</div>
           </div>`
         }
@@ -112,7 +177,7 @@
           points: [interactiveReference.value],
           options: {
             title: 'The Conversion Model Zoo',
-            subtitle: 'Comparing conversion probability models',
+            subtitle: 'Specified by behaviour at a single reference price',
           }
         });
         document.getElementById('reference-comparison-container').replaceChildren(comparisonPlot);
@@ -133,7 +198,7 @@
           points: [point0, point1],
           options: {
           title: 'The Conversion Model Zoo',
-          subtitle: 'Comparing conversion probability models',
+          subtitle: 'Specified by interpolation between two points',
           }
         });
         document.getElementById('interpolants-comparison-container').replaceChildren(comparisonPlot);
