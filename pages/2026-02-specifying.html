@@ -51,21 +51,19 @@
         There are many logistic conversion curves that give <i>that</i> conversion probability at <i>that</i> price.
       </p>
       <p>
-        If, however, you also specify the local behaviour of the conversion curve around that price,
-        you uniquely specify the entire shape of the curve across the entire range of prices.
-        Parametric modellers often refer to the "degrees of freedom" in their model.
-        In our case, all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a>
-        have two degrees of freedom: 
-        specifying a location (via a price/conversion pair)
-        and a shape (via elasticity at that point)
+        If, however, we also specify the local behaviour of the conversion curve around that price,
+        then we uniquely specify the shape of the curve across the entire range of prices.
+        Parametric modellers often refer to the "degrees of freedom" in their model. In our case, 
+        all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a> have two degrees of freedom: 
+        specifying a location (via a price/conversion pair) and a shape (via elasticity at that point)
         is sufficient to determine the entire curve.
       </p>
 
       <h3>On Elasticity</h3>
       <p>
-        We have mentioned the word "elasticity" numerous times.
+        We have mentioned the word "elasticity" in this post and previously.
         It is a description of the conversion probability curve in terms of how fast conversion is changing with price.
-        We <i>could</i> use the more accessible derivative, $\mathrm d\phi(p) / \mathrm dp$, for this description.
+        We <i>could</i> use the more classical and accessible derivative, $\mathrm d\phi(p) / \mathrm dp$, for this description.
         One problem with this quantity is that it is dimensional:
         it tells us the percentage point change in conversion rate per unit currency.
         However, a £1 price increase is a very different concept at $p=1$ versus $p=100$.
@@ -84,7 +82,10 @@
         conversion at price $p=101$ of $\phi(101) \approx (1 - 0.02) \times \phi(100) = 0.49$.
       </p>
       <p>
-        The key consequence of normalisation is that elasticity is an economically meaningful value,
+        The key consequence of normalisation is that
+        a given value of elasticity has the same meaning across the entire range of prices and conversion probabilities.
+        In other words,
+        elasticity is an economically meaningful value,
         and we don't need to know its contextual price and corresponding conversion probability to interpret it.
       </p>
 
