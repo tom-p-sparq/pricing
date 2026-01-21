@@ -59,13 +59,13 @@
       </p>
       <p>
         What do we mean by "local behaviour" in this context?
-        We in addition to specifying the conversion probability itself,
+        In addition to specifying the conversion probability itself,
         we can also specify the slope of the curve relating conversion probability to price at this point,
         via a quantity known as the "elasticity" of the curve.
         Parametric modellers often refer to the "degrees of freedom" in their model. In our case, 
-        all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a> have two degrees of freedom: 
-        specifying a location (via a price/conversion pair) and a local behaviour (via elasticity at that point)
-        is sufficient to determine the entire curve.
+        all of the models we specified in our <a href="2026-01-parametric-conversion-models.html">zoo</a> have two degrees of freedom. 
+        So, specifying both a location (via a price/conversion pair) and a local behaviour (via elasticity at that point)
+        fixes those two degrees of freedom, and is sufficient to uniquely determine the entire curve.
       </p>
 
       <h3>On Elasticity</h3>
@@ -109,7 +109,7 @@
         the elasticity of most models is <em>not</em> constant.
         As you move along the curve, the elasticity changes.
         For example, in the logistic model, demand is typically most elastic around the 50% conversion mark and less elastic at the extremes.
-        This variation is what gives each model its unique character
+        This variation is what gives each model its unique character,
         and makes the choice of model family so important for extrapolating behaviour across a wide range of prices.
         The "Constant Elasticity" model we saw previously is the exception that proves the rule:
         its defining feature is that this value does not change.
@@ -126,7 +126,8 @@
         Above, we used elasticity to nail down the other degree of freedom.
         Alternatively, we can uniquely determine a conversion curve by specifying another point it has to travel through.
         If we have estimates of the conversion rate at two different prices,
-        then that's enough to specify the global behaviour of each conversion probability curve across the entire price range.
+        then that fixes our two degrees of freedom.
+        So, that's enough to specify the global behaviour of each conversion probability curve across the entire price range.
       </p>
       
       <div id="interpolants-comparison-container"></div>
