@@ -138,8 +138,7 @@
       </div>
 
       <div id="incremental-revenue-container"></div>
-      
-      <div id="cost-container"></div>
+      <div id="cost-container" style="display: flex; align-items: center; justify-content: space-around; gap: 1em;"></div>
 
       <div>
       <p>
@@ -209,7 +208,7 @@
 
     <!-- Use the library to create and render plots -->
     <script type="module">
-      import { conversion, plotting, Inputs } from './compiled-pricing-core.js'
+      import { conversion, plotting, Inputs, html } from './compiled-pricing-core.js'
 
       // Interactive inputs
       const costSlider = Inputs.range([0, 150], {
@@ -226,8 +225,9 @@
         conversion: 0.5,
       };
       const model = conversion.WeibullDemandModel.from_reference(reference);
-      const conversionPlot = plotting.createSingleModelConversionPlot(model, {
-        title: 'Example conversion model',
+      const conversionPlot = plotting.createSingleModelConversionPlot({
+        model: model,
+        options: { title: 'Example conversion model' }
       });
       document.getElementById('conversion-container').replaceChildren(conversionPlot)
 
