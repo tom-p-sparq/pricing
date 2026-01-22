@@ -11,14 +11,12 @@ import { BaseDemandModel } from './base.js'
 export class LinearDemandModel extends BaseDemandModel {
   /**
    * @param {object} model_params
-   * @param {number} model_params.p0 The reference price.
-   * @param {number} model_params.c0 The conversion rate at the reference price.
+   * @param {number} model_params.a The intercept of the linear demand curve.
    * @param {number} model_params.b The slope of the linear demand curve.
    */
-  constructor({ p0, c0, b }) {
+  constructor({ a, b }) {
     super()
-    this.p0 = p0
-    this.c0 = c0
+    this.a = a
     this.b = b
   }
 
@@ -33,8 +31,9 @@ export class LinearDemandModel extends BaseDemandModel {
    */
   static from_reference({ price, conversion, elasticity }) {
     LinearDemandModel._check_reference(price, conversion, elasticity)
+    const a = conversion * (1 - elasticity)
     const b = elasticity * (conversion / price)
-    return new LinearDemandModel({ p0: price, c0: conversion, b })
+    return new LinearDemandModel({ a, b })
   }
 
   /**
@@ -52,8 +51,9 @@ export class LinearDemandModel extends BaseDemandModel {
    * @returns {LinearDemandModel} A new instance of the demand model.
    */
   static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
+    const a = (conversion0 * price1 - conversion1 * price0) / (price1 - price0);
     const b = (conversion1 - conversion0) / (price1 - price0);
-    return new LinearDemandModel({ p0: price0, c0: conversion0, b });
+    return new LinearDemandModel({ a, b });
   }
 
   /**
@@ -64,7 +64,7 @@ export class LinearDemandModel extends BaseDemandModel {
    * @returns {number} The calculated conversion rate (before clamping).
    */
   _conversion(price) {
-    return this.c0 + this.b * (price - this.p0)
+    return this.a + this.b * price
   }
 
   /**
@@ -75,7 +75,7 @@ export class LinearDemandModel extends BaseDemandModel {
    * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
    */
   _gradient(price) {
-    return { p0: 0, c0: 1, b: price }
+    return { a: 1, b: price }
   }
 }
 
