@@ -11,24 +11,15 @@ import { BaseDemandModel } from './base.js'
  */
 export class LogisticDemandModel extends BaseDemandModel {
   /**
-   * @param {object} model_params
-   * @param {number} model_params.k The steepness parameter of the logistic function.
-   * @param {number} model_params.p0 The price at the inflection point of the logistic curve.
+   * @param {{k: number, p0: number}} model_params
    */
   constructor({ k, p0 }) {
-    super()
+    super({k, p0})
     /**
-     * The steepness parameter of the logistic function.
      * @protected
-     * @type {number}
+     * @type {{k: number, p0: number}}
      */
-    this.k = k
-    /**
-     * The price at the inflection point of the logistic curve (where conversion is 0.5).
-     * @protected
-     * @type {number}
-     */
-    this.p0 = p0
+    this.parameters;
   }
 
   /**
@@ -77,28 +68,30 @@ export class LogisticDemandModel extends BaseDemandModel {
    * @returns {number} The calculated conversion rate (before clamping).
    */
   _conversion(price) {
-    const X = this.k * (price - this.p0)
+    const { k, p0 } = this.parameters
+    const X = k * (price - p0)
     return 1 / (1 + Math.exp(X))
   }
 
   /**
    * Calculate gradients with respect to the model parameters.
    * @override
-   * @protected
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {object} The gradient of log of conversion probability and rejection probability
+   * @returns {{conversion: {k: number, p0: number}, rejection:  {k: number, p0: number}}} 
+   *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
-  _gradLog(price) {
+  gradLog(price) {
+    const {k, p0} = this.parameters
     const phi = this._conversion(price)
     return {
       conversion: {
-        k: -(1 - phi) * (price - this.p0), 
-        p0: (1 - phi) * this.k,
+        k: -(1 - phi) * (price - p0), 
+        p0: (1 - phi) * k,
       },
       rejection: {
-        k: phi * (price - this.p0),
-        p0: -phi * this.k,
+        k: phi * (price - p0),
+        p0: -phi * k,
       }
     }
   }

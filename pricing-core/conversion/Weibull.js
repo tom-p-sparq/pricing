@@ -10,25 +10,16 @@ import { BaseDemandModel } from './base.js'
  */
 export class WeibullDemandModel extends BaseDemandModel {
   /**
-   * @param {object} model_params
-   * @param {number} model_params.k The shape parameter (k) of the Weibull distribution.
-   * @param {number} model_params.lambda The scale parameter (lambda) of the Weibull distribution.
+   * @param {{k: number, lambda: number}} model_params
    */
   constructor({ k, lambda }) {
-    super();
+    super({ k, lambda });
     /**
      * The shape parameter (k) of the Weibull distribution.
      * @protected
-     * @type {number}
+     * @type {{k: number, lambda: number}}
      */
-    this.k = k;
-
-    /**
-     * The scale parameter (lambda) of the Weibull distribution.
-     * @protected
-     * @type {number}
-     */
-    this.lambda = lambda;
+    this.parameters;
   }
 
   /**
@@ -80,28 +71,29 @@ export class WeibullDemandModel extends BaseDemandModel {
    */
   _conversion(price) {
     if (price <= 0) return 1.0;
-
-    return Math.exp(-Math.pow(price / this.lambda, this.k));
+    const { k, lambda } = this.parameters;
+    return Math.exp(-Math.pow(price / lambda, k));
   }
 
   /**
    * Calculate gradients with respect to the model parameters.
    * @override
-   * @protected
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {object} The gradient of log of conversion probability and rejection probability
+   * @returns {{conversion: {k: number, lambda: number}, rejection:  {k: number, lambda: number}}}
+   *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
-  _gradLog(price) {
+  gradLog(price) {
     const phi = this._conversion(price)
+    const { k, lambda } = this.parameters
     return {
       conversion: {
-        k: Math.log(phi) * (Math.log(price / this.lambda)),
-        lambda: -Math.log(phi) * (this.k / this.lambda),
+        k: Math.log(phi) * (Math.log(price / lambda)),
+        lambda: -Math.log(phi) * (k / lambda),
       },
       rejection: {
-        k: - (phi / (1 - phi)) * Math.log(phi) * (Math.log(price / this.lambda)),
-        lambda: (phi / (1 - phi)) * Math.log(phi) * (this.k / this.lambda),
+        k: - (phi / (1 - phi)) * Math.log(phi) * (Math.log(price / lambda)),
+        lambda: (phi / (1 - phi)) * Math.log(phi) * (k / lambda),
       }
     }
   }

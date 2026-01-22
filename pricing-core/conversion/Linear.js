@@ -10,14 +10,15 @@ import { BaseDemandModel } from './base.js'
  */
 export class LinearDemandModel extends BaseDemandModel {
   /**
-   * @param {object} model_params
-   * @param {number} model_params.a The intercept of the linear demand curve.
-   * @param {number} model_params.b The slope of the linear demand curve.
+   * @param {{a: number, b: number}} model_params
    */
   constructor({ a, b }) {
-    super()
-    this.a = a
-    this.b = b
+    super({ a, b })
+    /**
+     * @protected
+     * @type {{a: number, b: number}}
+     */
+    this.parameters;
   }
 
   /**
@@ -64,23 +65,23 @@ export class LinearDemandModel extends BaseDemandModel {
    * @returns {number} The calculated conversion rate (before clamping).
    */
   _conversion(price) {
-    return this.a + this.b * price
+    const { a, b } = this.parameters
+    return a + b * price
   }
 
   /**
    * Calculate gradients with respect to the model parameters.
    * @override
-   * @protected
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {object} The gradient of log of conversion probability and rejection probability
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}}
+   *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
-  _gradLog(price) {
+  gradLog(price) {
     const phi = this._conversion(price)
     return {
       conversion: { a: 1 / phi, b: price / phi },
-      rejection: { a: -1 / (1 - phi), b: -price / (1 - phi)}
+      rejection: { a: -1 / (1 - phi), b: -price / (1 - phi) }
     }
   }
 }
-

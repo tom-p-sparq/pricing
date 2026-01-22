@@ -11,25 +11,15 @@ import { BaseDemandModel } from './base.js'
  */
 export class LogLogisticDemandModel extends BaseDemandModel {
   /**
-   * @param {object} model_params
-   * @param {number} model_params.p_shape The shape parameter of the log-logistic distribution.
-   * @param {number} model_params.K The scale parameter (median) of the log-logistic distribution.
+   * @param {{p_shape: number, K: number}} model_params
    */
   constructor({ p_shape, K }) {
-    super()
+    super({ p_shape, K })
     /**
-     * The shape parameter of the log-logistic distribution.
      * @protected
-     * @type {number}
+     * @type {{p_shape: number, K: number}}
      */
-    this.p_shape = p_shape
-    /**
-     * The scale parameter (median) of the log-logistic distribution.
-     * This is the price at which the conversion rate is exactly 0.5.
-     * @protected
-     * @type {number}
-     */
-    this.K = K
+    this.parameters;
   }
 
   /**
@@ -83,28 +73,30 @@ export class LogLogisticDemandModel extends BaseDemandModel {
    */
   _conversion(price) {
     if (price <= 0) return 1.0;
-    const X = Math.pow(price / this.K, this.p_shape)
+    const { p_shape, K } = this.parameters;
+    const X = Math.pow(price / K, p_shape);
     return 1 / (1 + X)
   }
 
   /**
    * Calculate gradients with respect to the model parameters.
    * @override
-   * @protected
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {object} The gradient of log of conversion probability and rejection probability
+   * @returns {{conversion: {p_shape: number, K: number}, rejection:  {p_shape: number, K: number}}} 
+   *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
-  _gradLog(price) {
+  gradLog(price) {
     const phi = this._conversion(price)
+    const { p_shape, K } = this.parameters
     return {
       conversion: {
-        p_shape: -(1 - phi) * (Math.log(price) - Math.log(this.K)),
-        K: (1 - phi) * (this.p_shape / this.K),
+        p_shape: -(1 - phi) * (Math.log(price) - Math.log(K)),
+        K: (1 - phi) * (p_shape / K),
       },
       rejection: {
-        p_shape: phi * (Math.log(price) - Math.log(this.K)),
-        K: -phi * (this.p_shape / this.K),
+        p_shape: phi * (Math.log(price) - Math.log(K)),
+        K: -phi * (p_shape / K),
       }
     }
   }

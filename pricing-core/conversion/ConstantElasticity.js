@@ -10,24 +10,16 @@ import { BaseDemandModel } from './base.js'
  */
 export class ConstantElasticityDemandModel extends BaseDemandModel {
   /**
-   * @param {object} model_params
-   * @param {number} model_params.A The scaling constant for the model.
-   * @param {number} model_params.elasticity The constant price elasticity of demand.
+   * @param {{A: number, elasticity: number}} model_params
    */
   constructor({ A, elasticity }) {
-    super()
+    super({ A, elasticity })
     /**
      * The constant price elasticity of demand (e).
      * @protected
-     * @type {number}
+     * @type {{A: number, elasticity: number}}
      */
-    this.elasticity_param = elasticity
-    /**
-     * The scaling constant (A) for the model.
-     * @protected
-     * @type {number}
-     */
-    this.A = A
+    this.parameters;
   }
 
   /**
@@ -76,26 +68,28 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    */
   _conversion(price) {
     if (price <= 0) return 1.0;
-    return this.A * Math.pow(price, this.elasticity_param)
+    const { A, elasticity } = this.parameters
+    return A * Math.pow(price, elasticity)
   }
 
   /**
    * Calculate gradients with respect to the model parameters.
    * @override
-   * @protected
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {object} The gradient of log of conversion probability and rejection probability
+   * @returns {{conversion: {A: number, elasticity: number}, rejection:  {A: number, elasticity: number}}} 
+   *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
-  _gradLog(price) {
+  gradLog(price) {
     const phi = this._conversion(price)
+    const { A } = this.parameters
     return {
       conversion: {
-        A: this.A,
+        A: 1 / A,
         elasticity: Math.log(price),
       },
       rejection: {
-        A: - (phi / (1 - phi)) * this.A,
+        A: - (phi / (1 - phi)) / A,
         elasticity: - (phi / (1 - phi)) * Math.log(price),
       }
     }

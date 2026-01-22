@@ -4,6 +4,25 @@
  */
 export class BaseDemandModel {
   /**
+   * @param {object} parameters Model parameters.
+   */
+  constructor(parameters) {
+    /**
+     * @protected
+     * @type {object}
+     */
+    this.parameters = parameters;
+  }
+
+  get dof() {
+    return Object.keys(this.parameters).length;
+  }
+
+  get paramNames() {
+    return Object.keys(this.parameters);
+  }
+
+  /**
    * Calculates the conversion rate for a given price, clamped between 0 and 1.
    * @param {number} price The price at which to calculate the conversion rate.
    * @returns {number} The conversion rate, a value between 0 and 1.
@@ -26,12 +45,12 @@ export class BaseDemandModel {
 
   /**
    * @abstract
-   * @protected
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {object} The gradient of log of conversion probability and rejection probability
+   * @returns {{conversion: Record<string, number>, rejection: Record<string, number>}} 
+   *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
-  _gradLog(price) {
+  gradLog(price) {
     throw new Error("Define the gradient of the logarithm of conversion/rejection probabilities at this price in `_gradient`")
   }
 
