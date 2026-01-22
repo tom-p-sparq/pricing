@@ -88,17 +88,24 @@ export class LogLogisticDemandModel extends BaseDemandModel {
   }
 
   /**
-   * Calculates the gradient of conversion probability w.r.t. constructor parameters.
+   * Calculate gradients with respect to the model parameters.
    * @override
    * @protected
-   * @param {number} price The price at which to calculate the gradient of the conversion probability.
-   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
+   * @param {number} price The price at which to calculate the gradients.
+   * @returns {object} The gradient of log of conversion probability and rejection probability
+   *        w.r.t the model parameters in the constructor.
    */
-  _gradient(price) {
+  _gradLog(price) {
     const phi = this._conversion(price)
     return {
-      p_shape: -phi * (1 - phi) * (Math.log(price) - Math.log(this.K)),
-      K: phi * (1 - phi) * (this.p_shape / this.K),
+      conversion: {
+        p_shape: -(1 - phi) * (Math.log(price) - Math.log(this.K)),
+        K: (1 - phi) * (this.p_shape / this.K),
+      },
+      rejection: {
+        p_shape: phi * (Math.log(price) - Math.log(this.K)),
+        K: -phi * (this.p_shape / this.K),
+      }
     }
   }
 }

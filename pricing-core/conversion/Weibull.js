@@ -85,17 +85,24 @@ export class WeibullDemandModel extends BaseDemandModel {
   }
 
   /**
-   * Calculates the gradient of conversion probability w.r.t. constructor parameters.
+   * Calculate gradients with respect to the model parameters.
    * @override
    * @protected
-   * @param {number} price The price at which to calculate the gradient of the conversion probability.
-   * @returns {object} The gradient of conversion probability w.r.t the model parameters in the constructor
+   * @param {number} price The price at which to calculate the gradients.
+   * @returns {object} The gradient of log of conversion probability and rejection probability
+   *        w.r.t the model parameters in the constructor.
    */
-  _gradient(price) {
+  _gradLog(price) {
     const phi = this._conversion(price)
     return {
-      k: phi * Math.log(phi) * (Math.log(price / this.lambda)),
-      lambda: -phi * Math.log(phi) * (this.k / this.lambda),
+      conversion: {
+        k: Math.log(phi) * (Math.log(price / this.lambda)),
+        lambda: -Math.log(phi) * (this.k / this.lambda),
+      },
+      rejection: {
+        k: - (phi / (1 - phi)) * Math.log(phi) * (Math.log(price / this.lambda)),
+        lambda: (phi / (1 - phi)) * Math.log(phi) * (this.k / this.lambda),
+      }
     }
   }
 }
