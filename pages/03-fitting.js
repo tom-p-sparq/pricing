@@ -4,11 +4,12 @@ let dataMap = new Map();
 let currentPrice = 150;
 
 // --- Gradient Ascent Setup ---
+let modelClass = conversion.LogisticDemandModel;
 let currentModel;
 let isRunning = false;
 
 // Adam optimizer parameters
-const learningRate = 0.01; // Adam's alpha
+const learningRate = 0.005; // Adam's alpha
 const beta1 = 0.9; // Adam's beta1
 const beta2 = 0.999; // Adam's beta2
 const epsilon = 1e-8; // Small constant to prevent division by zero
@@ -16,15 +17,13 @@ let m = {}; // First moment vector
 let v = {}; // Second moment vector
 let t = 0; // Time step for bias correction
 
-// New variables for batching and rendering frequency
+// New variable for batching and rendering frequency
 const stepsPerFrame = 100; // Number of optimization steps per animation frame
-const renderEveryNFrames = 1; // Render every N frames
-let frameCount = 0; // Counter for frames
 
 // Initialize a default model (e.g., LogLogisticDemandModel)
 // This reference point is arbitrary; adjust as needed for your application.
 const initialReference = { price: 100, conversion: 0.5, elasticity: -2 };
-currentModel = conversion.WeibullDemandModel.from_reference(initialReference);
+currentModel = modelClass.from_reference(initialReference);
 
 /**
  * Initializes or resets the Adam optimizer's moment vectors and time step.
@@ -34,14 +33,11 @@ function initializeAdamParameters(model) {
     m = Object.fromEntries(model.paramNames.map(name => [name, 0]));
     v = Object.fromEntries(model.paramNames.map(name => [name, 0]));
     t = 0;
-    frameCount = 0; // Reset frame count
 }
 
 function gradientAscentLoop() {
     if (!isRunning) return;
-
-    frameCount++;
-
+    
     // Perform a batch of optimization steps
     for (let i = 0; i < stepsPerFrame; i++) {
         const points = Array.from(dataMap.values()).map(d => ({
@@ -61,8 +57,14 @@ function gradientAscentLoop() {
 
         t++; // Increment time step for bias correction
 
+        let maxStep = 0;
         const newParamEntries = currentModel.paramEntries.map(([name, value]) => {
             const g_t = grad[name];
+
+            if (!Number.isFinite(g_t)) {
+                console.warn(`Non-finite gradient for ${name}, skipping update.`);
+                return [name, value];
+            }
 
             // Update biased first and second moment estimates
             m[name] = beta1 * m[name] + (1 - beta1) * g_t;
@@ -73,20 +75,31 @@ function gradientAscentLoop() {
             const v_hat = v[name] / (1 - Math.pow(beta2, t));
 
             // Update parameter using Adam rule
-            value += (learningRate * m_hat) / (Math.sqrt(v_hat) + epsilon);
+            const step = (learningRate * m_hat) / (Math.sqrt(v_hat) + epsilon);
+            if (!Number.isFinite(step)) {
+                console.warn(`Non-finite step for ${name}, skipping update.`);
+                return [name, value];
+            }
+            maxStep = Math.max(maxStep, Math.abs(step));
+            value += step;
             return [name, value];
         });
 
+        if (maxStep < 1e-6) {
+            isRunning = false
+        }
         const newParams = Object.fromEntries(newParamEntries);
+        if (Object.values(newParams).some(v => !Number.isFinite(v))) {
+            console.warn("New parameters contain non-finite values, stopping optimization.", newParams);
+            isRunning = false;
+            break;
+        }
         const ModelClass = Object.getPrototypeOf(currentModel).constructor;
         currentModel = new ModelClass(newParams);
     }
 
-    // Only render every N frames to keep the UI responsive
-    if (frameCount % renderEveryNFrames === 0) {
-        renderModel();
-    }
-
+    renderModel();
+    
     // Schedule the next iteration using requestAnimationFrame for speed
     if (isRunning) {
         requestAnimationFrame(gradientAscentLoop);
