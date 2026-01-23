@@ -43,7 +43,8 @@ export function logLikelihood(model, points) {
  *
  * @param {BaseDemandModel} model The demand model to evaluate.
  * @param {Array<{price: number, looks: number, books: number}>} points An array of data points, each with `price`, `looks`, and `books`.
- * @returns {Record<string, number> | undefined} An object where keys are model parameter names and values are the corresponding gradients. Returns undefined if the log-likelihood is not finite.
+ * @returns {Record<string, number> | undefined} An object where keys are model parameter names and values are the corresponding gradients.
+ *               Returns undefined if the log-likelihood is not finite.
  */
 export function gradLogLikelihood(model, points) {
     if (!hasFiniteLogLikelihood(model, points)) {
@@ -67,6 +68,31 @@ export function gradLogLikelihood(model, points) {
             }
         }
     }
-
     return totalGrad;
+}
+
+/**
+ * Performs a single step of gradient ascent to update the model's parameters.
+ * This function calculates the gradient of the log-likelihood and updates the
+ * parameters of the model in the direction of the gradient.
+ *
+ * @param {BaseDemandModel} model The initial demand model.
+ * @param {Array<{price: number, looks: number, books: number}>} points An array of data points for gradient calculation.
+ * @param {number} stepSize The learning rate or size of the step to take.
+ * @returns {BaseDemandModel} A new demand model instance with updated parameters, or the original model if the gradient is not finite.
+ */
+export function step(model, points, stepSize) {
+    const grad = gradLogLikelihood(model, points);
+    if (grad === undefined) {
+        return model;
+    } else {
+        const oldParamEntries = model.paramEntries;
+        const newParamEntries = oldParamEntries.map(([name, value]) => {
+            value += stepSize * grad[name];
+            return [name, value];
+        });
+        const newParams = Object.fromEntries(newParamEntries);
+        const ModelClass = Object.getPrototypeOf(model).constructor;
+        return new ModelClass(newParams);
+    }
 }

@@ -14,13 +14,38 @@ export class BaseDemandModel {
     this.parameters = parameters;
   }
 
+  /**
+   * The number of parameters in the model (degrees of freedom).
+   * @type {number}
+   */
   get dof() {
     return Object.keys(this.parameters).length;
   }
 
+  /**
+   * The names of the model parameters.
+   * @type {string[]}
+   */
   get paramNames() {
     return Object.keys(this.parameters);
   }
+
+  /**
+   * The values of the model parameters.
+   * @type {number[]}
+   */
+  get paramValues() {
+    return Object.values(this.parameters);
+  }
+
+  /**
+   * The [name, value] pairs of the model parameters.
+   * @type {[string, number][]}
+   */
+  get paramEntries() {
+    return Object.entries(this.parameters);
+  }
+
 
   /**
    * Calculates the conversion rate for a given price, clamped between 0 and 1.
