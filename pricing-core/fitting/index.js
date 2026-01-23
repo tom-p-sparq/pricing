@@ -46,17 +46,17 @@ export function logLikelihood(model, points) {
  * @returns {Record<string, number> | undefined} An object where keys are model parameter names and values are the corresponding gradients.
  *               Returns undefined if the log-likelihood is not finite.
  */
-export function gradLogLikelihood(model, points) {
-    if (!hasFiniteLogLikelihood(model, points)) {
-        return undefined;
-    }
+export function gradLogLikelihood(model, points, eta=0) {
+    // if (!hasFiniteLogLikelihood(model, points)) {
+    //     return undefined;
+    // }
     const paramNames = model.paramNames;
     const totalGrad = Object.fromEntries(paramNames.map(param => [param, 0]));
 
     for (const { price, looks, books } of points) {
         const { conversion, rejection } = model.gradLog(price);
 
-        for (const param of paramNames) {
+        for (const [param, value] of model.paramEntries) {
             if (conversion[param] === undefined || rejection[param] === undefined) {
                 throw new Error(`Gradient for parameter '${param}' not found at price ${price}. The model's gradLog implementation may be incomplete.`);
             }
@@ -67,6 +67,9 @@ export function gradLogLikelihood(model, points) {
                 totalGrad[param] += (looks - books) * rejection[param];
             }
         }
+    }
+    for (const [param, value] of model.paramEntries) {
+        totalGrad[param] -= eta * value;
     }
     return totalGrad;
 }

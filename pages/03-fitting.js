@@ -4,7 +4,7 @@ let dataMap = new Map();
 let currentPrice = 150;
 
 // --- Gradient Ascent Setup ---
-let modelClass = conversion.LogisticDemandModel;
+let modelClass = conversion.WeibullDemandModel;
 let currentModel;
 let isRunning = false;
 
@@ -13,6 +13,7 @@ const learningRate = 0.005; // Adam's alpha
 const beta1 = 0.9; // Adam's beta1
 const beta2 = 0.999; // Adam's beta2
 const epsilon = 1e-8; // Small constant to prevent division by zero
+const eta = 1e-5; // L2 regularisation constant 
 let m = {}; // First moment vector
 let v = {}; // Second moment vector
 let t = 0; // Time step for bias correction
@@ -48,7 +49,7 @@ function gradientAscentLoop() {
 
         if (points.length === 0) break; // No data to process
 
-        const grad = fitting.gradLogLikelihood(currentModel, points);
+        const grad = fitting.gradLogLikelihood(currentModel, points, eta);
 
         if (grad === undefined) {
             console.log("Gradient is undefined, stopping optimization for this frame.");
@@ -94,8 +95,7 @@ function gradientAscentLoop() {
             isRunning = false;
             break;
         }
-        const ModelClass = Object.getPrototypeOf(currentModel).constructor;
-        currentModel = new ModelClass(newParams);
+        currentModel = new modelClass(newParams);
     }
 
     renderModel();
