@@ -34,7 +34,7 @@ export class LogLogisticDemandModel extends BaseDemandModel {
   static from_reference({ price, conversion, elasticity }) {
     LogLogisticDemandModel._check_reference(price, conversion, elasticity)
     const logprice = Math.log(price)
-    const b = elasticity / ((1 - conversion) * logprice)
+    const b = elasticity / (1 - conversion)
     const a = Math.log(conversion) - Math.log(1 - conversion) - b * logprice
     return new LogLogisticDemandModel({ a, b })
   }
