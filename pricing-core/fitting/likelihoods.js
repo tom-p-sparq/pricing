@@ -54,7 +54,7 @@ export function gradLogLikelihood(model, points, eta=0) {
     for (const { price, looks, books } of points) {
         const { conversion, rejection } = model.gradLog(price);
 
-        for (const [param, value] of model.paramEntries) {
+        for (const param of model.paramNames) {
             if (conversion[param] === undefined || rejection[param] === undefined) {
                 throw new Error(`Gradient for parameter '${param}' not found at price ${price}. The model's gradLog implementation may be incomplete.`);
             }

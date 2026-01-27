@@ -5,28 +5,26 @@ import { BaseDemandModel } from './base.js'
  * This model is useful for representing demand where the conversion rate is a
  * function of the logarithm of the price, often providing a good fit for survival-type data.
  *
- * The conversion rate is given by the formula: C(p) = 1 / (1 + (p/K)^p_shape),
- * where `p_shape` is the shape parameter and `K` is the scale parameter (the median,
- * or the price at which conversion is 0.5).
+ * The conversion rate is given by the formula: logit C(p) = a + b*log(p),
+ * where a and b are the intercept and gradient of the linear form for conversion
+ * in logit-log space.
  */
 export class LogLogisticDemandModel extends BaseDemandModel {
   /**
-   * @param {{p_shape: number, K: number}} model_params
+   * @param {{a: number, b: number}} model_params
    */
-  constructor({ p_shape, K }) {
-    super({ p_shape, K })
+  constructor({ a, b }) {
+    super({ a, b })
     /**
      * @protected
-     * @type {{p_shape: number, K: number}}
+     * @type {{a: number, b: number}}
      */
     this.parameters;
   }
 
   /**
-   * @override
-   */
-  /**
    * Creates a new model instance from a reference point.
+   * @override
    * @param {object} params
    * @param {number} params.price The reference price.
    * @param {number} params.conversion The conversion rate at the reference price.
@@ -35,10 +33,10 @@ export class LogLogisticDemandModel extends BaseDemandModel {
    */
   static from_reference({ price, conversion, elasticity }) {
     LogLogisticDemandModel._check_reference(price, conversion, elasticity)
-    const p_shape = -elasticity / (1 - conversion)
-    const odds = conversion / (1 - conversion)
-    const K = price * Math.pow(odds, 1 / p_shape)
-    return new LogLogisticDemandModel({ p_shape, K })
+    const logprice = Math.log(price)
+    const b = elasticity / ((1 - conversion) * logprice)
+    const a = Math.log(conversion) - Math.log(1 - conversion) - b * logprice
+    return new LogLogisticDemandModel({ a, b })
   }
 
   /**
@@ -56,13 +54,13 @@ export class LogLogisticDemandModel extends BaseDemandModel {
    * @returns {LogLogisticDemandModel} A new instance of the demand model.
    */
   static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
-    const logPrice0 = Math.log(price0);
-    const logPrice1 = Math.log(price1);
     const logit0 = Math.log(conversion0 / (1 - conversion0));
     const logit1 = Math.log(conversion1 / (1 - conversion1));
-    const p_shape = -(logit1 - logit0) / (logPrice1 - logPrice0);
-    const K = price0 * Math.pow(conversion0 / (1 - conversion0), 1 / p_shape);
-    return new LogLogisticDemandModel({ p_shape, K });
+    const logprice0 = Math.log(price0);
+    const logprice1 = Math.log(price1);
+    const b = (logit1 - logit0) / (logprice1 - logprice0);
+    const a = (logit0 * logprice1 - logit1 * logprice0) / (logprice1 - logprice0);
+    return new LogLogisticDemandModel({ a, b });
   }
 
   /**
@@ -73,30 +71,30 @@ export class LogLogisticDemandModel extends BaseDemandModel {
    */
   _conversion(price) {
     if (price <= 0) return 1.0;
-    const { p_shape, K } = this.parameters;
-    const X = Math.pow(price / K, p_shape);
-    return 1 / (1 + X)
+    const { a, b } = this.parameters
+    const Z = a + b * Math.log(price)
+    return 1 / (1 + Math.exp(-Z))
   }
 
   /**
    * Calculate gradients with respect to the model parameters.
    * @override
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {{conversion: {p_shape: number, K: number}, rejection:  {p_shape: number, K: number}}} 
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}} 
    *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
   gradLog(price) {
     const phi = this._conversion(price)
-    const { p_shape, K } = this.parameters
+    const logprice = Math.log(price)
     return {
       conversion: {
-        p_shape: -(1 - phi) * (Math.log(price) - Math.log(K)),
-        K: (1 - phi) * (p_shape / K),
+        a: (1 - phi),
+        b: (1 - phi) * logprice,
       },
       rejection: {
-        p_shape: phi * (Math.log(price) - Math.log(K)),
-        K: -phi * (p_shape / K),
+        a: -phi,
+        b: -phi * logprice,
       }
     }
   }

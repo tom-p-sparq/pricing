@@ -5,19 +5,18 @@ import { BaseDemandModel } from './base.js'
  * The conversion rate is modeled as a logistic function of price, which provides
  * a more realistic "S-shaped" curve than a linear model.
  *
- * The model is defined by a reference point (p_ref, c_ref) and the price elasticity `e`
- * at that point. These are used to calculate the parameters `k` (steepness) and `p0`
- * (inflection point) for the logistic function: C(p) = 1 / (1 + exp(k * (p - p0))).
- */
+ * The model is defined by a straight line intercept and gradient (a,  b) for the logit
+ * of conversion. Conversion is the linear form Z=a+b*price put through the sigmoid form.
+*/
 export class LogisticDemandModel extends BaseDemandModel {
   /**
-   * @param {{k: number, p0: number}} model_params
+   * @param {{a: number, b: number}} model_params
    */
-  constructor({ k, p0 }) {
-    super({k, p0})
+  constructor({ a, b }) {
+    super({ a, b })
     /**
      * @protected
-     * @type {{k: number, p0: number}}
+     * @type {{a: number, b: number}}
      */
     this.parameters;
   }
@@ -33,10 +32,9 @@ export class LogisticDemandModel extends BaseDemandModel {
    */
   static from_reference({ price, conversion, elasticity }) {
     LogisticDemandModel._check_reference(price, conversion, elasticity)
-    const k = -elasticity / (price * (1 - conversion))
-    const logit = Math.log(1 / conversion - 1)
-    const p0 = price - (logit / k)
-    return new LogisticDemandModel({ k, p0 })
+    const b = elasticity / ((1 - conversion) * price)
+    const a = Math.log(conversion) - Math.log(1 - conversion) - b * price
+    return new LogisticDemandModel({ a, b })
   }
 
   /**
@@ -56,9 +54,9 @@ export class LogisticDemandModel extends BaseDemandModel {
   static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
     const logit0 = Math.log(conversion0 / (1 - conversion0));
     const logit1 = Math.log(conversion1 / (1 - conversion1));
-    const k = -(logit1 - logit0) / (price1 - price0);
-    const p0 = (price0 * logit1 - price1 * logit0) / (logit1 - logit0);
-    return new LogisticDemandModel({ k, p0 });
+    const b = (logit1 - logit0) / (price1 - price0);
+    const a = (logit0 * price1 - logit1 * price0) / (price1 - price0);
+    return new LogisticDemandModel({ a, b });
   }
 
   /**
@@ -68,30 +66,29 @@ export class LogisticDemandModel extends BaseDemandModel {
    * @returns {number} The calculated conversion rate (before clamping).
    */
   _conversion(price) {
-    const { k, p0 } = this.parameters
-    const X = k * (price - p0)
-    return 1 / (1 + Math.exp(X))
+    const { a, b } = this.parameters
+    const Z = a + b * price
+    return 1 / (1 + Math.exp(-Z))
   }
 
   /**
    * Calculate gradients with respect to the model parameters.
    * @override
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {{conversion: {k: number, p0: number}, rejection:  {k: number, p0: number}}} 
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}} 
    *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */
   gradLog(price) {
-    const {k, p0} = this.parameters
     const phi = this._conversion(price)
     return {
       conversion: {
-        k: -(1 - phi) * (price - p0), 
-        p0: (1 - phi) * k,
+        a: (1 - phi),
+        b: (1 - phi) * price,
       },
       rejection: {
-        k: phi * (price - p0),
-        p0: -phi * k,
+        a: -phi,
+        b: -phi * price,
       }
     }
   }

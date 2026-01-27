@@ -13,11 +13,11 @@ export class Adam {
      * @param {number} [params.convergenceThreshold=1e-6] Linf step size for convergence
      */
     constructor({
-        learningRate = 0.005,
+        learningRate = 0.001,
         beta1 = 0.9,
         beta2 = 0.999,
         epsilon = 1e-8,
-        eta = 1e-4,
+        eta = 1e-5,
         convergenceThreshold = 1e-6
     } = {}) {
         this.parameters = { learningRate, beta1, beta2, epsilon, eta, convergenceThreshold };
@@ -53,6 +53,10 @@ export class Adam {
         let maxAbsStep = 0
         const newParamEntries = currentModel.paramEntries.map(([name, value]) => {
             const g_t = grad[name]
+            if (!isFinite(g_t)) {
+                console.log(`Gradient is not finite. Returning current value for ${name}`)
+                return [name, value]
+            }
             // Update (biased) first and second moments
             this.m[name] = beta1 * this.m[name] + (1 - beta1) * g_t
             this.v[name] = beta2 * this.v[name] + (1 - beta2) * (g_t * g_t)
