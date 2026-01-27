@@ -4,19 +4,8 @@ let dataMap = new Map();
 let currentPrice = 150;
 
 // --- Gradient Ascent Setup ---
-let modelClass = conversion.WeibullDemandModel;
-let currentModel;
+const modelClass = conversion.LogLogisticDemandModel;
 let isRunning = false;
-
-// Adam optimizer parameters
-const learningRate = 0.005; // Adam's alpha
-const beta1 = 0.9; // Adam's beta1
-const beta2 = 0.999; // Adam's beta2
-const epsilon = 1e-8; // Small constant to prevent division by zero
-const eta = 1e-5; // L2 regularisation constant 
-let m = {}; // First moment vector
-let v = {}; // Second moment vector
-let t = 0; // Time step for bias correction
 
 // New variable for batching and rendering frequency
 const stepsPerFrame = 100; // Number of optimization steps per animation frame
@@ -24,80 +13,12 @@ const stepsPerFrame = 100; // Number of optimization steps per animation frame
 // Initialize a default model (e.g., LogLogisticDemandModel)
 // This reference point is arbitrary; adjust as needed for your application.
 const initialReference = { price: 100, conversion: 0.5, elasticity: -2 };
-currentModel = modelClass.from_reference(initialReference);
-
-/**
- * Initializes or resets the Adam optimizer's moment vectors and time step.
- * @param {BaseDemandModel} model The current demand model.
- */
-function initializeAdamParameters(model) {
-    m = Object.fromEntries(model.paramNames.map(name => [name, 0]));
-    v = Object.fromEntries(model.paramNames.map(name => [name, 0]));
-    t = 0;
-}
+const optimiser = new fitting.Adam();
+let currentModel = modelClass.from_reference(initialReference);
 
 function gradientAscentLoop() {
     if (!isRunning) return;
-    
-    // Perform a batch of optimization steps
-    for (let i = 0; i < stepsPerFrame; i++) {
-        const points = Array.from(dataMap.values()).map(d => ({
-            price: d.price,
-            looks: d.looks,
-            books: d.books
-        }));
-
-        if (points.length === 0) break; // No data to process
-
-        const grad = fitting.gradLogLikelihood(currentModel, points, eta);
-
-        if (grad === undefined) {
-            console.log("Gradient is undefined, stopping optimization for this frame.");
-            break; // Stop this batch if gradient is non-finite
-        }
-
-        t++; // Increment time step for bias correction
-
-        let maxStep = 0;
-        const newParamEntries = currentModel.paramEntries.map(([name, value]) => {
-            const g_t = grad[name];
-
-            if (!Number.isFinite(g_t)) {
-                console.warn(`Non-finite gradient for ${name}, skipping update.`);
-                return [name, value];
-            }
-
-            // Update biased first and second moment estimates
-            m[name] = beta1 * m[name] + (1 - beta1) * g_t;
-            v[name] = beta2 * v[name] + (1 - beta2) * (g_t * g_t);
-
-            // Compute bias-corrected first and second moment estimates
-            const m_hat = m[name] / (1 - Math.pow(beta1, t));
-            const v_hat = v[name] / (1 - Math.pow(beta2, t));
-
-            // Update parameter using Adam rule
-            const step = (learningRate * m_hat) / (Math.sqrt(v_hat) + epsilon);
-            if (!Number.isFinite(step)) {
-                console.warn(`Non-finite step for ${name}, skipping update.`);
-                return [name, value];
-            }
-            maxStep = Math.max(maxStep, Math.abs(step));
-            value += step;
-            return [name, value];
-        });
-
-        if (maxStep < 1e-6) {
-            isRunning = false
-        }
-        const newParams = Object.fromEntries(newParamEntries);
-        if (Object.values(newParams).some(v => !Number.isFinite(v))) {
-            console.warn("New parameters contain non-finite values, stopping optimization.", newParams);
-            isRunning = false;
-            break;
-        }
-        currentModel = new modelClass(newParams);
-    }
-
+    currentModel = optimiser.batchRun(currentModel, Array.from(dataMap.values()), stepsPerFrame)
     renderModel();
     
     // Schedule the next iteration using requestAnimationFrame for speed
@@ -109,7 +30,7 @@ function gradientAscentLoop() {
 function startGradientAscent() {
     if (!isRunning) {
         isRunning = true;
-        initializeAdamParameters(currentModel); // Initialize Adam parameters on start
+        optimiser.reset(currentModel); // Initialize Adam parameters on start
         console.log("Starting gradient ascent...");
         requestAnimationFrame(gradientAscentLoop); // Start the loop with requestAnimationFrame
     }
@@ -129,7 +50,7 @@ function addInput(price, conversion) {
     // When new data comes in, reset Adam parameters and ensure gradient ascent is running
     // Do nothing for a single data point; interpolate two data points; start numerics if more than two data points
     if (dataMap.size > 2) {
-        initializeAdamParameters(currentModel);
+        optimiser.reset(currentModel);
         startGradientAscent();
     } else if (dataMap.size === 2) {
         const points = Array.from(dataMap.values()).map(({ price, looks, books }) => ({
@@ -191,7 +112,7 @@ function renderModel() {
         points: pointsForPlot,
         options: {
             title: 'Fitted Demand Model (Gradient Ascent)',
-            subtitle: `Log-Likelihood: ${currentLogLikelihood.toFixed(4)}`
+            subtitle: `Log-Likelihood: ${currentLogLikelihood.toFixed(4)}\nParams: ${JSON.stringify(currentModel.paramEntries)}`
         }
     });
     document.getElementById('model-plot-container').replaceChildren(comparisonPlot);
