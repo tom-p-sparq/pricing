@@ -18,7 +18,7 @@ export class Adam {
         beta2 = 0.999,
         epsilon = 1e-8,
         eta = 1e-5,
-        convergenceThreshold = 1e-6
+        convergenceThreshold = 1e-6,
     } = {}) {
         this.parameters = { learningRate, beta1, beta2, epsilon, eta, convergenceThreshold };
     }
@@ -85,7 +85,7 @@ export class Adam {
             const {nextModel, maxAbsStep} = this.step(currentModel, points)
             currentModel = nextModel
             if (maxAbsStep < this.parameters.convergenceThreshold) {
-                return currentModel
+                break
             }
         }
         return currentModel
