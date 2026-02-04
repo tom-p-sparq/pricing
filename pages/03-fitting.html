@@ -30,15 +30,80 @@
 
   <div class="main-container">
     <h1>Fitting Conversion Model Parameters</h1>
+    <p>
+      In the <a href="./02-specifying.html">previous post</a>, we introduced the idea of specifying a conversion model
+      by selecting the model parameters.
+      More typically, we are faced with the task of fitting a conversion model to observations of conversions and
+      non-conversions.
+      In this post we'll be able to create synthetic data and see how our model fit responds.
+    </p>
 
-    <h2>User input.</h2>
-    <div id="data-generation-container"></div>
+    <h2>Data generation</h2>
+    <p>
+      The controls below allow you to set a price and then record a conversion or rejection event at that price.
+      The table on the right keeps track of the data that's accumulated so far.
+      If you want to reset the data generating process, just refresh the page.
+    </p>
+    <div style="display: flex; align-items: flex-start; gap: 2em;">
+      <div id="data-generation-container"></div>
+      <div id="data-table-container"></div>
+    </div>
 
-    <h2>Data to fit.</h2>
-    <div id="data-table-container"></div>
-
-    <div id="gradient-controls-container"></div>
+    <h2>Model fitting</h2>
+    <p>
+      Below, we show the best fit of a <a href="./01-parametric-conversion-models.html#logistic-model">logistic model</a> to the data generated above.
+    </p>
     <div id="model-plot-container"></div>
+    <p>
+      We <a href="./02-specifying.html">previously</a> talked about having two degrees of freedom in our models.
+      If all of our generated data is at a single price-point, we don't have enough data to choose a model:
+      in the plot above, I have imposed an estimated elasticity of -2 when we only have a single price point.
+      This is important in real world cases: with no price exploration, we cannot fit a model.
+    </p>
+    <p>
+      As soon as we have produced data at two price points,
+      the curve we fit is now the interpolation between the observed conversion rates.
+      This is clearly the best fit we have to our data.
+    </p>
+    <p>
+      The moment we generate data at three or more price points, we are in the realm of statistics and data science.
+    </p>
+
+    <h2>Maximum likelihood estimation</h2>
+    <p>
+      We are looking for the price sensitivity model parameters that best explain our data.
+      To fit these parameters, we quantify the likelihood of the data under those parameters.
+      If, at any one price point, we have a conversion probability of $\phi(p)$,
+      then the likelihood of $k$ conversions from $n$ looks is the binomial probability proportional to
+      $$\phi(p)^k (1 - \phi(p))^{n - k}.$$
+      For each of multiple price points, $p_i$, then the overall likelihood of the data is proportional to
+      $$\prod_{i=1}^n \phi(p_i)^k_i (1 - \phi(p_i))^{n_i - k_i},$$
+      where we observe $k_i$ conversions from $n_i$ looks at price point $p_i$.
+    </p>
+    <p>
+      The key to fitting our parameters is to observe that this likelihood is a function of the model parameters.
+      We want to choose the parameters going into the function $\phi(p)$ such that this likelihood is maximised.
+      For practical purposes, we maximise the logarithm of this likelihood, which is equivalent.
+    </p>
+    <p>
+      The animation above that runs at each new datapoint depicts an optimisation algorithm taking the model parameter values
+      to a new optimum that maximises the (log) likelihood of the generated dataset.
+    </p>
+
+    <h2>Investigation</h2>
+    <p>
+      We can try out all sorts of different datasets and see what happens.
+      For example, what about when we have few observations at many different prices?
+      When all of the observed prices are in a narrow band, what does that mean for extrapolation beyond that band?
+      Why should fitting a newly observed, low-probability conversion at a high price lower the predicted conversion rate at a lower price?
+    </p>
+    <p>
+      There's lots to play around with.
+    </p>
+    <p>
+      In the following posts, we'll consider the questions of uncertainty,
+      and the extrapolation of global information out of local fitting. 
+    </p>
 
   </div>
   <script type="module" src="03-fitting.js"></script>

@@ -4,15 +4,15 @@ let dataMap = new Map();
 let currentPrice = 150;
 
 // --- Gradient Ascent Setup ---
-const modelClass = conversion.WeibullDemandModel;
+const modelClass = conversion.LogisticDemandModel;
 const optimiser = new fitting.Adam();
 let isRunning = false;
 const stepsPerFrame = 100; // Number of optimization steps per animation frame
 
-// Initialize a default model (e.g., LogLogisticDemandModel)
-// This reference point is arbitrary; adjust as needed for your application.
-// const initialReference = { price: 100, conversion: 0.5, elasticity: -2 };
-let currentModel
+// Declare a model of type model class
+
+/** @type {modelClass} */
+let currentModel;
 
 function gradientAscentLoop() {
     if (!isRunning) return;
@@ -40,7 +40,6 @@ function startGradientAscent() {
     }
 }
 
-// --- Existing UI Elements ---
 function addInput(price, conversion) {
     price = Number(price); // Ensure price is a number for consistent map key lookup
     let entry = dataMap.get(price)
@@ -125,7 +124,7 @@ function renderModel() {
         model: currentModel,
         points: pointsForPlot,
         options: {
-            title: 'Fitted Demand Model (Gradient Ascent)',
+            title: 'Maximum likelihood model',
             subtitle: `Log-Likelihood: ${currentLogLikelihood.toFixed(4)}`
         }
     });
