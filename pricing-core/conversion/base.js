@@ -4,6 +4,50 @@
  */
 export class BaseDemandModel {
   /**
+   * @param {object} parameters Model parameters.
+   */
+  constructor(parameters) {
+    /**
+     * @protected
+     * @type {object}
+     */
+    this.parameters = parameters;
+  }
+
+  /**
+   * The number of parameters in the model (degrees of freedom).
+   * @type {number}
+   */
+  get dof() {
+    return Object.keys(this.parameters).length;
+  }
+
+  /**
+   * The names of the model parameters.
+   * @type {string[]}
+   */
+  get paramNames() {
+    return Object.keys(this.parameters);
+  }
+
+  /**
+   * The values of the model parameters.
+   * @type {number[]}
+   */
+  get paramValues() {
+    return Object.values(this.parameters);
+  }
+
+  /**
+   * The [name, value] pairs of the model parameters.
+   * @type {[string, number][]}
+   */
+  get paramEntries() {
+    return Object.entries(this.parameters);
+  }
+
+
+  /**
    * Calculates the conversion rate for a given price, clamped between 0 and 1.
    * @param {number} price The price at which to calculate the conversion rate.
    * @returns {number} The conversion rate, a value between 0 and 1.
@@ -25,6 +69,17 @@ export class BaseDemandModel {
   }
 
   /**
+   * @abstract
+   * @param {number} price The price at which to calculate the gradients.
+   * @returns {{conversion: Record<string, number>, rejection: Record<string, number>}} 
+   *        The gradient of log of conversion probability and rejection probability
+   *        w.r.t the model parameters in the constructor.
+   */
+  gradLog(price) {
+    throw new Error("Define the gradient of the logarithm of conversion/rejection probabilities at this price in `_gradient`")
+  }
+
+  /**
    * Creates a new model instance from a reference point.
    * This is a factory method.
    * @abstract
@@ -34,7 +89,7 @@ export class BaseDemandModel {
    * @param {number} params.conversion The conversion rate at the reference price.
    * @returns {BaseDemandModel} A new instance of the demand model.
    */
-  static from_reference({price, conversion, elasticity}) {
+  static from_reference({ price, conversion, elasticity }) {
     throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `from_reference`")
   }
 

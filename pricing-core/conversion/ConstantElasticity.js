@@ -4,30 +4,21 @@ import { BaseDemandModel } from './base.js'
  * Implements a constant elasticity demand model (also known as isoelastic).
  * In this model, the price elasticity of demand is constant regardless of the price.
  *
- * The conversion rate is given by the formula: C(p) = A * p^e,
- * where `e` is the constant price elasticity and `A` is a scaling constant derived
- * from a reference point (price, conversion).
+ * The conversion rate is given by the formula: log(C(p)) = a + b*log(p),
+ * where `a` and `b` are the intercept and gradient of a straight line in log-log space.
  */
 export class ConstantElasticityDemandModel extends BaseDemandModel {
   /**
-   * @param {object} model_params
-   * @param {number} model_params.A The scaling constant for the model.
-   * @param {number} model_params.elasticity The constant price elasticity of demand.
+   * @param {{a: number, b: number}} model_params
    */
-  constructor({ A, elasticity }) {
-    super()
+  constructor({ a, b }) {
+    super({ a, b })
     /**
      * The constant price elasticity of demand (e).
      * @protected
-     * @type {number}
+     * @type {{a: number, b: number}}
      */
-    this.elasticity_param = elasticity
-    /**
-     * The scaling constant (A) for the model.
-     * @protected
-     * @type {number}
-     */
-    this.A = A
+    this.parameters;
   }
 
   /**
@@ -41,8 +32,9 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    */
   static from_reference({ price, conversion, elasticity }) {
     ConstantElasticityDemandModel._check_reference(price, conversion, elasticity)
-    const A = conversion * Math.pow(price, -elasticity)
-    return new ConstantElasticityDemandModel({ A, elasticity })
+    const b = elasticity
+    const a = Math.log(conversion) - b * Math.log(price)
+    return new ConstantElasticityDemandModel({ a, b })
   }
 
   /**
@@ -64,9 +56,9 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
     const logPrice1 = Math.log(price1)
     const logConv0 = Math.log(conversion0);
     const logConv1 = Math.log(conversion1);
-    const elasticity = (logConv1 - logConv0) / (logPrice1 - logPrice0);
-    const A = conversion0 * Math.pow(price0, -elasticity)
-    return new ConstantElasticityDemandModel({ A, elasticity });
+    const b = (logConv1 - logConv0) / (logPrice1 - logPrice0);
+    const a = (logConv0 * logPrice1 - logConv1 * logPrice0) / (logPrice1 - logPrice0)
+    return new ConstantElasticityDemandModel({ a, b });
   }
 
   /**
@@ -76,6 +68,31 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    */
   _conversion(price) {
     if (price <= 0) return 1.0;
-    return this.A * Math.pow(price, this.elasticity_param)
+    const { a, b } = this.parameters
+    const Z = a + b * Math.log(price)
+    return Math.exp(Z);
+  }
+
+  /**
+   * Calculate gradients with respect to the model parameters.
+   * @override
+   * @param {number} price The price at which to calculate the gradients.
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}} 
+   *        The gradient of log of conversion probability and rejection probability
+   *        w.r.t the model parameters in the constructor.
+   */
+  gradLog(price) {
+    const phi = this._conversion(price)
+    const logprice = Math.log(price)
+    return {
+      conversion: {
+        a: 1,
+        b: logprice,
+      },
+      rejection: {
+        a: - (phi / (1 - phi)),
+        b: - (phi / (1 - phi)) * logprice,
+      }
+    }
   }
 }
