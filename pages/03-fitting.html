@@ -74,12 +74,14 @@
     <p>
       We are looking for the price sensitivity model parameters that best explain our data.
       To fit these parameters, we quantify the likelihood of the data under those parameters.
-      If, at any one price point, we have a conversion probability of $\phi(p)$,
-      then the likelihood of $k$ conversions from $n$ looks is the binomial probability proportional to
-      $$\phi(p)^k (1 - \phi(p))^{n - k}.$$
+    </p>
+    <p>
+      If, at any one price point, we are modelling a conversion probability of $\phi(p)$,
+      then (assuming independence of the looks) the likelihood of $k$ conversions from $n$ looks is
+      the binomial probability proportional to $$\phi(p)^k (1 - \phi(p))^{n - k}.$$
       For each of multiple price points, $p_i$, then the overall likelihood of the data is proportional to
       $$\prod_{i=1}^n \phi(p_i)^{k_i} (1 - \phi(p_i))^{n_i - k_i},$$
-      where we observe $k_i$ conversions from $n_i$ looks at price point $p_i$.
+      where we observe $k_i$ conversions from $n_i$ looks at each price point, $p_i$.
     </p>
     <p>
       The key to fitting our parameters is to observe that this likelihood is a function of the model parameters.
