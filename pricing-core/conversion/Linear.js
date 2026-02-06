@@ -10,16 +10,15 @@ import { BaseDemandModel } from './base.js'
  */
 export class LinearDemandModel extends BaseDemandModel {
   /**
-   * @param {object} model_params
-   * @param {number} model_params.p0 The reference price.
-   * @param {number} model_params.c0 The conversion rate at the reference price.
-   * @param {number} model_params.b The slope of the linear demand curve.
+   * @param {{a: number, b: number}} model_params
    */
-  constructor({ p0, c0, b }) {
-    super()
-    this.p0 = p0
-    this.c0 = c0
-    this.b = b
+  constructor({ a, b }) {
+    super({ a, b })
+    /**
+     * @protected
+     * @type {{a: number, b: number}}
+     */
+    this.parameters;
   }
 
   /**
@@ -33,9 +32,29 @@ export class LinearDemandModel extends BaseDemandModel {
    */
   static from_reference({ price, conversion, elasticity }) {
     LinearDemandModel._check_reference(price, conversion, elasticity)
+    const a = conversion * (1 - elasticity)
     const b = elasticity * (conversion / price)
+    return new LinearDemandModel({ a, b })
+  }
 
-    return new LinearDemandModel({ p0: price, c0: conversion, b })
+  /**
+   * Creates a new model instance by interpolating between two points.
+   * This method calculates the slope `b` of the linear demand curve that passes
+   * through two given points (p0, c0) and (p1, c1), and then creates a new
+   * `LinearDemandModel` instance.
+   * @override
+   * @param {object} point0 An object representing the first point, with `price` and `conversion` properties.
+   * @param {number} point0.price The price at the first point.
+   * @param {number} point0.conversion The conversion rate at the first point.
+   * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
+   * @param {number} point1.price The price at the second point.
+   * @param {number} point1.conversion The conversion rate at the second point.
+   * @returns {LinearDemandModel} A new instance of the demand model.
+   */
+  static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
+    const a = (conversion0 * price1 - conversion1 * price0) / (price1 - price0);
+    const b = (conversion1 - conversion0) / (price1 - price0);
+    return new LinearDemandModel({ a, b });
   }
 
   /**
@@ -46,6 +65,23 @@ export class LinearDemandModel extends BaseDemandModel {
    * @returns {number} The calculated conversion rate (before clamping).
    */
   _conversion(price) {
-    return this.c0 + this.b * (price - this.p0)
+    const { a, b } = this.parameters
+    return a + b * price
+  }
+
+  /**
+   * Calculate gradients with respect to the model parameters.
+   * @override
+   * @param {number} price The price at which to calculate the gradients.
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}}
+   *        The gradient of log of conversion probability and rejection probability
+   *        w.r.t the model parameters in the constructor.
+   */
+  gradLog(price) {
+    const phi = this._conversion(price)
+    return {
+      conversion: { a: 1 / phi, b: price / phi },
+      rejection: { a: -1 / (1 - phi), b: -price / (1 - phi) }
+    }
   }
 }
