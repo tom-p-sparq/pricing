@@ -132,6 +132,10 @@
       The model will fit this data well.
       However, look at the predictions for prices around £50 or £200.
       There is very little support in the data for confident predictions at these prices.
+      Indeed, as we saw from interpolation in the <a>model zoo</a>,
+      different models can lead to very different extrpolation behaviours.
+    </p>
+    <p>
       Fitting a model without a quantification of uncertainty is a key risk:
       when your data doesn't cover a wide range of prices, your model's extrapolations can be unreliable.
       The model has no data to learn the "true" elasticity and is just fitting to the local noise.
@@ -144,6 +148,11 @@
       have seen, a single outlier or a narrow band of prices can have a dramatic and sometimes counter-intuitive impact
       on the model's parameters and its predictions. This is why continuous price exploration and careful data
       curation are essential for building a reliable understanding of demand.
+    </p>
+    <p>
+      In future posts we'll look at how to select between model families,
+      how to quantify uncertainty,
+      and how to think more flexibly about data-driven conversion curves.
     </p>
 
   </div>
