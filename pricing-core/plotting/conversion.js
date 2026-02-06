@@ -1,5 +1,5 @@
 import * as Plot from "@observablehq/plot";
-import * as d3 from "d3";
+import { range } from "d3";
 
 /**
  * Generates a plot definition for a set of demand models using Observable Plot.
@@ -23,7 +23,7 @@ export function createMultiModelConversionPlot({models, points = [], options = {
   const subtitle = options.subtitle;
 
   const data = models.flatMap(({ model, name }) =>
-    d3.range(0, max_price, 1).map((p) => ({
+    range(0, max_price, 1).map((p) => ({
       price: p,
       conversion: model.conversion(p),
       name: name,
@@ -62,15 +62,17 @@ export function createMultiModelConversionPlot({models, points = [], options = {
  */
 export function createSingleModelConversionPlot({model, points = [], options = {}}) {
   const max_price = options.max_price || 400;
-  const title = options.title || `Conversion rates: ${model.constructor.name}`;
+  const title = options.title || (model ? `Conversion rates: ${model.constructor.name}`: 'Conversion rates');
   const subtitle = options.subtitle;
 
-  const data = d3.range(0, max_price, 1).map((p) => ({
-    price: p,
-    conversion: model.conversion(p),
-  }));
+  const data = model
+    ? range(0, max_price, 1).map((p) => ({
+        price: p,
+        conversion: model.conversion(p),
+      }))
+    : [];
   return Plot.plot({
-    title: title || `${model.constructor.name} for conversion rates`,
+    title: title,
     subtitle: subtitle,
     x: { label: "Price" },
     y: { domain: [0, 1], grid: true, label: "Conversion probability" },

@@ -51,7 +51,8 @@
 
     <h2>Model fitting</h2>
     <p>
-      Below, we show the best fit of a <a href="./01-parametric-conversion-models.html#logistic-model">logistic model</a> to the data generated above.
+      Below, we show the best fit of a <a href="./01-parametric-conversion-models.html#logistic-model">logistic
+        model</a> to the data generated above.
     </p>
     <div id="model-plot-container"></div>
     <p>
@@ -77,32 +78,72 @@
       then the likelihood of $k$ conversions from $n$ looks is the binomial probability proportional to
       $$\phi(p)^k (1 - \phi(p))^{n - k}.$$
       For each of multiple price points, $p_i$, then the overall likelihood of the data is proportional to
-      $$\prod_{i=1}^n \phi(p_i)^k_i (1 - \phi(p_i))^{n_i - k_i},$$
+      $$\prod_{i=1}^n \phi(p_i)^{k_i} (1 - \phi(p_i))^{n_i - k_i},$$
       where we observe $k_i$ conversions from $n_i$ looks at price point $p_i$.
     </p>
     <p>
       The key to fitting our parameters is to observe that this likelihood is a function of the model parameters.
       We want to choose the parameters going into the function $\phi(p)$ such that this likelihood is maximised.
-      For practical purposes, we maximise the logarithm of this likelihood, which is equivalent.
+      For practical purposes, we maximise the logarithm of this likelihood,
+      $$\sum_i k_i \log\left(\phi(p_i)\right) + \sum_i (n_i - k_i) \log\left(1 - \phi(p_i)\right),$$
+      which is equivalent.
     </p>
     <p>
-      The animation above that runs at each new datapoint depicts an optimisation algorithm taking the model parameter values
+      The animation above that runs at each new datapoint depicts an optimisation algorithm taking the model parameter
+      values
       to a new optimum that maximises the (log) likelihood of the generated dataset.
     </p>
 
-    <h2>Investigation</h2>
+    <h2>Scenarios to Explore</h2>
     <p>
-      We can try out all sorts of different datasets and see what happens.
-      For example, what about when we have few observations at many different prices?
-      When all of the observed prices are in a narrow band, what does that mean for extrapolation beyond that band?
-      Why should fitting a newly observed, low-probability conversion at a high price lower the predicted conversion rate at a lower price?
+      The power of this tool is in experimenting. Here are a few scenarios to try. I recommend refreshing the page to
+      start fresh for each one.
+    </p>
+    <h4>Scenario 1: The Impact of an Outlier</h4>
+    <p>
+      First, we can create a solid baseline curve interpolating a 50% observed conversion at £100 and 40% observed
+      conversion at £120.
+    </p>
+    <div id="scenario-1-button-container"></div>
+    <p>
+      Now observe what happens if we add just <em>one</em> "Convert" click at a higher price, say £160.
     </p>
     <p>
-      There's lots to play around with.
+      Notice how the entire curve shifts.
+      To account for this single new data point,
+      the best-fitting model actually reverses its estimate of how price drives conversion,
+      implying that increasing price <em>increases</em> conversion.
+      Why?
+      The model must now explain how someone was willing to pay £160.
+      To do so, it infers that the overall price sensitivity of the market is far lower than it previously thought.
+      This changes its prediction for conversion at all prices, hugely affecting what the model things will happen
+      even at low prices, below £100.
     </p>
     <p>
-      In the following posts, we'll consider the questions of uncertainty,
-      and the extrapolation of global information out of local fitting. 
+      This is a crucial lesson: in a parametric model, every data point informs the entire curve.
+    </p>
+    <h4>Scenario 2: The Danger of Narrow Data</h4>
+    <p>
+      Now let's think about what happens if we generate data only within a very narrow price band.
+      For example, let's start with several conversions and rejections only at prices between £140 and £160.
+    </p>
+    <div id="scenario-2-button-container"></div>
+    <p>
+      The model will fit this data well.
+      However, look at the predictions for prices around £50 or £200.
+      There is very little support in the data for confident predictions at these prices.
+      Fitting a model without a quantification of uncertainty is a key risk:
+      when your data doesn't cover a wide range of prices, your model's extrapolations can be unreliable.
+      The model has no data to learn the "true" elasticity and is just fitting to the local noise.
+      New local data can hugely change our predictions at the extremes of the price range.
+    </p>
+
+    <h2>Conclusion</h2>
+    <p>
+      Fitting a model is not a purely mechanical exercise. The distribution of our data points matters immensely. As we
+      have seen, a single outlier or a narrow band of prices can have a dramatic and sometimes counter-intuitive impact
+      on the model's parameters and its predictions. This is why continuous price exploration and careful data
+      curation are essential for building a reliable understanding of demand.
     </p>
 
   </div>

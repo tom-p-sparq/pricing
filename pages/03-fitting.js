@@ -40,6 +40,13 @@ function startGradientAscent() {
     }
 }
 
+function clearData() {
+    dataMap.clear();
+    //    currentModel = undefined;
+    renderTable();
+    renderModel();
+}
+
 function addInput(price, conversion) {
     price = Number(price); // Ensure price is a number for consistent map key lookup
     let entry = dataMap.get(price)
@@ -81,6 +88,13 @@ function mapDataToModel() {
         renderModel();
     }
     else if (numPoints > 2) {
+        if (!currentModel) {
+            currentModel = modelClass.from_reference({
+                price: currentPrice,
+                conversion: 0.5,
+                elasticity: -2
+            });
+        }
         optimiser.reset(currentModel);
         startGradientAscent();
     }
@@ -113,27 +127,62 @@ function renderTable() {
     )
 }
 
-// --- New Model Rendering Function ---
 function renderModel() {
-    const pointsForPlot = Array.from(dataMap.values()).map(d => ({
-        price: d.price,
-        conversion: d.books / d.looks
-    }));
-    const currentLogLikelihood = fitting.logLikelihood(currentModel, Array.from(dataMap.values()));
+    const pointsForPlot = dataMap.size > 0
+        ? Array.from(dataMap.values()).map(d => ({
+            price: d.price,
+            conversion: d.books / d.looks
+        }))
+        : [];
+
+    const logLikelihood = currentModel ? fitting.logLikelihood(currentModel, Array.from(dataMap.values())) : 0;
+
     const comparisonPlot = plotting.createSingleModelConversionPlot({
         model: currentModel,
         points: pointsForPlot,
         options: {
             title: 'Maximum likelihood model',
-            subtitle: `Log-Likelihood: ${currentLogLikelihood.toFixed(4)}`
+            subtitle: currentModel ? `Log-Likelihood: ${logLikelihood.toFixed(4)}` : 'Add data to begin fitting a model.'
         }
     });
     document.getElementById('model-plot-container').replaceChildren(comparisonPlot);
 }
 
 // Initialise
-document.getElementById("data-generation-container").replaceChildren(interactiveDataInput)
-renderTable()
-// renderModel(); // Render the initial model
-// Optionally, you can start gradient ascent automatically on page load:
-// startGradientAscent();
+document.getElementById("data-generation-container").replaceChildren(interactiveDataInput);
+renderTable();
+renderModel(); // Render the initial empty model plot
+
+// --- Scenario Button Logic ---
+
+function setupScenario1() {
+    clearData();
+    // 50% conversion at £100
+    dataMap.set(100, { price: 100, looks: 10, books: 5 });
+    // 40% conversion at £120
+    dataMap.set(120, { price: 120, looks: 10, books: 4 });
+    renderTable();
+    mapDataToModel();
+}
+
+function setupScenario2() {
+    clearData();
+    // Several conversions and rejections between £140 and £160
+    dataMap.set(140, { price: 140, looks: 10, books: 6 }); // 60%
+    dataMap.set(150, { price: 150, looks: 11, books: 6 });
+    dataMap.set(155, { price: 155, looks: 9, books: 6 });
+    dataMap.set(160, { price: 160, looks: 10, books: 4 }); // 40%
+    renderTable();
+    mapDataToModel();
+}
+
+const scenario1Button = Inputs.button([
+    ["Set up Scenario 1", setupScenario1],
+]);
+
+const scenario2Button = Inputs.button([
+    ["Set up Scenario 2", setupScenario2],
+]);
+
+document.getElementById("scenario-1-button-container").append(scenario1Button);
+document.getElementById("scenario-2-button-container").append(scenario2Button);
