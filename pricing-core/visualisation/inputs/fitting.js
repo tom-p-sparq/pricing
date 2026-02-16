@@ -33,8 +33,8 @@ export function getData() {
  * Set a row of the dataMap
  * @param {{price: number, looks: number, books: number}} row
  */
-export function setData({price, looks, books}) {
-    dataMap.set(price, {price, looks, books})
+export function setData({ price, looks, books }) {
+    dataMap.set(price, { price, looks, books })
 }
 
 function _convert() {
@@ -55,15 +55,22 @@ export function fittingDataInput(element) {
         throw new Error('fittingDataInput: the provided element is not a valid HTMLElement.');
     }
     const priceSlider = range([50, 250], { step: 1, value: currentPrice, label: "Price" })
-    priceSlider.addEventListener("input", (event) => {
-        currentPrice = Number(event.target.value); // Ensure currentPrice is always a number
-    })
+    priceSlider.addEventListener(
+        "input",
+        /** @param {Event & {target: HTMLInputElement}} event */
+        (event) => {
+            currentPrice = Number(event.target.value);
+        }
+    )
 
-    const conversionButtons = button([
+    /** @type {any} */
+    const buttonArray = [
         ["Convert", _convert],
         ["Reject", _reject],
-    ])
-    
+    ];
+
+    const conversionButtons = button(buttonArray)
+
     const _form = form([priceSlider, conversionButtons])
     element.append(_form);
     return { priceSlider, conversionButtons }
@@ -103,8 +110,11 @@ function setupScenario(data) {
  * @param {Array<{price: number, looks: number, books: number}>} spec.data
  * @returns 
  */
-export function scenarioButton(element, {buttonText, data}) {
-    const _button = button(buttonText, {reduce: () => setupScenario(data)})
+export function scenarioButton(element, { buttonText, data }) {
+    /** @type {any} */
+    const options = { reduce: () => setupScenario(data) };
+    const _button = button(buttonText, options);
+
     if (!(element instanceof HTMLElement)) {
         throw new Error('scenarioButton: the provided element is not a valid HTMLElement.');
     }
