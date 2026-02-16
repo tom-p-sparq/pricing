@@ -1,4 +1,4 @@
-import { conversion, plotting, Inputs, html } from './compiled-pricing-core.js'
+import { conversion, plotting, inputs } from './compiled-pricing-core.js'
 
 // Static plot
 const plotConfigs = [
@@ -30,18 +30,9 @@ plotConfigs.forEach(({ modelClass, title, containerId }) => {
 });
 
 // Interactive plot
-const interactiveReference = Inputs.form(
-    {
-        price: Inputs.range([50, 250], { step: 1, value: 150, label: "Reference price" }),
-        elasticity: Inputs.range([-5, -0.1], { step: 0.1, value: -2, label: "Reference elasticity" }),
-        conversion: Inputs.range([0.01, 0.99], { step: 0.01, value: 0.5, label: "Reference conversion" })
-    },
-    {
-        template: ({ price, elasticity, conversion }) =>
-            html`<div style="display: flex; align-items: center; justify-content: space-around; gap: 1em;">${price}${elasticity}${conversion}</div>`
-    }
+const interactiveReference = inputs.referenceForm(
+    document.getElementById('controls-container')
 );
-document.getElementById('controls-container').replaceChildren(interactiveReference);
 
 function render() {
     const models = plotConfigs.map(({ modelClass, title }) => ({

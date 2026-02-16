@@ -1,7 +1,4 @@
-import { conversion, plotting, Inputs, fitting } from './compiled-pricing-core.js'
-
-let dataMap = new Map();
-let currentPrice = 150;
+import { conversion, plotting, inputs, fitting } from './compiled-pricing-core.js'
 
 // --- Gradient Ascent Setup ---
 const modelClass = conversion.LogisticDemandModel;
@@ -17,7 +14,7 @@ let currentModel;
 function gradientAscentLoop() {
     if (!isRunning) return;
     const oldParams = currentModel.paramValues;
-    currentModel = optimiser.batchRun(currentModel, Array.from(dataMap.values()), stepsPerFrame)
+    currentModel = optimiser.batchRun(currentModel, inputs.fittingData.get(), stepsPerFrame)
     const newParams = currentModel.paramValues;
     renderModel();
     // Schedule the next iteration using requestAnimationFrame for speed
@@ -40,45 +37,26 @@ function startGradientAscent() {
     }
 }
 
-function clearData() {
-    dataMap.clear();
-    //    currentModel = undefined;
-    renderTable();
-    renderModel();
-}
-
-function addInput(price, conversion) {
-    price = Number(price); // Ensure price is a number for consistent map key lookup
-    let entry = dataMap.get(price)
-    if (entry) {
-        entry.looks += 1;
-        if (conversion) entry.books += 1;
-    } else {
-        dataMap.set(price, { price, looks: 1, books: conversion ? 1 : 0 })
-    }
-    renderTable();
-    mapDataToModel();
-}
-
 function mapDataToModel() {
+    console.log("Entered `mapDataToModel`")
     // Impose a reference on a single data point;
     // interpolate two data points;
     // start numerics if more than two data points.
     // Reset Adam parameters and ensure gradient ascent is running
-    const numPoints = dataMap.size;
+    const data = inputs.fittingData.get();
+    const numPoints = data.length;
     if (numPoints === 1) {
-        const referencePoint = Array.from(dataMap.values()).map(
-            ({ price, looks, books }) => ({
-                price: price,
-                conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
-                elasticity: -2
-            })
-        );
-        currentModel = modelClass.from_reference(referencePoint[0]);
+        const { price, looks, books } = data[0];
+        const referencePoint = {
+            price: price,
+            conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
+            elasticity: -2,
+        };
+        currentModel = modelClass.from_reference(referencePoint);
         renderModel();
     }
     else if (numPoints === 2) {
-        const points = Array.from(dataMap.values()).map(({ price, looks, books }) => ({
+        const points = data.map(({ price, looks, books }) => ({
             price: price,
             conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
         }));
@@ -90,7 +68,7 @@ function mapDataToModel() {
     else if (numPoints > 2) {
         if (!currentModel) {
             currentModel = modelClass.from_reference({
-                price: currentPrice,
+                price: 150,
                 conversion: 0.5,
                 elasticity: -2
             });
@@ -101,41 +79,22 @@ function mapDataToModel() {
 }
 
 
-const priceSlider = Inputs.range([50, 250], { step: 1, value: currentPrice, label: "Price" })
-priceSlider.addEventListener("input", (event) => {
-    currentPrice = Number(event.target.value); // Ensure currentPrice is always a number
-})
-
-const conversionButtons = Inputs.button([
-    ["Convert", () => addInput(currentPrice, true)],
-    ["Reject", () => addInput(currentPrice, false)],
-])
-const interactiveDataInput = Inputs.form([priceSlider, conversionButtons])
+const tableContainer = document.getElementById("data-table-container")
+tableContainer.style.height = '250px'
+tableContainer.style.overflowY = 'auto'
 
 function renderTable() {
-    const tableContainer = document.getElementById("data-table-container")
-    tableContainer.style.height = '250px'
-    tableContainer.style.overflowY = 'auto'
-    tableContainer.replaceChildren(
-        Inputs.table(
-            Array.from(dataMap.values()),
-            {
-                header: { price: "Price (£)", looks: "Looks", books: "Books" }, // Existing header
-                editable: false
-            }
-        )
-    )
+    inputs.fittingData.table(tableContainer)
 }
 
 function renderModel() {
-    const fitPoints = dataMap.size > 0
-        ? Array.from(dataMap.values()).map(d => ({
-            price: d.price,
-            conversion: d.books / d.looks
-        }))
-        : [];
+    const data = inputs.fittingData.get();
+    const fitPoints = data.map(d => ({
+        price: d.price,
+        conversion: d.books / d.looks
+    }))
 
-    const logLikelihood = currentModel ? fitting.logLikelihood(currentModel, Array.from(dataMap.values())) : 0;
+    const logLikelihood = currentModel ? fitting.logLikelihood(currentModel, data) : 0;
 
     const plot = plotting.conversionPlot({
         model: currentModel,
@@ -147,45 +106,47 @@ function renderModel() {
         subtitle: currentModel ? `Log-Likelihood: ${logLikelihood.toFixed(4)}` : 'Add data to begin fitting a model.'
     };
     document.getElementById('model-plot-container').replaceChildren(
-        plotting.plot({...plot, ...info})
+        plotting.plot({ ...plot, ...info })
     );
 }
 
 // Initialise
-document.getElementById("data-generation-container").replaceChildren(interactiveDataInput);
+const { _, conversionButtons } = inputs.fittingData.input(document.getElementById("data-generation-container"));
 renderTable();
 renderModel(); // Render the initial empty model plot
 
-// --- Scenario Button Logic ---
 
-function setupScenario1() {
-    clearData();
-    // 50% conversion at £100
-    dataMap.set(100, { price: 100, looks: 10, books: 5 });
-    // 40% conversion at £120
-    dataMap.set(120, { price: 120, looks: 10, books: 4 });
+// --- Scenario Buttons ---
+
+const scenario1 = [
+    { price: 100, looks: 10, books: 5 },
+    { price: 120, looks: 10, books: 4 },
+]
+
+const scenario2 = [
+    { price: 140, looks: 10, books: 6 }, // 60%
+    { price: 150, looks: 11, books: 6 },
+    { price: 155, looks: 9, books: 6 },
+    { price: 160, looks: 10, books: 4 }, // 40%
+]
+
+const scenario1Button = inputs.fittingData.scenario(
+    document.getElementById("scenario-1-button-container"),
+    {
+        buttonText: 'Set up Scenario 1',
+        data: scenario1,
+    },
+)
+const scenario2Button = inputs.fittingData.scenario(
+    document.getElementById("scenario-2-button-container"),
+    {
+        buttonText: 'Set up Scenario 2',
+        data: scenario2,
+    },
+)
+
+const buttons = [conversionButtons, scenario1Button, scenario2Button]
+buttons.map(button => button.addEventListener("input", () => {
     renderTable();
     mapDataToModel();
-}
-
-function setupScenario2() {
-    clearData();
-    // Several conversions and rejections between £140 and £160
-    dataMap.set(140, { price: 140, looks: 10, books: 6 }); // 60%
-    dataMap.set(150, { price: 150, looks: 11, books: 6 });
-    dataMap.set(155, { price: 155, looks: 9, books: 6 });
-    dataMap.set(160, { price: 160, looks: 10, books: 4 }); // 40%
-    renderTable();
-    mapDataToModel();
-}
-
-const scenario1Button = Inputs.button([
-    ["Set up Scenario 1", setupScenario1],
-]);
-
-const scenario2Button = Inputs.button([
-    ["Set up Scenario 2", setupScenario2],
-]);
-
-document.getElementById("scenario-1-button-container").append(scenario1Button);
-document.getElementById("scenario-2-button-container").append(scenario2Button);
+}));

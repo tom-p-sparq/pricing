@@ -1,12 +1,9 @@
-import { conversion, plotting, Inputs } from './compiled-pricing-core.js'
+import { conversion, plotting, inputs } from './compiled-pricing-core.js'
 
 // Interactive inputs
-const costSlider = Inputs.range([0, 150], {
-    step: 1,
-    value: 0,
-    label: 'Incremental cost'
-});
-document.getElementById('cost-container').append(costSlider);
+const costSlider = inputs.costSlider(
+    document.getElementById('cost-container')
+);
 
 // Static plot
 const reference = {
@@ -14,7 +11,7 @@ const reference = {
     elasticity: -2,
     conversion: 0.5,
 };
-const model = conversion.WeibullDemandModel.from_reference(reference);
+const model = conversion.LogisticDemandModel.from_reference(reference);
 const conversionPlot = plotting.conversionPlot({ model: model, });
 document.getElementById('conversion-container').replaceChildren(
     plotting.plot({
