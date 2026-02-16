@@ -41,20 +41,31 @@ const interactiveInterpolants = Inputs.form(
 document.getElementById('reference-controls-container').replaceChildren(interactiveReference);
 document.getElementById('interpolants-controls-container').replaceChildren(interactiveInterpolants);
 
+// Rendering functions
+
+const singleReferenceTitles = {
+    title: 'The Conversion Model Zoo',
+    subtitle: 'Specified by behaviour at a single reference price',
+    color: { legend: true },
+}
+const interpolantTitles = {
+    title: 'The Conversion Model Zoo',
+    subtitle: 'Specified by interpolation between two points',
+    color: { legend: true },
+}
+
 function renderReference() {
     const models = plotConfigs.map(({ modelClass, title }) => ({
         model: modelClass.from_reference(interactiveReference.value),
         name: title,
     }));
-    const comparisonPlot = plotting.createMultiModelConversionPlot({
-        models: models,
-        points: [interactiveReference.value],
-        options: {
-            title: 'The Conversion Model Zoo',
-            subtitle: 'Specified by behaviour at a single reference price',
-        }
+    const comparisonPlot = plotting.conversionPlot({
+        model: models,
+        specPoints: [interactiveReference.value],
     });
-    document.getElementById('reference-comparison-container').replaceChildren(comparisonPlot);
+    document.getElementById('reference-comparison-container').replaceChildren(
+        plotting.plot({ ...comparisonPlot, ...singleReferenceTitles })
+    );
 }
 
 function renderInterpolants() {
@@ -67,15 +78,13 @@ function renderInterpolants() {
         model: modelClass.interpolate(point0, point1),
         name: title,
     }));
-    const comparisonPlot = plotting.createMultiModelConversionPlot({
-        models: models,
-        points: [point0, point1],
-        options: {
-            title: 'The Conversion Model Zoo',
-            subtitle: 'Specified by interpolation between two points',
-        }
+    const comparisonPlot = plotting.conversionPlot({
+        model: models,
+        specPoints: [point0, point1],
     });
-    document.getElementById('interpolants-comparison-container').replaceChildren(comparisonPlot);
+    document.getElementById('interpolants-comparison-container').replaceChildren(
+        plotting.plot({ ...comparisonPlot, ...interpolantTitles })
+    );
 }
 
 // Set up listeners

@@ -15,18 +15,24 @@ const reference = {
     conversion: 0.5,
 };
 const model = conversion.WeibullDemandModel.from_reference(reference);
-const conversionPlot = plotting.createSingleModelConversionPlot({
-    model: model,
-    options: { title: 'Example conversion model' }
-});
-document.getElementById('conversion-container').replaceChildren(conversionPlot)
+const conversionPlot = plotting.conversionPlot({ model: model, });
+document.getElementById('conversion-container').replaceChildren(
+    plotting.plot({
+        ...conversionPlot,
+        title: 'Example conversion model',
+    })
+)
 
 // Interactive plot
 function render() {
-    const incrementalRevenuePlot = plotting.createIncrementalRevenuePlot(model, costSlider.value, {
-        title: 'Modelled expected incremental revenue',
-    })
-    document.getElementById('incremental-revenue-container').replaceChildren(incrementalRevenuePlot)
+    const incrementalRevenuePlot = plotting.incrementalRevenuePlot(model, costSlider.value)
+    document.getElementById('incremental-revenue-container').replaceChildren(
+        plotting.plot({
+            ...incrementalRevenuePlot,
+            title: 'Modelled expected incremental revenue',
+        })
+    )
 }
+
 costSlider.addEventListener('input', render)
 render()

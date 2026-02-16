@@ -128,7 +128,7 @@ function renderTable() {
 }
 
 function renderModel() {
-    const pointsForPlot = dataMap.size > 0
+    const fitPoints = dataMap.size > 0
         ? Array.from(dataMap.values()).map(d => ({
             price: d.price,
             conversion: d.books / d.looks
@@ -137,15 +137,18 @@ function renderModel() {
 
     const logLikelihood = currentModel ? fitting.logLikelihood(currentModel, Array.from(dataMap.values())) : 0;
 
-    const comparisonPlot = plotting.createSingleModelConversionPlot({
+    const plot = plotting.conversionPlot({
         model: currentModel,
-        points: pointsForPlot,
-        options: {
-            title: 'Maximum likelihood model',
-            subtitle: currentModel ? `Log-Likelihood: ${logLikelihood.toFixed(4)}` : 'Add data to begin fitting a model.'
-        }
-    });
-    document.getElementById('model-plot-container').replaceChildren(comparisonPlot);
+        fitPoints: fitPoints,
+    })
+
+    const info = {
+        title: 'Maximum likelihood model',
+        subtitle: currentModel ? `Log-Likelihood: ${logLikelihood.toFixed(4)}` : 'Add data to begin fitting a model.'
+    };
+    document.getElementById('model-plot-container').replaceChildren(
+        plotting.plot({...plot, ...info})
+    );
 }
 
 // Initialise

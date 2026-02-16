@@ -17,11 +17,16 @@ const reference = {
 
 plotConfigs.forEach(({ modelClass, title, containerId }) => {
     const model = modelClass.from_reference(reference);
-    const plot = plotting.createSingleModelConversionPlot({ model: model, options: { title } });
+    const plot = plotting.conversionPlot({ model: model });
     const container = document.getElementById(containerId);
     if (container) {
-        container.replaceChildren(plot);
-    }
+        container.replaceChildren(
+            plotting.plot({
+                ...plot,
+                title: title,
+            })
+        )
+    };
 });
 
 // Interactive plot
@@ -43,15 +48,18 @@ function render() {
         model: modelClass.from_reference(interactiveReference.value),
         name: title,
     }));
-    const comparisonPlot = plotting.createMultiModelConversionPlot({
-        models: models,
-        points: [interactiveReference.value],
-        options: {
+    const comparisonPlot = plotting.conversionPlot({
+        model: models,
+        specPoints: [interactiveReference.value],
+    });
+    document.getElementById('conversion-comparison-container').replaceChildren(
+        plotting.plot({
+            ...comparisonPlot,
             title: 'The Conversion Model Zoo',
             subtitle: 'Comparing conversion probability models',
-        }
-    });
-    document.getElementById('conversion-comparison-container').replaceChildren(comparisonPlot);
+            color: { legend: true },
+        })
+    );
 }
 
 interactiveReference.addEventListener('input', render);
