@@ -1,0 +1,20 @@
+export { costSlider } from './cost.js';
+export { referenceForm } from './reference.js';
+export { interpolantsForm } from './interpolants.js';
+import {
+    getData,
+    clearData,
+    setData,
+    fittingDataInput,
+    fittingDataTable,
+    scenarioButton
+} from './fitting.js';
+
+export const fittingData = {
+    get: getData,
+    clear: clearData,
+    set: setData,
+    input: fittingDataInput,
+    table: fittingDataTable,
+    scenario: scenarioButton,
+};

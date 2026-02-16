@@ -1,2 +1,2 @@
 export * as plotting from "./plotting"
-// import * as input from "./input"
+export * as inputs from "./inputs"
