@@ -1,28 +1,29 @@
 import { conversion, plotting, inputs, fitting } from './compiled-pricing-core.js'
 
-// --- Gradient Ascent Setup ---
-const modelClass = conversion.LogisticDemandModel;
-const optimiser = new fitting.Adam();
+const modelSpecs = [
+    { name: 'Logistic', optimiser: new fitting.Adam(), model: new conversion.LogisticDemandModel({ a: 0, b: 0 }) },
+    { name: 'Log Logistic', optimiser: new fitting.Adam(), model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }) },
+    { name: 'Weibull', optimiser: new fitting.Adam(), model: new conversion.WeibullDemandModel({ a: 0, b: 0 }) },
+]
 let isRunning = false;
 const stepsPerFrame = 100; // Number of optimization steps per animation frame
 
-// Declare a model of type model class
-
-/** @type {modelClass} */
-let currentModel;
 
 function gradientAscentLoop() {
     if (!isRunning) return;
-    const oldParams = currentModel.paramValues;
-    currentModel = optimiser.batchRun(currentModel, inputs.fittingData.get(), stepsPerFrame)
-    const newParams = currentModel.paramValues;
-    renderModel();
-    // Schedule the next iteration using requestAnimationFrame for speed
-    const maxAbsDiff = Math.max(...newParams.map((v, i) => Math.abs(v - oldParams[i])));
+    const maxAbsDiffs = modelSpecs.map((spec) => {
+        const oldParams = spec.model.paramValues;
+        spec.model = spec.optimiser.batchRun(spec.model, inputs.fittingData.get(), stepsPerFrame)
+        const newParams = spec.model.paramValues;
+        return Math.max(...newParams.map((v, i) => Math.abs(v - oldParams[i])));
+    });
+    renderModelPlots();
+    const maxAbsDiff = Math.max(...maxAbsDiffs);
     if (maxAbsDiff < 1e-5) {
         console.log("Numerics converged!")
         isRunning = false;
     }
+    // Schedule the next iteration using requestAnimationFrame for speed
     if (isRunning) {
         requestAnimationFrame(gradientAscentLoop);
     }
@@ -31,7 +32,9 @@ function gradientAscentLoop() {
 function startGradientAscent() {
     if (!isRunning) {
         isRunning = true;
-        optimiser.reset(currentModel); // Initialize Adam parameters on start
+        modelSpecs.forEach(({ optimiser, model }) => {
+            optimiser.reset(model); // Initialize Adam parameters on start
+        })
         console.log("Starting gradient ascent...");
         requestAnimationFrame(gradientAscentLoop); // Start the loop with requestAnimationFrame
     }
@@ -52,28 +55,22 @@ function mapDataToModel() {
             conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
             elasticity: -2,
         };
-        currentModel = modelClass.from_reference(referencePoint);
-        renderModel();
+        modelSpecs.forEach(spec => {
+            spec.model = spec.model.constructor.from_reference(referencePoint);
+        });
+        renderModelPlots();
     }
     else if (numPoints === 2) {
         const points = data.map(({ price, looks, books }) => ({
             price: price,
             conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
         }));
-        const point0 = points[0];
-        const point1 = points[1];
-        currentModel = modelClass.interpolate(point0, point1);
-        renderModel();
+        modelSpecs.forEach(spec => {
+            spec.model = spec.model.constructor.interpolate(points[0], points[1]);
+        });
+        renderModelPlots();
     }
     else if (numPoints > 2) {
-        if (!currentModel) {
-            currentModel = modelClass.from_reference({
-                price: 150,
-                conversion: 0.5,
-                elasticity: -2
-            });
-        }
-        optimiser.reset(currentModel);
         startGradientAscent();
     }
 }
@@ -87,33 +84,34 @@ function renderTable() {
     inputs.fittingData.table(tableContainer)
 }
 
-function renderModel() {
+function renderModelPlots() {
     const data = inputs.fittingData.get();
     const fitPoints = data.map(d => ({
         price: d.price,
         conversion: d.books / d.looks
     }))
 
-    const logLikelihood = currentModel ? fitting.logLikelihood(currentModel, data) : 0;
+    // const models = modelSpecs.map((spec) => { model: spec.model, name: spec.name })
+    // const logLikelihoods = modelSpecs.map(spec => fitting.logLikelihood(spec.model, data));
 
     const plot = plotting.conversionPlot({
-        model: currentModel,
+        model: modelSpecs,
         fitPoints: fitPoints,
     })
 
-    const info = {
-        title: 'Maximum likelihood model',
-        subtitle: currentModel ? `Log-Likelihood: ${logLikelihood.toFixed(4)}` : 'Add data to begin fitting a model.'
-    };
     document.getElementById('model-plot-container').replaceChildren(
-        plotting.plot({ ...plot, ...info })
-    );
+        plotting.plot({
+            ...plot,
+            color: {legend: true},
+            title: 'Maximum likelihood models',
+        })
+    )
 }
 
 // Initialise
 const { _, conversionButtons } = inputs.fittingData.input(document.getElementById("data-generation-container"));
 renderTable();
-renderModel(); // Render the initial empty model plot
+renderModelPlots(); // Render the initial empty model plot
 
 
 // --- Scenario Buttons ---
