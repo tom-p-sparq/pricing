@@ -100,13 +100,14 @@ function renderModel() {
         model: currentModel,
         fitPoints: fitPoints,
     })
-
-    const info = {
+    const options = {
         title: 'Maximum likelihood model',
         subtitle: currentModel ? `Log-Likelihood: ${logLikelihood.toFixed(4)}` : 'Add data to begin fitting a model.'
     };
-    document.getElementById('model-plot-container').replaceChildren(
-        plotting.plot({ ...plot, ...info })
+    plotting.plot(
+        document.getElementById('model-plot-container'),
+        plot,
+        options,
     );
 }
 

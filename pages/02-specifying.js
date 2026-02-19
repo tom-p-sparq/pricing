@@ -40,9 +40,11 @@ function renderReference() {
         model: models,
         specPoints: [interactiveReference.value],
     });
-    document.getElementById('reference-comparison-container').replaceChildren(
-        plotting.plot({ ...comparisonPlot, ...singleReferenceTitles })
-    );
+    plotting.plot(
+        document.getElementById('reference-comparison-container'),
+        comparisonPlot,
+        singleReferenceTitles,
+    )
 }
 
 function renderInterpolants() {
@@ -59,9 +61,11 @@ function renderInterpolants() {
         model: models,
         specPoints: [point0, point1],
     });
-    document.getElementById('interpolants-comparison-container').replaceChildren(
-        plotting.plot({ ...comparisonPlot, ...interpolantTitles })
-    );
+    plotting.plot(
+        document.getElementById('interpolants-comparison-container'),
+        comparisonPlot,
+        interpolantTitles,
+    )
 }
 
 // Set up listeners

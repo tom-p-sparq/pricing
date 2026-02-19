@@ -13,21 +13,19 @@ const reference = {
 };
 const model = conversion.LogisticDemandModel.from_reference(reference);
 const conversionPlot = plotting.conversionPlot({ model: model, });
-document.getElementById('conversion-container').replaceChildren(
-    plotting.plot({
-        ...conversionPlot,
-        title: 'Example conversion model',
-    })
+plotting.plot(
+    document.getElementById('conversion-container'),
+    conversionPlot,
+    { title: 'Example conversion model' },
 )
 
 // Interactive plot
 function render() {
     const incrementalRevenuePlot = plotting.incrementalRevenuePlot(model, costSlider.value)
-    document.getElementById('incremental-revenue-container').replaceChildren(
-        plotting.plot({
-            ...incrementalRevenuePlot,
-            title: 'Modelled expected incremental revenue',
-        })
+    plotting.plot(
+        document.getElementById('incremental-revenue-container'),
+        incrementalRevenuePlot,
+        { title: 'Modelled expected incremental revenue' },
     )
 }
 

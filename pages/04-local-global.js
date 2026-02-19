@@ -98,13 +98,15 @@ function renderModelPlots() {
         model: modelSpecs,
         fitPoints: fitPoints,
     })
+    const options = {
+        color: { legend: true },
+        title: 'Maximum likelihood models',
+    }
 
-    document.getElementById('model-plot-container').replaceChildren(
-        plotting.plot({
-            ...plot,
-            color: {legend: true},
-            title: 'Maximum likelihood models',
-        })
+    plotting.plot(
+        document.getElementById('model-plot-container'),
+        plot,
+        options,
     )
 }
 
