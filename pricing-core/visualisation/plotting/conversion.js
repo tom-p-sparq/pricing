@@ -77,7 +77,7 @@ function _conversionCurveMarks(data) {
     ruleY([0]),
     lineY(data, { x: "price", y: "conversion", stroke: "name" }),
     crosshair(data, { x: "price", y: "conversion" }),
-    tip(data, pointer({ x: "price", y: "conversion" })),
+    tip(data, pointer({ x: "price", y: "conversion", stroke: "name" })),
   ]
 }
 

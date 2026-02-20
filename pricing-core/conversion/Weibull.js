@@ -82,16 +82,16 @@ export class WeibullDemandModel extends BaseDemandModel {
    */
   gradLog(price) {
     const phi = this._conversion(price)
-    const logphi = Math.log(phi)
-    const logprice = Math.log(price)
+    const logphi = Math.log(phi + 1e-9)
+    const logprice = Math.log(price + 1e-9)
     return {
       conversion: {
         a: logphi,
         b: logphi * logprice,
       },
       rejection: {
-        a: -phi * logphi / (1 - phi),
-        b: -phi * logphi * logprice / (1 - phi),
+        a: -phi * logphi / (1 + 1e-9 - phi),
+        b: -phi * logphi * logprice / (1 + 1e-9 - phi),
       }
     }
   }
