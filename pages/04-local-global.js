@@ -1,80 +1,40 @@
 import { conversion, plotting, inputs, fitting } from './compiled-pricing-core.js'
 
 const modelSpecs = [
-    { name: 'Logistic', optimiser: new fitting.Adam(), model: new conversion.LogisticDemandModel({ a: 0, b: 0 }) },
-    { name: 'Log Logistic', optimiser: new fitting.Adam(), model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }) },
-    { name: 'Weibull', optimiser: new fitting.Adam(), model: new conversion.WeibullDemandModel({ a: 0, b: 0 }) },
+    { name: 'Logistic', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.LogisticDemandModel({ a: 0, b: 0 }) },
+    { name: 'Log Logistic', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }) },
+    { name: 'Weibull', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.WeibullDemandModel({ a: 0, b: 0 }) },
 ]
-let isRunning = false;
-const stepsPerFrame = 100; // Number of optimization steps per animation frame
+const stepsPerFrame = 200; // Number of optimization steps per animation frame
 
-
-function gradientAscentLoop() {
-    if (!isRunning) return;
-    const maxAbsDiffs = modelSpecs.map((spec) => {
-        const oldParams = spec.model.paramValues;
-        spec.model = spec.optimiser.batchRun(spec.model, inputs.fittingData.get(), stepsPerFrame)
-        const newParams = spec.model.paramValues;
-        return Math.max(...newParams.map((v, i) => Math.abs(v - oldParams[i])));
-    });
+function animateStep(fitGenerators) {
+    const stepped = fitGenerators.map(
+        generator => generator.next()
+    )
+    modelSpecs.forEach((modelSpec, i) => {
+        const { value, done } = stepped[i]
+        if (!done) {
+            modelSpec.model = value;
+        }
+    })
     renderModelPlots();
-    const maxAbsDiff = Math.max(...maxAbsDiffs);
-    if (maxAbsDiff < 1e-5) {
-        console.log("Numerics converged!")
-        isRunning = false;
-    }
-    // Schedule the next iteration using requestAnimationFrame for speed
-    if (isRunning) {
-        requestAnimationFrame(gradientAscentLoop);
+    const all_done = stepped.every(step => step.done)
+    if (!all_done) {
+        requestAnimationFrame(() => animateStep(fitGenerators))
     }
 }
 
-function startGradientAscent() {
-    if (!isRunning) {
-        isRunning = true;
-        modelSpecs.forEach(({ optimiser, model }) => {
-            optimiser.reset(model); // Initialize Adam parameters on start
-        })
-        console.log("Starting gradient ascent...");
-        requestAnimationFrame(gradientAscentLoop); // Start the loop with requestAnimationFrame
-    }
-}
-
-function mapDataToModel() {
-    console.log("Entered `mapDataToModel`")
-    // Impose a reference on a single data point;
-    // interpolate two data points;
-    // start numerics if more than two data points.
-    // Reset Adam parameters and ensure gradient ascent is running
+function fitModelToData() {
     const data = inputs.fittingData.get();
-    const numPoints = data.length;
-    if (numPoints === 1) {
-        const { price, looks, books } = data[0];
-        const referencePoint = {
-            price: price,
-            conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
-            elasticity: -2,
-        };
-        modelSpecs.forEach(spec => {
-            spec.model = spec.model.constructor.from_reference(referencePoint);
-        });
-        renderModelPlots();
-    }
-    else if (numPoints === 2) {
-        const points = data.map(({ price, looks, books }) => ({
-            price: price,
-            conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
-        }));
-        modelSpecs.forEach(spec => {
-            spec.model = spec.model.constructor.interpolate(points[0], points[1]);
-        });
-        renderModelPlots();
-    }
-    else if (numPoints > 2) {
-        startGradientAscent();
-    }
+    const fitGenerators = modelSpecs.map(
+        ({ model, optimiser }) => fitting.fit(
+            model,
+            optimiser,
+            data,
+            { batchSize: stepsPerFrame, epsilon: 1e-8 })
+    )
+    requestAnimationFrame(() => animateStep(fitGenerators))
 }
-
 
 const tableContainer = document.getElementById("data-table-container")
 tableContainer.style.height = '250px'
@@ -86,13 +46,10 @@ function renderTable() {
 
 function renderModelPlots() {
     const data = inputs.fittingData.get();
-    const fitPoints = data.map(d => ({
-        price: d.price,
-        conversion: d.books / d.looks
+    const fitPoints = data.map(({ price, books, looks }) => ({
+        price: price,
+        conversion: books / looks
     }))
-
-    // const models = modelSpecs.map((spec) => { model: spec.model, name: spec.name })
-    // const logLikelihoods = modelSpecs.map(spec => fitting.logLikelihood(spec.model, data));
 
     const plot = plotting.conversionPlot({
         model: modelSpecs,
@@ -102,7 +59,6 @@ function renderModelPlots() {
         color: { legend: true },
         title: 'Maximum likelihood models',
     }
-
     plotting.plot(
         document.getElementById('model-plot-container'),
         plot,
@@ -111,10 +67,11 @@ function renderModelPlots() {
 }
 
 // Initialise
-const { _, conversionButtons } = inputs.fittingData.input(document.getElementById("data-generation-container"));
+const { conversionButtons } = inputs.fittingData.input(
+    document.getElementById("data-generation-container")
+);
 renderTable();
 renderModelPlots(); // Render the initial empty model plot
-
 
 // --- Scenario Buttons ---
 
@@ -148,5 +105,5 @@ const scenario2Button = inputs.fittingData.scenario(
 const buttons = [conversionButtons, scenario1Button, scenario2Button]
 buttons.map(button => button.addEventListener("input", () => {
     renderTable();
-    mapDataToModel();
+    fitModelToData();
 }));
