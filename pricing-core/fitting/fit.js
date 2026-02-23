@@ -35,21 +35,17 @@ export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }
         yield modelClass.interpolate(points[0], points[1]);
     } else {
         optimiser.reset(model)
+        const LLH = logLikelihood(model, data);
+        if (LLH/numPoints < -5) {
+            model = makeFlatModel(modelClass, data);
+        }
         let oldLLH;
-        let newLLH = logLikelihood(model, data);
+        let newLLH = LLH;
         do {
             oldLLH = newLLH;
-            if (oldLLH === Number.NEGATIVE_INFINITY) {
-                model = makeFlatModel(modelClass, data);
-                optimiser.reset(model)
-                newLLH = logLikelihood(model, data);
-                yield model;
-                continue;
-            } else {
-                model = optimiser.batchRun(model, data, batchSize);
-                newLLH = logLikelihood(model, data);
-                yield model
-            }
+            model = optimiser.batchRun(model, data, batchSize);
+            newLLH = logLikelihood(model, data);
+            yield model
         } while (newLLH - oldLLH > epsilon)
         console.log(`${modelClass.name} converged with normalised LLH: ${newLLH / numPoints}`);
         yield model
@@ -66,5 +62,5 @@ function makeFlatModel(modelClass, data) {
     const totalLooks = data.reduce((total, point) => total + point.looks, 0);
     const totalBooks = data.reduce((total, point) => total + point.books, 0);
     const averageConversion = totalBooks / totalLooks
-    return new modelClass({a: 0, b: 0})
+    return new modelClass({ a: 0, b: 0 })
 }
