@@ -67,22 +67,38 @@ function renderModelPlots() {
         conversion: books / looks
     }))
 
-    const toPlot = modelSpecs.map(({ model, name, llh }) => ({
+    const toConversionPlot = modelSpecs.map(({ model, name, llh }) => ({
         model,
         name: llh === undefined ? name : `${name} (LLH: ${llh.toFixed(3)})`,
     }))
-    const plot = plotting.conversionPlot({
-        model: toPlot,
+    const toLogLikelihoodPlot = modelSpecs.map(({ name, llh }) =>  ({
+        name,
+        llh: llh === undefined ? 0 : llh,
+    }))
+
+    const _conversionPlot = plotting.conversionPlot({
+        model: toConversionPlot,
         fitPoints: fitPoints,
     })
-    const options = {
+    const _logLikelihoodPlot = plotting.logLikelihoodPlot(toLogLikelihoodPlot)
+
+    const _conversionOptions = {
         color: { legend: true },
         title: 'Maximum likelihood models',
     }
+    const _logLikelihoodOptions = {
+        title: 'Selection via log-likelihood ratio'
+    }
+
     plotting.plot(
         document.getElementById('model-plot-container'),
-        plot,
-        options,
+        _conversionPlot,
+        _conversionOptions,
+    )
+    plotting.plot(
+        document.getElementById('likelihood-ratio-container'),
+        _logLikelihoodPlot,
+        _logLikelihoodOptions,
     )
 }
 
