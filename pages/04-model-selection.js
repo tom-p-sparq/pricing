@@ -71,7 +71,7 @@ function renderModelPlots() {
         model,
         name: llh === undefined ? name : `${name} (LLH: ${llh.toFixed(3)})`,
     }))
-    const toLogLikelihoodPlot = modelSpecs.map(({ name, llh }) =>  ({
+    const toLogLikelihoodPlot = modelSpecs.map(({ name, llh }) => ({
         name,
         llh: llh === undefined ? 0 : llh,
     }))
@@ -81,6 +81,7 @@ function renderModelPlots() {
         fitPoints: fitPoints,
     })
     const _logLikelihoodPlot = plotting.logLikelihoodPlot(toLogLikelihoodPlot)
+    const _incrementalRevenuePlot = plotting.incrementalRevenuePlot(modelSpecs, costSlider.value)
 
     const _conversionOptions = {
         color: { legend: true },
@@ -100,6 +101,11 @@ function renderModelPlots() {
         _logLikelihoodPlot,
         _logLikelihoodOptions,
     )
+    plotting.plot(
+        document.getElementById('incremental-revenue-container'),
+        _incrementalRevenuePlot,
+        { title: 'Modelled expected incremental revenue' },
+    )
 }
 
 // Initialise
@@ -110,6 +116,11 @@ conversionButtons.addEventListener("input", () => {
     renderTable();
     fitModelToData();
 });
+
+const costSlider = inputs.costSlider(
+    document.getElementById('cost-container')
+);
+costSlider.addEventListener("input", renderModelPlots);
 
 renderTable();
 renderModelPlots(); // Render the initial empty model plot
