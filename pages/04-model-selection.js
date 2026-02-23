@@ -1,9 +1,24 @@
 import { conversion, plotting, inputs, fitting } from './compiled-pricing-core.js'
 
 const modelSpecs = [
-    { name: 'Logistic', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.LogisticDemandModel({ a: 0, b: 0 }) },
-    { name: 'Log Logistic', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }) },
-    { name: 'Weibull', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.WeibullDemandModel({ a: 0, b: 0 }) },
+    {
+        name: 'Logistic',
+        optimiser: new fitting.Adam({ learningRate: 0.001 }),
+        model: new conversion.LogisticDemandModel({ a: 0, b: 0 }),
+        llh: undefined,
+    },
+    {
+        name: 'Log Logistic',
+        optimiser: new fitting.Adam({ learningRate: 0.001 }),
+        model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }),
+        llh: undefined,
+    },
+    {
+        name: 'Weibull',
+        optimiser: new fitting.Adam({ learningRate: 0.001 }),
+        model: new conversion.WeibullDemandModel({ a: Math.log(Math.log(2)), b: 0 }),
+        llh: undefined,
+    },
 ]
 const stepsPerFrame = 200; // Number of optimization steps per animation frame
 
@@ -15,6 +30,7 @@ function animateStep(fitGenerators) {
         const { value, done } = stepped[i]
         if (!done) {
             modelSpec.model = value;
+            modelSpec.llh = fitting.logLikelihood(modelSpec.model, inputs.fittingData.get())
         }
     })
     renderModelPlots();
@@ -51,8 +67,12 @@ function renderModelPlots() {
         conversion: books / looks
     }))
 
+    const toPlot = modelSpecs.map(({ model, name, llh }) => ({
+        model,
+        name: llh === undefined ? name : `${name} (LLH: ${llh.toFixed(3)})`,
+    }))
     const plot = plotting.conversionPlot({
-        model: modelSpecs,
+        model: toPlot,
         fitPoints: fitPoints,
     })
     const options = {
@@ -70,40 +90,10 @@ function renderModelPlots() {
 const { conversionButtons } = inputs.fittingData.input(
     document.getElementById("data-generation-container")
 );
-renderTable();
-renderModelPlots(); // Render the initial empty model plot
-
-// --- Scenario Buttons ---
-
-const scenario1 = [
-    { price: 100, looks: 10, books: 5 },
-    { price: 120, looks: 10, books: 4 },
-]
-
-const scenario2 = [
-    { price: 140, looks: 10, books: 6 }, // 60%
-    { price: 150, looks: 11, books: 6 },
-    { price: 155, looks: 9, books: 6 },
-    { price: 160, looks: 10, books: 4 }, // 40%
-]
-
-const scenario1Button = inputs.fittingData.scenario(
-    document.getElementById("scenario-1-button-container"),
-    {
-        buttonText: 'Set up Scenario 1',
-        data: scenario1,
-    },
-)
-const scenario2Button = inputs.fittingData.scenario(
-    document.getElementById("scenario-2-button-container"),
-    {
-        buttonText: 'Set up Scenario 2',
-        data: scenario2,
-    },
-)
-
-const buttons = [conversionButtons, scenario1Button, scenario2Button]
-buttons.map(button => button.addEventListener("input", () => {
+conversionButtons.addEventListener("input", () => {
     renderTable();
     fitModelToData();
-}));
+});
+
+renderTable();
+renderModelPlots(); // Render the initial empty model plot

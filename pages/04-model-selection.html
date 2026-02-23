@@ -29,18 +29,26 @@
   </header>
 
   <div class="main-container">
-    <h1>Fitting Conversion Model Parameters</h1>
+    <h1>Model Selection from Data</h1>
     <p>
-      In the <a href="./02-specifying.html">previous post</a>, we introduced the idea of specifying a conversion model
-      by selecting the model parameters.
-      More typically, we are faced with the task of fitting a conversion model to observations of conversions and
-      non-conversions.
-      In this post we'll be able to create synthetic data and see how our model fit responds.
+      In the <a href="./03-fitting.html">previous post</a>, we showed a conversion model being fit to data.
+      We picked one species from our <a href="./01-parametric-conversion-models.html">zoo</a>,
+      the logistic model,
+      and implemented the search for the two parameter values giving the best fit to data,
+      by choosing their values to maximise the <em>likelihood</em> of the data.
+      The interactivity in our post showed how the best-fitting model updates
+      as synthetic data on looks and books at different price points accumulate.
+    </p>
+    <p>
+      In this post, we'll revisit that approach but from the perspective of <em>model selection</em>.
+      We chose logistic previously: why not the log-logistic model, or the Weibulll model?
+      We will think about how you might use the models' fit to data to choose between different possible model families.
     </p>
 
     <h2>Data generation</h2>
     <p>
-      The controls below allow you to set a price and then record a conversion or rejection event at that price.
+      As previously, the controls below allow you to set a price
+      and then record a conversion or rejection event at that price.
       The table on the right keeps track of the data that's accumulated so far.
       If you want to reset the data generating process, just refresh the page.
     </p>
@@ -49,114 +57,70 @@
       <div id="data-table-container"></div>
     </div>
 
-    <h2>Model fitting</h2>
+    <h2>Fitting three models</h2>
     <p>
-      Below, we show the best fit of a <a href="./01-parametric-conversion-models.html#logistic-model">logistic
-        model</a> to the data generated above.
+      In the figure below,
+      we show the best fit to the data specified above for each of:
+      a <a href="./01-parametric-conversion-models.html#logistic-model">logisitic</a> model,
+      a <a href="./01-parametric-conversion-models.html#log-logistic-model">log-logisitic</a> model
+      and a <a href="./01-parametric-conversion-models.html#weibull-model">Weibull</a> model<a href="#fn1"
+        id="ref1"><sup>1</sup></a>.
     </p>
     <div id="model-plot-container"></div>
     <p>
-      We <a href="./02-specifying.html">previously</a> talked about having two degrees of freedom in our models.
-      If all of our generated data is at a single price-point, we don't have enough data to choose a model:
-      in the plot above, I have imposed an estimated elasticity of -2 when we only have a single price point.
-      This is important in real world cases: with no price exploration, we cannot fit a model.
-    </p>
-    <p>
-      As soon as we have produced data at two price points,
-      the curve we fit is now the interpolation between the observed conversion rates.
-      This is clearly the best fit we have to our data.
-    </p>
-    <p>
-      The moment we generate data at three or more price points, we are in the realm of statistics and data science.
+      Clearly we now have three curves which all demonstrate similar behaviour in the region of the synthetic data.
+      How can we choose between them?
+      And to what extent does our choice actually matter?
     </p>
 
-    <h2>Maximum likelihood estimation</h2>
+    <h2>Model selection by likelihood</h2>
     <p>
-      We are looking for the price sensitivity model parameters that best explain our data.
+      Recall that we are looking for the price sensitivity model parameters that best explain our data.
       To fit these parameters, we quantify the likelihood of the data under those parameters.
+      For each of our fitted models, therefore, we can keep track of the likelihood, or log-likelihood, of the best fit.
     </p>
     <p>
-      If, at any one price point, we are modelling a conversion probability of $\phi(p)$,
-      then (assuming independence of the looks) the likelihood of $k$ conversions from $n$ looks is
-      the binomial probability proportional to $$\phi(p)^k (1 - \phi(p))^{n - k}.$$
-      For each of multiple price points, $p_i$, then the overall likelihood of the data is proportional to
-      $$\prod_{i=1}^n \phi(p_i)^{k_i} (1 - \phi(p_i))^{n_i - k_i},$$
-      where we observe $k_i$ conversions from $n_i$ looks at each price point, $p_i$.
+      As each our models evolve towards its optimal fit, we display the log-likelihood of each in the figure legend
+      above.
+      The model that demonstrates the maximum value for the log-likelihood
+      is the best fit to the data
+      (noting that log-likelihood is negative, so we aim for the value closest to zero).
+      Assuming no prior preference towards one model or another, this model then becomes the winner.
     </p>
     <p>
-      The key to fitting our parameters is to observe that this likelihood is a function of the model parameters.
-      We want to choose the parameters going into the function $\phi(p)$ such that this likelihood is maximised.
-      For practical purposes, we maximise the logarithm of this likelihood,
-      $$\sum_i k_i \log\left(\phi(p_i)\right) + \sum_i (n_i - k_i) \log\left(1 - \phi(p_i)\right),$$
-      which is equivalent.
-    </p>
-    <p>
-      The animation above that runs at each new datapoint depicts an optimisation algorithm taking the model parameter
-      values
-      to a new optimum that maximises the (log) likelihood of the generated dataset.
+      But how <em>convincing</em> is the evidence that produces this result?
+      Do we believe that one model is <em>actually</em> a better fit than the other?
     </p>
 
-    <h2>Scenarios to Explore</h2>
+    <h2>Likelihood ratios</h2>
     <p>
-      The power of this tool is in experimenting. Here are a few scenarios to try. I recommend refreshing the page to
-      start fresh for each one.
+      For any two models, we can directly compare the log likelihoods.
+      We know that all of the models we are considering have just two parameters,
+      so we only need consider the quality of fit.
+      There exist rules of thumb by which we can conclude that the data provide sufficient evidence
+      that any one model is better than the other.
+      For example, we would like a difference in log-likelihoods of at least 1 to even <em>begin</em>
+      to conclude that there is evidence to choose one model over another.
+      For the evidence to count as convincing might require a difference more like 5.
     </p>
-    <h4>Scenario 1: The Impact of an Outlier</h4>
+    <div id="likelihood-ratio-container"></div>
     <p>
-      First, we can create a solid baseline curve interpolating a 50% observed conversion at £100 and 40% observed
-      conversion at £120.
-    </p>
-    <div id="scenario-1-button-container"></div>
-    <p>
-      Now observe what happens if we add just <em>one</em> "Convert" click at a higher price, say £160.
-    </p>
-    <p>
-      Notice how the entire curve shifts.
-      To account for this single new data point,
-      the best-fitting model actually reverses its estimate of how price drives conversion,
-      implying that increasing price <em>increases</em> conversion.
-      Why?
-      The model must now explain how someone was willing to pay £160.
-      To do so, it infers that the overall price sensitivity of the market is far lower than it previously thought.
-      This changes its prediction for conversion at all prices, hugely affecting what the model things will happen
-      even at low prices, below £100.
-    </p>
-    <p>
-      This is a crucial lesson: in a parametric model, every data point informs the entire curve.
-    </p>
-    <h4>Scenario 2: The Danger of Narrow Data</h4>
-    <p>
-      Now let's think about what happens if we generate data only within a very narrow price band.
-      For example, let's start with several conversions and rejections only at prices between £140 and £160.
-    </p>
-    <div id="scenario-2-button-container"></div>
-    <p>
-      The model will fit this data well.
-      However, look at the predictions for prices around £50 or £200.
-      There is very little support in the data for confident predictions at these prices.
-      Indeed, as we saw from specifying models via interpolation
-      in the <a href="./02-specifying.html#interpolation">previous post</a>,
-      different models can produce very different extrapolation behaviours.
-    </p>
-    <p>
-      Fitting a model without a quantification of uncertainty is a key risk:
-      when your data doesn't cover a wide range of prices, your model's extrapolations can be unreliable.
-      The model has no data to learn the "true" elasticity and is just fitting to the local noise.
-      New local data can hugely change our predictions at the extremes of the price range.
+      As can be seen from this visualisation of the pairwise differences between our models,
+      it is quite a task to engineer situations where the data allows us to convincingly distinguish between our models.
+      It seems to be a reasonable conclusion that
+      we will find it very difficult to choose one model over another
+      in very many cases.
     </p>
 
-    <h2>Conclusion</h2>
-    <p>
-      Fitting a model is not a purely mechanical exercise. The distribution of our data points matters immensely. As we
-      have seen, a single outlier or a narrow band of prices can have a dramatic and sometimes counter-intuitive impact
-      on the model's parameters and its predictions. This is why continuous price exploration and careful data
-      curation are essential for building a reliable understanding of demand.
-    </p>
-    <p>
-      In future posts we'll look at how to select between model families,
-      how to quantify uncertainty,
-      and how to think more flexibly about data-driven conversion curves.
-    </p>
+    <hr>
+    <div class="footnotes">
+      <ol>
+        <li id="fn1">
+          Note that we've limited our focus to these models because they are numerically tractable:
+          as soon as we consider models reliant on clamping, we are in the realm of vanishing gradients,
+          making fitting numerically tricky. <a href="#ref1">↩</a></li>
+      </ol>
+    </div>
 
   </div>
   <script type="module" src="04-model-selection.js"></script>
