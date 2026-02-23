@@ -13,7 +13,7 @@ import { logLikelihood } from "./likelihoods"
  * @param {number} [options.batchSize=100] The number of steps per iteration
  * @returns {Generator<BaseDemandModel, BaseDemandModel, void>} A generator that yields the model at each step of the fitting process.
  */
-export function* fit(model, optimiser, data, {epsilon=1e-5, batchSize=100}) {
+export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }) {
     const numPoints = data.length;
     const modelClass = Object.getPrototypeOf(model).constructor
     if (numPoints == 0) {
@@ -39,11 +39,32 @@ export function* fit(model, optimiser, data, {epsilon=1e-5, batchSize=100}) {
         let newLLH = logLikelihood(model, data);
         do {
             oldLLH = newLLH;
-            model = optimiser.batchRun(model, data, batchSize);
-            newLLH = logLikelihood(model, data);
-            yield model
+            if (oldLLH === Number.NEGATIVE_INFINITY) {
+                model = makeFlatModel(modelClass, data);
+                optimiser.reset(model)
+                newLLH = logLikelihood(model, data);
+                yield model;
+                continue;
+            } else {
+                model = optimiser.batchRun(model, data, batchSize);
+                newLLH = logLikelihood(model, data);
+                yield model
+            }
         } while (newLLH - oldLLH > epsilon)
-        console.log(`${modelClass.name} converged with normalised LLH: ${newLLH/numPoints}`);
+        console.log(`${modelClass.name} converged with normalised LLH: ${newLLH / numPoints}`);
         yield model
     }
+}
+
+/**
+ * 
+ * @param {*} modelClass 
+ * @param {{price: number, looks: number, books: number}[]} data 
+ * @returns 
+ */
+function makeFlatModel(modelClass, data) {
+    const totalLooks = data.reduce((total, point) => total + point.looks, 0);
+    const totalBooks = data.reduce((total, point) => total + point.books, 0);
+    const averageConversion = totalBooks / totalLooks
+    return new modelClass({a: 0, b: 0})
 }
