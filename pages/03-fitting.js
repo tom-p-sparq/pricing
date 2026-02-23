@@ -65,34 +65,22 @@ renderModel(); // Render the initial empty model plot
 
 // --- Scenario Buttons ---
 
-const scenario1 = [
-    { price: 100, looks: 10, books: 5 },
-    { price: 120, looks: 10, books: 4 },
-]
-
-const scenario2 = [
+const scenario = [
     { price: 140, looks: 10, books: 6 }, // 60%
     { price: 150, looks: 11, books: 6 },
     { price: 155, looks: 9, books: 6 },
     { price: 160, looks: 10, books: 4 }, // 40%
 ]
 
-const scenario1Button = inputs.fittingData.scenario(
-    document.getElementById("scenario-1-button-container"),
+const scenarioButton = inputs.fittingData.scenario(
+    document.getElementById("scenario-button-container"),
     {
-        buttonText: 'Set up Scenario 1',
-        data: scenario1,
-    },
-)
-const scenario2Button = inputs.fittingData.scenario(
-    document.getElementById("scenario-2-button-container"),
-    {
-        buttonText: 'Set up Scenario 2',
-        data: scenario2,
+        buttonText: 'Set up Scenario',
+        data: scenario,
     },
 )
 
-const buttons = [conversionButtons, scenario1Button, scenario2Button]
+const buttons = [conversionButtons, scenarioButton]
 buttons.map(button => button.addEventListener("input", () => {
     renderTable();
     fitModelToData();
