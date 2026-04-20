@@ -1,3 +1,5 @@
+import { BaseDemandModel } from "../conversion/base.js"
+
 /**
  * Checks if the log-likelihood for a given model and data points is finite.
  * The log-likelihood becomes non-finite (-Infinity) if we need to compute log(0). This happens when:
@@ -17,7 +19,7 @@ function hasFiniteLogLikelihood(model, points) {
 /**
  * Calculates the total log-likelihood for a given model and a set of data points.
  *
- * @param {import('../conversion/base.js').BaseDemandModel} model The demand model to evaluate.
+ * @param {BaseDemandModel} model The demand model to evaluate.
  * @param {Array<{price: number, looks: number, books: number}>} points An array of data points, each with `price`, `looks`, and `books`.
  * @returns {number} The total log-likelihood of the data given the model.
  */
@@ -39,15 +41,12 @@ export function logLikelihood(model, points) {
 /**
  * Calculates the gradient of the log-likelihood for a given model and a set of data points.
  *
- * @param {import('../conversion/base.js').BaseDemandModel} model The demand model to evaluate.
+ * @param {BaseDemandModel} model The demand model to evaluate.
  * @param {Array<{price: number, looks: number, books: number}>} points An array of data points, each with `price`, `looks`, and `books`.
  * @returns {Record<string, number> | undefined} An object where keys are model parameter names and values are the corresponding gradients.
  *               Returns undefined if the log-likelihood is not finite.
  */
-export function gradLogLikelihood(model, points, eta=0) {
-    // if (!hasFiniteLogLikelihood(model, points)) {
-    //     return undefined;
-    // }
+export function gradLogLikelihood(model, points, eta = 0) {
     const paramNames = model.paramNames;
     const totalGrad = Object.fromEntries(paramNames.map(param => [param, 0]));
 
