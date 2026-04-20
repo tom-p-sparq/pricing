@@ -1,4 +1,4 @@
-import { conversion, plotting, Inputs, html } from './compiled-pricing-core.js'
+import { conversion, plotting, inputs } from './compiled-pricing-core.js'
 
 // Static plot
 const plotConfigs = [
@@ -17,41 +17,35 @@ const reference = {
 
 plotConfigs.forEach(({ modelClass, title, containerId }) => {
     const model = modelClass.from_reference(reference);
-    const plot = plotting.createSingleModelConversionPlot({ model: model, options: { title } });
+    const plot = plotting.conversionPlot({ model: model });
     const container = document.getElementById(containerId);
-    if (container) {
-        container.replaceChildren(plot);
-    }
+    if (container) plotting.plot(container, plot, { title: title })
 });
 
 // Interactive plot
-const interactiveReference = Inputs.form(
-    {
-        price: Inputs.range([50, 250], { step: 1, value: 150, label: "Reference price" }),
-        elasticity: Inputs.range([-5, -0.1], { step: 0.1, value: -2, label: "Reference elasticity" }),
-        conversion: Inputs.range([0.01, 0.99], { step: 0.01, value: 0.5, label: "Reference conversion" })
-    },
-    {
-        template: ({ price, elasticity, conversion }) =>
-            html`<div style="display: flex; align-items: center; justify-content: space-around; gap: 1em;">${price}${elasticity}${conversion}</div>`
-    }
+const interactiveReference = inputs.referenceForm(
+    document.getElementById('controls-container')
 );
-document.getElementById('controls-container').replaceChildren(interactiveReference);
 
 function render() {
     const models = plotConfigs.map(({ modelClass, title }) => ({
         model: modelClass.from_reference(interactiveReference.value),
         name: title,
     }));
-    const comparisonPlot = plotting.createMultiModelConversionPlot({
-        models: models,
-        points: [interactiveReference.value],
-        options: {
-            title: 'The Conversion Model Zoo',
-            subtitle: 'Comparing conversion probability models',
-        }
+    const comparisonPlot = plotting.conversionPlot({
+        model: models,
+        specPoints: [interactiveReference.value],
     });
-    document.getElementById('conversion-comparison-container').replaceChildren(comparisonPlot);
+    const info = {
+        title: 'The Conversion Model Zoo',
+        subtitle: 'Comparing conversion probability models',
+        color: { legend: true },
+    }
+    plotting.plot(
+        document.getElementById('conversion-comparison-container'),
+        comparisonPlot,
+        info,
+    );
 }
 
 interactiveReference.addEventListener('input', render);

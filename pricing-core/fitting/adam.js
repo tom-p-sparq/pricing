@@ -9,8 +9,7 @@ export class Adam {
      * @param {number} [params.beta1=0.9] Adam's beta1
      * @param {number} [params.beta2=0.999] Adam's beta2
      * @param {number} [params.epsilon=1e-8] Prevent division by zero
-     * @param {number} [params.eta=1e-4] L2 regularisation constant
-     * @param {number} [params.convergenceThreshold=1e-6] Linf step size for convergence
+     * @param {number} [params.eta=1e-5] L2 regularisation constant
      */
     constructor({
         learningRate = 0.001,
@@ -18,9 +17,8 @@ export class Adam {
         beta2 = 0.999,
         epsilon = 1e-8,
         eta = 1e-5,
-        convergenceThreshold = 1e-6,
     } = {}) {
-        this.parameters = { learningRate, beta1, beta2, epsilon, eta, convergenceThreshold };
+        this.parameters = { learningRate, beta1, beta2, epsilon, eta };
     }
 
     /**
@@ -37,20 +35,19 @@ export class Adam {
      * Step the model parameters based on data array
      * @param {BaseDemandModel} currentModel The current model parameters ([name, value][]) 
      * @param {{price: number, looks: number, books:number}[]} points  Data being fit as an array of price, looks, books triples.
-     * @returns {{nextModel: BaseDemandModel, maxAbsStep: number}} The new model and the step applied to each of the parameters.
+     * @returns {BaseDemandModel} The new model and the step applied to each of the parameters.
      */
     step(currentModel, points) {
         if (points.length === 0) {
-            return {nextModel: currentModel, maxAbsStep: 0}
+            return currentModel
         }
         const {learningRate, beta1, beta2, epsilon, eta} = this.parameters
         const grad = gradLogLikelihood(currentModel, points, eta)
         if (grad === undefined) {
             console.log("Gradient is undefined. Returning current model.")
-            return {nextModel: currentModel, maxAbsStep: 0}
+            return currentModel
         }
         this.t += 1
-        let maxAbsStep = 0
         const newParamEntries = currentModel.paramEntries.map(([name, value]) => {
             const g_t = grad[name]
             if (!isFinite(g_t)) {
@@ -65,12 +62,11 @@ export class Adam {
             const v_hat = this.v[name] / (1 - beta2 ** this.t)
             // Update parameters according to Adam
             const step = learningRate * m_hat / (Math.sqrt(v_hat) + epsilon)
-            maxAbsStep = Math.max(maxAbsStep, Math.abs(step))
             return [name, value + step]
         })
         const newParams = Object.fromEntries(newParamEntries)
         const modelClass = Object.getPrototypeOf(currentModel).constructor
-        return {nextModel: new modelClass(newParams), maxAbsStep}
+        return new modelClass(newParams)
     }
 
     /**
@@ -82,11 +78,7 @@ export class Adam {
      */
     batchRun(currentModel, points, batchSize) {
         for (let i = 0; i < batchSize; i++) {
-            const {nextModel, maxAbsStep} = this.step(currentModel, points)
-            currentModel = nextModel
-            if (maxAbsStep < this.parameters.convergenceThreshold) {
-                break
-            }
+            currentModel = this.step(currentModel, points)
         }
         return currentModel
     }
