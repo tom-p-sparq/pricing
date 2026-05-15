@@ -1,9 +1,8 @@
 import { conversion, plotting, inputs } from '/pricing-core/index.js'
+import { requireElement } from '/utils.js'
 
 // Interactive inputs
-const costSlider = inputs.costSlider(
-    document.getElementById('cost-container')
-);
+const costSlider = inputs.costSlider(requireElement('cost-container'));
 
 // Static plot
 const reference = {
@@ -14,16 +13,17 @@ const reference = {
 const model = conversion.LogisticDemandModel.from_reference(reference);
 const conversionPlot = plotting.conversionPlot({ model: model, });
 plotting.plot(
-    document.getElementById('conversion-container'),
+    requireElement('conversion-container'),
     conversionPlot,
     { title: 'Example conversion model' },
 )
 
 // Interactive plot
+const incrementalRevenueContainer = requireElement('incremental-revenue-container');
 function render() {
     const incrementalRevenuePlot = plotting.incrementalRevenuePlot(model, costSlider.value)
     plotting.plot(
-        document.getElementById('incremental-revenue-container'),
+        incrementalRevenueContainer,
         incrementalRevenuePlot,
         { title: 'Modelled expected incremental revenue' },
     )

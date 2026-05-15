@@ -1,27 +1,35 @@
 import { conversion, plotting, inputs, fitting } from '/pricing-core/index.js'
+import { requireElement } from '/utils.js'
 
 const modelSpecs = [
     {
         name: 'Logistic',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
+        /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
         model: new conversion.LogisticDemandModel({ a: 0, b: 0 }),
+        /** @type {number | undefined} */
         llh: undefined,
     },
     {
         name: 'Log Logistic',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
+        /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
         model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }),
+        /** @type {number | undefined} */
         llh: undefined,
     },
     {
         name: 'Weibull',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
+        /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
         model: new conversion.WeibullDemandModel({ a: Math.log(Math.log(2)), b: 0 }),
+        /** @type {number | undefined} */
         llh: undefined,
     },
 ]
 const stepsPerFrame = 200; // Number of optimization steps per animation frame
 
+/** @param {Generator<import('/pricing-core/conversion/base.js').BaseDemandModel>[]} fitGenerators */
 function animateStep(fitGenerators) {
     const stepped = fitGenerators.map(
         generator => generator.next()
@@ -52,9 +60,13 @@ function fitModelToData() {
     requestAnimationFrame(() => animateStep(fitGenerators))
 }
 
-const tableContainer = document.getElementById("data-table-container")
+const tableContainer = requireElement("data-table-container");
 tableContainer.style.height = '250px'
 tableContainer.style.overflowY = 'auto'
+
+const modelPlotContainer = requireElement('model-plot-container');
+const likelihoodRatioContainer = requireElement('likelihood-ratio-container');
+const incrementalRevenueContainer = requireElement('incremental-revenue-container');
 
 function renderTable() {
     inputs.fittingData.table(tableContainer)
@@ -83,43 +95,19 @@ function renderModelPlots() {
     const _logLikelihoodPlot = plotting.logLikelihoodPlot(toLogLikelihoodPlot)
     const _incrementalRevenuePlot = plotting.incrementalRevenuePlot(modelSpecs, costSlider.value)
 
-    const _conversionOptions = {
-        color: { legend: true },
-        title: 'Maximum likelihood models',
-    }
-    const _logLikelihoodOptions = {
-        title: 'Selection via log-likelihood ratio'
-    }
-
-    plotting.plot(
-        document.getElementById('model-plot-container'),
-        _conversionPlot,
-        _conversionOptions,
-    )
-    plotting.plot(
-        document.getElementById('likelihood-ratio-container'),
-        _logLikelihoodPlot,
-        _logLikelihoodOptions,
-    )
-    plotting.plot(
-        document.getElementById('incremental-revenue-container'),
-        _incrementalRevenuePlot,
-        { title: 'Modelled expected incremental revenue' },
-    )
+    plotting.plot(modelPlotContainer, _conversionPlot, { color: { legend: true }, title: 'Maximum likelihood models' })
+    plotting.plot(likelihoodRatioContainer, _logLikelihoodPlot, { title: 'Selection via log-likelihood ratio' })
+    plotting.plot(incrementalRevenueContainer, _incrementalRevenuePlot, { title: 'Modelled expected incremental revenue' })
 }
 
 // Initialise
-const { conversionButtons } = inputs.fittingData.input(
-    document.getElementById("data-generation-container")
-);
+const { conversionButtons } = inputs.fittingData.input(requireElement("data-generation-container"));
 conversionButtons.addEventListener("input", () => {
     renderTable();
     fitModelToData();
 });
 
-const costSlider = inputs.costSlider(
-    document.getElementById('cost-container')
-);
+const costSlider = inputs.costSlider(requireElement('cost-container'));
 costSlider.addEventListener("input", renderModelPlots);
 
 renderTable();

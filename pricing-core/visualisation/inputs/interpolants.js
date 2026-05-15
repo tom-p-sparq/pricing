@@ -4,7 +4,7 @@ import { html } from 'htl';
 /**
  * Creates a form for reference point input and appends it to a given element.
  * @param {HTMLElement} element The DOM element to append the form to.
- * @returns {HTMLInputElement} The form of input elements.
+ * @returns {HTMLElement & { value: { price0: number; conversion0: number; price1: number; conversion1: number } }} The form of input elements.
  */
 export function interpolantsForm(element) {
     const _form = form(

@@ -1,4 +1,5 @@
 import { conversion, plotting, inputs } from '/pricing-core/index.js'
+import { requireElement } from '/utils.js'
 
 // Static plot
 const plotConfigs = [
@@ -18,14 +19,12 @@ const reference = {
 plotConfigs.forEach(({ modelClass, title, containerId }) => {
     const model = modelClass.from_reference(reference);
     const plot = plotting.conversionPlot({ model: model });
-    const container = document.getElementById(containerId);
-    if (container) plotting.plot(container, plot, { title: title })
+    plotting.plot(requireElement(containerId), plot, { title: title });
 });
 
 // Interactive plot
-const interactiveReference = inputs.referenceForm(
-    document.getElementById('controls-container')
-);
+const interactiveReference = inputs.referenceForm(requireElement('controls-container'));
+const comparisonContainer = requireElement('conversion-comparison-container');
 
 function render() {
     const models = plotConfigs.map(({ modelClass, title }) => ({
@@ -36,16 +35,11 @@ function render() {
         model: models,
         specPoints: [interactiveReference.value],
     });
-    const info = {
+    plotting.plot(comparisonContainer, comparisonPlot, {
         title: 'The Conversion Model Zoo',
         subtitle: 'Comparing conversion probability models',
         color: { legend: true },
-    }
-    plotting.plot(
-        document.getElementById('conversion-comparison-container'),
-        comparisonPlot,
-        info,
-    );
+    });
 }
 
 interactiveReference.addEventListener('input', render);

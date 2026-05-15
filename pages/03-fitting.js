@@ -1,8 +1,15 @@
 import { conversion, plotting, inputs, fitting } from '/pricing-core/index.js'
+import { requireElement } from '/utils.js'
 
-const modelSpec = { name: 'Logistic', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.LogisticDemandModel({ a: 0, b: 0 }) };
+const modelSpec = {
+    name: 'Logistic',
+    optimiser: new fitting.Adam({ learningRate: 0.001 }),
+    /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
+    model: new conversion.LogisticDemandModel({ a: 0, b: 0 }),
+};
 const stepsPerFrame = 200; // Number of optimization steps per animation frame
 
+/** @param {Generator<import('/pricing-core/conversion/base.js').BaseDemandModel>} fitGenerator */
 function animateStep(fitGenerator) {
     const { value, done } = fitGenerator.next()
     if (!done) {
@@ -25,9 +32,11 @@ function fitModelToData() {
     requestAnimationFrame(() => animateStep(fitGenerator))
 }
 
-const tableContainer = document.getElementById("data-table-container")
+const tableContainer = requireElement("data-table-container");
 tableContainer.style.height = '250px'
 tableContainer.style.overflowY = 'auto'
+
+const modelPlotContainer = requireElement('model-plot-container');
 
 function renderTable() {
     inputs.fittingData.table(tableContainer)
@@ -50,15 +59,11 @@ function renderModel() {
         title: 'Maximum likelihood model',
         subtitle: `Log-Likelihood: ${logLikelihood.toFixed(4)}`
     };
-    plotting.plot(
-        document.getElementById('model-plot-container'),
-        plot,
-        options,
-    );
+    plotting.plot(modelPlotContainer, plot, options);
 }
 
 // Initialise
-const { _, conversionButtons } = inputs.fittingData.input(document.getElementById("data-generation-container"));
+const { conversionButtons } = inputs.fittingData.input(requireElement("data-generation-container"));
 renderTable();
 renderModel(); // Render the initial empty model plot
 
@@ -73,7 +78,7 @@ const scenario = [
 ]
 
 const scenarioButton = inputs.fittingData.scenario(
-    document.getElementById("scenario-button-container"),
+    requireElement("scenario-button-container"),
     {
         buttonText: 'Set up Scenario',
         data: scenario,
