@@ -1,2 +1,2 @@
-export * as plotting from "./plotting"
-export * as inputs from "./inputs"
+export * as plotting from "./plotting/index.js"
+export * as inputs from "./inputs/index.js"

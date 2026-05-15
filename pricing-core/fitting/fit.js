@@ -1,6 +1,6 @@
-import { BaseDemandModel } from "../conversion/base";
-import { Adam } from "./adam"
-import { logLikelihood } from "./likelihoods"
+import { BaseDemandModel } from "../conversion/base.js";
+import { Adam } from "./adam.js"
+import { logLikelihood } from "./likelihoods.js"
 
 /**
  * Create an iterator that fits a model to data

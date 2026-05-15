@@ -11,46 +11,29 @@ An interactive educational platform for exploring pricing models and optimisatio
 All commands run from the repository root unless noted.
 
 ```bash
-# Install dependencies (must install both levels)
+# Install dependencies
 npm install
-cd pricing-core && npm install && cd ..
 
-# Development (live reload for both JS and HTML)
+# Development (live reload)
 npm run dev
 
 # Production build
-npm run build
-
-# Build steps individually
-npm run build:js    # esbuild bundles pricing-core/ → pricing-core/bundle.js
-npm run build:html  # 11ty generates pages/ → _site/
+npm run build       # 11ty generates pages/ → _site/
 ```
 
 There is no test suite currently. Type-check via JSDoc annotations; no separate `tsc` step.
 
 ## Architecture
 
-The project has two independent build systems joined by a symlink.
-
-### Two-Level Build
-
-```
-pricing-core/         ← ES6 library, bundled by esbuild
-  └── bundle.js       ← output (gitignored)
-
-pages/
-  └── compiled-pricing-core.js  ← symlink to ../pricing-core/bundle.js
-```
-
-The symlink is the only coupling between the two systems. If you add files or change the esbuild entry point, ensure the symlink target remains valid.
-
 ### Static Site (11ty)
 
 - **Input**: `pages/` — HTML files with Nunjucks front matter
-- **Layouts**: `pages/_layouts/base.njk` — single shared layout (nav, MathJax CDN)
+- **Layouts**: `pages/_layouts/base.njk` — single shared layout (nav, import map, MathJax CDN)
 - **Output**: `_site/` (gitignored)
-- **Passthrough**: `style.css` and all `*.js` files are copied unmodified
+- **Passthrough**: `style.css`, page `*.js` files, and the entire `pricing-core/` source directory are copied unmodified
 - **Path prefix**: `PATHPREFIX=/pricing/` is set at build time for GitHub Pages deployment; `.eleventy.js` rewrites root-relative URLs accordingly
+
+`pricing-core/` source files are served directly — no bundling step. npm bare specifiers (`@observablehq/plot`, `d3`, etc.) are resolved at runtime by a native browser import map in `base.njk`, pointing to pinned esm.sh CDN URLs.
 
 Each page is a pair: `pages/NN-name.html` (content/front matter) + `pages/NN-name.js` (Observable interactivity). The JS module is referenced in the HTML front matter's `script:` field and injected by the base layout.
 

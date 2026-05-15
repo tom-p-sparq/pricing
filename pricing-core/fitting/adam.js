@@ -1,5 +1,5 @@
 import { BaseDemandModel } from "../conversion/base.js"
-import { gradLogLikelihood } from "./likelihoods"
+import { gradLogLikelihood } from "./likelihoods.js"
 
 export class Adam {
     /**

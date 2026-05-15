@@ -1,4 +1,4 @@
-import { conversion, plotting, inputs, fitting } from './compiled-pricing-core.js'
+import { conversion, plotting, inputs, fitting } from './pricing-core/index.js'
 
 const modelSpecs = [
     {

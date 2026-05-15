@@ -3,6 +3,7 @@ export default function(eleventyConfig) {
 
   eleventyConfig.addPassthroughCopy("pages/style.css");
   eleventyConfig.addPassthroughCopy("pages/*.js");
+  eleventyConfig.addPassthroughCopy({ "pricing-core": "pricing-core" });
 
   // Rewrite root-relative href/src attributes to include the path prefix,
   // so the site works correctly when served from a subdirectory on GitHub Pages.
