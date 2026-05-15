@@ -4,12 +4,12 @@ import { requireElement } from '/utils.js'
 const modelSpec = {
     name: 'Logistic',
     optimiser: new fitting.Adam({ learningRate: 0.001 }),
-    /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
+    /** @type {conversion.BaseDemandModel} */
     model: new conversion.LogisticDemandModel({ a: 0, b: 0 }),
 };
 const stepsPerFrame = 200; // Number of optimization steps per animation frame
 
-/** @param {Generator<import('/pricing-core/conversion/base.js').BaseDemandModel>} fitGenerator */
+/** @param {Generator<conversion.BaseDemandModel>} fitGenerator */
 function animateStep(fitGenerator) {
     const { value, done } = fitGenerator.next()
     if (!done) {

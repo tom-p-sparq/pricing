@@ -5,7 +5,7 @@ const modelSpecs = [
     {
         name: 'Logistic',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
-        /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
+        /** @type {conversion.BaseDemandModel} */
         model: new conversion.LogisticDemandModel({ a: 0, b: 0 }),
         /** @type {number | undefined} */
         llh: undefined,
@@ -13,7 +13,7 @@ const modelSpecs = [
     {
         name: 'Log Logistic',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
-        /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
+        /** @type {conversion.BaseDemandModel} */
         model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }),
         /** @type {number | undefined} */
         llh: undefined,
@@ -21,7 +21,7 @@ const modelSpecs = [
     {
         name: 'Weibull',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
-        /** @type {import('/pricing-core/conversion/base.js').BaseDemandModel} */
+        /** @type {conversion.BaseDemandModel} */
         model: new conversion.WeibullDemandModel({ a: Math.log(Math.log(2)), b: 0 }),
         /** @type {number | undefined} */
         llh: undefined,
@@ -29,7 +29,7 @@ const modelSpecs = [
 ]
 const stepsPerFrame = 200; // Number of optimization steps per animation frame
 
-/** @param {Generator<import('/pricing-core/conversion/base.js').BaseDemandModel>[]} fitGenerators */
+/** @param {Generator<conversion.BaseDemandModel>[]} fitGenerators */
 function animateStep(fitGenerators) {
     const stepped = fitGenerators.map(
         generator => generator.next()
