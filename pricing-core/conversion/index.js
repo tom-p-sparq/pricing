@@ -1,3 +1,4 @@
+export { BaseDemandModel } from './base.js'
 export { LinearDemandModel } from './Linear.js'
 export { ConstantElasticityDemandModel } from './ConstantElasticity.js'
 export { LogLogisticDemandModel } from './LogLogistic.js'
