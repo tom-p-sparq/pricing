@@ -1,164 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
+---
+layout: base.njk
+title: Model Selection from Data
+script: 04-model-selection.js
+---
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
-  <title>Parametric Conversion Modelling</title>
-</head>
+<h1>Model Selection from Data</h1>
+<p>
+  In the <a href="/03-fitting/">previous post</a>, we showed a conversion model being fit to data.
+  We picked one species from our <a href="/01-parametric-conversion-models/">zoo</a>,
+  the logistic model,
+  and implemented the search for the two parameter values giving the best fit to data,
+  by choosing their values to maximise the <em>likelihood</em> of the data.
+  The interactivity in our post showed how the best-fitting model updates
+  as synthetic data on looks and books at different price points accumulate.
+</p>
+<p>
+  In this post, we'll revisit that approach but from the perspective of <em>model selection</em>.
+  We chose logistic previously: why not the log-logistic model, or the Weibulll model?
+  We will think about how you might use the models' fit to data to choose between different possible model families.
+</p>
 
-<body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-      </ul>
-    </nav>
-  </header>
+<h2>Data generation</h2>
+<p>
+  As previously, the controls below allow you to set a price
+  and then record a conversion or rejection event at that price.
+  The table on the right keeps track of the data that's accumulated so far.
+  If you want to reset the data generating process, just refresh the page.
+</p>
+<div style="display: flex; align-items: flex-start; gap: 2em;">
+  <div id="data-generation-container"></div>
+  <div id="data-table-container"></div>
+</div>
 
-  <div class="main-container">
-    <h1>Model Selection from Data</h1>
-    <p>
-      In the <a href="./03-fitting.html">previous post</a>, we showed a conversion model being fit to data.
-      We picked one species from our <a href="./01-parametric-conversion-models.html">zoo</a>,
-      the logistic model,
-      and implemented the search for the two parameter values giving the best fit to data,
-      by choosing their values to maximise the <em>likelihood</em> of the data.
-      The interactivity in our post showed how the best-fitting model updates
-      as synthetic data on looks and books at different price points accumulate.
-    </p>
-    <p>
-      In this post, we'll revisit that approach but from the perspective of <em>model selection</em>.
-      We chose logistic previously: why not the log-logistic model, or the Weibulll model?
-      We will think about how you might use the models' fit to data to choose between different possible model families.
-    </p>
+<h2>Fitting three models</h2>
+<p>
+  In the figure below,
+  we show the best fit to the data specified above for each of:
+  a <a href="/01-parametric-conversion-models/#logistic-model">logistic</a> model,
+  a <a href="/01-parametric-conversion-models/#log-logistic-model">log-logistic</a> model
+  and a <a href="/01-parametric-conversion-models/#weibull-model">Weibull</a> model<a href="#fn1"
+    id="ref1"><sup>1</sup></a>.
+</p>
+<div id="model-plot-container"></div>
+<p>
+  Clearly we now have three curves which all demonstrate similar behaviour in the region of the synthetic data.
+  How can we choose between them?
+  And to what extent does our choice actually matter?
+</p>
 
-    <h2>Data generation</h2>
-    <p>
-      As previously, the controls below allow you to set a price
-      and then record a conversion or rejection event at that price.
-      The table on the right keeps track of the data that's accumulated so far.
-      If you want to reset the data generating process, just refresh the page.
-    </p>
-    <div style="display: flex; align-items: flex-start; gap: 2em;">
-      <div id="data-generation-container"></div>
-      <div id="data-table-container"></div>
-    </div>
+<h2>Model selection by likelihood</h2>
+<p>
+  Recall that we are looking for the price sensitivity model parameters that best explain our data.
+  To fit these parameters, we quantify the likelihood of the data under those parameters.
+  For each of our fitted models, therefore, we can keep track of the likelihood, or log-likelihood, of the best fit.
+</p>
+<p>
+  As each our models evolve towards its optimal fit, we display the log-likelihood of each in the figure legend
+  above.
+  The model that demonstrates the maximum value for the log-likelihood
+  is the best fit to the data
+  (noting that log-likelihood is negative, so we aim for the value closest to zero).
+  Assuming no prior preference towards one model or another, this model then becomes the winner.
+</p>
+<p>
+  But how <em>convincing</em> is the evidence that produces this result?
+  Do we believe that one model is <em>actually</em> a better fit than the other?
+</p>
 
-    <h2>Fitting three models</h2>
-    <p>
-      In the figure below,
-      we show the best fit to the data specified above for each of:
-      a <a href="./01-parametric-conversion-models.html#logistic-model">logistic</a> model,
-      a <a href="./01-parametric-conversion-models.html#log-logistic-model">log-logistic</a> model
-      and a <a href="./01-parametric-conversion-models.html#weibull-model">Weibull</a> model<a href="#fn1"
-        id="ref1"><sup>1</sup></a>.
-    </p>
-    <div id="model-plot-container"></div>
-    <p>
-      Clearly we now have three curves which all demonstrate similar behaviour in the region of the synthetic data.
-      How can we choose between them?
-      And to what extent does our choice actually matter?
-    </p>
+<h2>Likelihood ratios</h2>
+<p>
+  For any two models, we can directly compare the log likelihoods.
+  We know that all of the models we are considering have just two parameters,
+  so we only need consider the quality of fit.
+  There exist rules of thumb by which we can conclude that the data provide sufficient evidence
+  that any one model is better than the other.
+  For example, we would like a difference in log-likelihoods of at least 1 to even <em>begin</em>
+  to conclude that there is evidence to choose one model over another.
+  For the evidence to count as convincing might require a difference more like 5.
+</p>
+<div id="likelihood-ratio-container"></div>
+<p>
+  As can be seen from this visualisation of the pairwise differences between our fitted models,
+  it is quite a task to engineer situations where the data allows us to convincingly distinguish between our models.
+  It seems to be a reasonable conclusion that
+  we will find it very difficult to choose one model over another
+  in very many cases.
+</p>
 
-    <h2>Model selection by likelihood</h2>
-    <p>
-      Recall that we are looking for the price sensitivity model parameters that best explain our data.
-      To fit these parameters, we quantify the likelihood of the data under those parameters.
-      For each of our fitted models, therefore, we can keep track of the likelihood, or log-likelihood, of the best fit.
-    </p>
-    <p>
-      As each our models evolve towards its optimal fit, we display the log-likelihood of each in the figure legend
-      above.
-      The model that demonstrates the maximum value for the log-likelihood
-      is the best fit to the data
-      (noting that log-likelihood is negative, so we aim for the value closest to zero).
-      Assuming no prior preference towards one model or another, this model then becomes the winner.
-    </p>
-    <p>
-      But how <em>convincing</em> is the evidence that produces this result?
-      Do we believe that one model is <em>actually</em> a better fit than the other?
-    </p>
+<h2>So does it matter?</h2>
+<p>
+  The conclusion we're nearing is
+  that we could probably choose any one of our three models,
+  and consider ourselves fairly accurate when it comes to matching the data.
+  At least, until we have hundreds or even thousands of looks at various prices.
+</p>
+<p>
+  But we shouldn't be complacent, because the choice of model does still matter.
+  Recall the model for expected revenue from our <a href="/00-intro-conversion-models/">introductory post</a>,
+  where the conversion probability multiplies the incremental margin of revenue less cost.
+  For each of the three fitted models, we show the projected margin per look in the figure below,
+  allowing the incremental cost to vary.
+</p>
+<div id="incremental-revenue-container"></div>
+<div id="cost-container" style="display: flex; align-items: center; justify-content: space-around; gap: 1em;"></div>
+<p>
+  Higher prices magnify differences,
+  so that even if the conversion curves look nearby at higher prices,
+  the increased incremental revenue per sale can lead to
+  significantly different projections for the expected incremental revenue per look.
+</p>
 
-    <h2>Likelihood ratios</h2>
-    <p>
-      For any two models, we can directly compare the log likelihoods.
-      We know that all of the models we are considering have just two parameters,
-      so we only need consider the quality of fit.
-      There exist rules of thumb by which we can conclude that the data provide sufficient evidence
-      that any one model is better than the other.
-      For example, we would like a difference in log-likelihoods of at least 1 to even <em>begin</em>
-      to conclude that there is evidence to choose one model over another.
-      For the evidence to count as convincing might require a difference more like 5.
-    </p>
-    <div id="likelihood-ratio-container"></div>
-    <p>
-      As can be seen from this visualisation of the pairwise differences between our fitted models,
-      it is quite a task to engineer situations where the data allows us to convincingly distinguish between our models.
-      It seems to be a reasonable conclusion that
-      we will find it very difficult to choose one model over another
-      in very many cases.
-    </p>
+<h2>Conclusions</h2>
+<p>
+  The choice of model is, of course, likely to impact the key pricing decision.
+  This is especially true if we need to extrapolate our predictions beyond the historic support of our data.
+  But it is difficult to choose between models for the sparse data we are likely to have.
+  So, where do we go from here?
+</p>
 
-    <h2>So does it matter?</h2>
-    <p>
-      The conclusion we're nearing is
-      that we could probably choose any one of our three models,
-      and consider ourselves fairly accurate when it comes to matching the data.
-      At least, until we have hundreds or even thousands of looks at various prices.
-    </p>
-    <p>
-      But we shouldn't be complacent, because the choice of model does still matter.
-      Recall the model for expected revenue from our <a href="./00-intro-conversion-models.html">introductory post</a>,
-      where the conversion probability multiplies the incremental margin of revenue less cost.
-      For each of the three fitted models, we show the projected margin per look in the figure below,
-      allowing the incremental cost to vary.
-    </p>
-    <div id="incremental-revenue-container"></div>
-    <div id="cost-container" style="display: flex; align-items: center; justify-content: space-around; gap: 1em;"></div>
-    <p>
-      Higher prices magnify differences,
-      so that even if the conversion curves look nearby at higher prices,
-      the increased incremental revenue per sale can lead to
-      significantly different projections for the expected incremental revenue per look.
-    </p>
-
-    <h2>Conclusions</h2>
-    <p>
-      The choice of model is, of course, likely to impact the key pricing decision.
-      This is especially true if we need to extrapolate our predictions beyond the historic support of our data. 
-      But it is difficult to choose between models for the sparse data we are likely to have.
-      So, where do we go from here?
-    </p>
-    
-    <hr>
-    <div class="footnotes">
-      <ol>
-        <li id="fn1">
-          Note that we've limited our focus to these models because they are numerically tractable:
-          as soon as we consider models reliant on clamping, we are in the realm of vanishing gradients,
-          making fitting numerically tricky. <a href="#ref1">↩</a></li>
-      </ol>
-    </div>
-
-  </div>
-  <script type="module" src="04-model-selection.js"></script>
-
-  <footer>
-    <p>&copy; 2026 TP Prescott</p>
-  </footer>
-</body>
-
-</html>
+<hr>
+<div class="footnotes">
+  <ol>
+    <li id="fn1">
+      Note that we've limited our focus to these models because they are numerically tractable:
+      as soon as we consider models reliant on clamping, we are in the realm of vanishing gradients,
+      making fitting numerically tricky. <a href="#ref1">↩</a></li>
+  </ol>
+</div>
