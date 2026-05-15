@@ -1,3 +1,3 @@
-export * as conversion from './conversion';
-export { plotting, inputs } from './visualisation';
-export * as fitting from './fitting';
+export * as conversion from './conversion/index.js';
+export { plotting, inputs } from './visualisation/index.js';
+export * as fitting from './fitting/index.js';

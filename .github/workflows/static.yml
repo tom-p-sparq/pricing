@@ -36,13 +36,9 @@ jobs:
         with:
           node-version: "lts/*"
           cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            pricing-core/package-lock.json
-      - name: Install root dependencies
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
         run: npm install
-      - name: Install pricing-core dependencies
-        run: cd pricing-core && npm install
       - name: Build
         run: npm run build
         env:
