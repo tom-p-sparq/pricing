@@ -1,154 +1,119 @@
-<!DOCTYPE html>
-<html lang="en">
+---
+layout: base.njk
+title: Fitting Conversion Model Parameters
+script: 03-fitting.js
+---
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
-  <title>Parametric Conversion Modelling</title>
-</head>
+<h1>Fitting Conversion Model Parameters</h1>
+<p>
+  In the <a href="/02-specifying/">previous post</a>, we introduced the idea of specifying a conversion model
+  by selecting the model parameters.
+  More typically, we are faced with the task of fitting a conversion model to observations of conversions and
+  non-conversions.
+  In this post we'll be able to create synthetic data and see how our model fit responds.
+</p>
 
-<body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-      </ul>
-    </nav>
-  </header>
+<h2>Data generation</h2>
+<p>
+  The controls below allow you to set a price and then record a conversion or rejection event at that price.
+  The table on the right keeps track of the data that's accumulated so far.
+  If you want to reset the data generating process, just refresh the page.
+</p>
+<div style="display: flex; align-items: flex-start; gap: 2em;">
+  <div id="data-generation-container"></div>
+  <div id="data-table-container"></div>
+</div>
 
-  <div class="main-container">
-    <h1>Fitting Conversion Model Parameters</h1>
-    <p>
-      In the <a href="./02-specifying.html">previous post</a>, we introduced the idea of specifying a conversion model
-      by selecting the model parameters.
-      More typically, we are faced with the task of fitting a conversion model to observations of conversions and
-      non-conversions.
-      In this post we'll be able to create synthetic data and see how our model fit responds.
-    </p>
+<h2>Model fitting</h2>
+<p>
+  Below, we show the best fit of a <a href="/01-parametric-conversion-models/#logistic-model">logistic
+    model</a> to the data generated above.
+</p>
+<div id="model-plot-container"></div>
+<p>
+  We <a href="/02-specifying/">previously</a> talked about having two degrees of freedom in our models.
+  If all of our generated data is at a single price-point, we don't have enough data to choose a model:
+  in the plot above, I have imposed an estimated elasticity of -2 when we only have a single price point.
+  This is important in real world cases: with no price exploration, we cannot fit a model.
+</p>
+<p>
+  As soon as we have produced data at two price points,
+  the curve we fit is now the interpolation between the observed conversion rates.
+  This is clearly the best fit we have to our data.
+</p>
+<p>
+  The moment we generate data at three or more price points, we are in the realm of statistics and data science.
+</p>
 
-    <h2>Data generation</h2>
-    <p>
-      The controls below allow you to set a price and then record a conversion or rejection event at that price.
-      The table on the right keeps track of the data that's accumulated so far.
-      If you want to reset the data generating process, just refresh the page.
-    </p>
-    <div style="display: flex; align-items: flex-start; gap: 2em;">
-      <div id="data-generation-container"></div>
-      <div id="data-table-container"></div>
-    </div>
+<h2>Maximum likelihood estimation</h2>
+<p>
+  We are looking for the price sensitivity model parameters that best explain our data.
+  To fit these parameters, we quantify the likelihood of the data under those parameters.
+</p>
+<p>
+  If, at any one price point, we are modelling a conversion probability of $\phi(p)$,
+  then (assuming independence of the looks) the likelihood of $k$ conversions from $n$ looks is
+  the binomial probability proportional to $$\phi(p)^k (1 - \phi(p))^{n - k}.$$
+  For each of multiple price points, $p_i$, then the overall likelihood of the data is proportional to
+  $$\prod_{i=1}^n \phi(p_i)^{k_i} (1 - \phi(p_i))^{n_i - k_i},$$
+  where we observe $k_i$ conversions from $n_i$ looks at each price point, $p_i$.
+</p>
+<p>
+  The key to fitting our parameters is to observe that this likelihood is a function of the model parameters.
+  We want to choose the parameters going into the function $\phi(p)$ such that this likelihood is maximised.
+  For practical purposes, we maximise the logarithm of this likelihood,
+  $$\sum_i k_i \log\left(\phi(p_i)\right) + \sum_i (n_i - k_i) \log\left(1 - \phi(p_i)\right),$$
+  which is equivalent.
+</p>
+<p>
+  The animation above that runs at each new datapoint depicts an optimisation algorithm taking the model parameter
+  values
+  to a new optimum that maximises the (log) likelihood of the generated dataset.
+</p>
 
-    <h2>Model fitting</h2>
-    <p>
-      Below, we show the best fit of a <a href="./01-parametric-conversion-models.html#logistic-model">logistic
-        model</a> to the data generated above.
-    </p>
-    <div id="model-plot-container"></div>
-    <p>
-      We <a href="./02-specifying.html">previously</a> talked about having two degrees of freedom in our models.
-      If all of our generated data is at a single price-point, we don't have enough data to choose a model:
-      in the plot above, I have imposed an estimated elasticity of -2 when we only have a single price point.
-      This is important in real world cases: with no price exploration, we cannot fit a model.
-    </p>
-    <p>
-      As soon as we have produced data at two price points,
-      the curve we fit is now the interpolation between the observed conversion rates.
-      This is clearly the best fit we have to our data.
-    </p>
-    <p>
-      The moment we generate data at three or more price points, we are in the realm of statistics and data science.
-    </p>
+<h2>Local fitting and new data</h2>
+<p>
+  The power of this tool is in experimenting: here is one scenario to get started with.
+</p>
+<p>
+  First, let's create a baseline curve based on a moderately significant number of looks and books at four
+  different, but similar prices.
+</p>
+<div id="scenario-button-container"></div>
+<p>
+  Now observe what happens if we add just <em>one</em> "Convert" click at a higher price, say £180.
+</p>
+<p>
+  Notice how the entire curve shifts to account for this single new data point.
+  The best-fitting model dramatically shifts its opinions not just about prices near £180,
+  but actually also for prices below £140.
+  Why was there any need to lower the estimate of conversion rate at £120
+  simply because we observed a conversion at £180?
+</p>
+<p>
+  The answer to this is that the model we're trying to fit,
+  having only two degrees of freedom, is in fact severely constrained.
+  This is a crucial lesson: in a parametric model like this, every data point informs the entire curve.
+  Even this single conversion at £120, which had a non-trivial probability (around 1/3) of occurring,
+  was enough to dramatically shift our best-fitting model.
+  Indeed, had that conversion been even less expected (say at £200)
+  then the curve would completely reverse direction, implying conversions being more likely at higher prices.
+</p>
 
-    <h2>Maximum likelihood estimation</h2>
-    <p>
-      We are looking for the price sensitivity model parameters that best explain our data.
-      To fit these parameters, we quantify the likelihood of the data under those parameters.
-    </p>
-    <p>
-      If, at any one price point, we are modelling a conversion probability of $\phi(p)$,
-      then (assuming independence of the looks) the likelihood of $k$ conversions from $n$ looks is
-      the binomial probability proportional to $$\phi(p)^k (1 - \phi(p))^{n - k}.$$
-      For each of multiple price points, $p_i$, then the overall likelihood of the data is proportional to
-      $$\prod_{i=1}^n \phi(p_i)^{k_i} (1 - \phi(p_i))^{n_i - k_i},$$
-      where we observe $k_i$ conversions from $n_i$ looks at each price point, $p_i$.
-    </p>
-    <p>
-      The key to fitting our parameters is to observe that this likelihood is a function of the model parameters.
-      We want to choose the parameters going into the function $\phi(p)$ such that this likelihood is maximised.
-      For practical purposes, we maximise the logarithm of this likelihood,
-      $$\sum_i k_i \log\left(\phi(p_i)\right) + \sum_i (n_i - k_i) \log\left(1 - \phi(p_i)\right),$$
-      which is equivalent.
-    </p>
-    <p>
-      The animation above that runs at each new datapoint depicts an optimisation algorithm taking the model parameter
-      values
-      to a new optimum that maximises the (log) likelihood of the generated dataset.
-    </p>
-
-    <h2>Local fitting and new data</h2>
-    <p>
-      The power of this tool is in experimenting: here is one scenario to get started with.
-    </p>
-    <p>
-      First, let's create a baseline curve based on a moderately significant number of looks and books at four
-      different, but similar prices.
-    </p>
-    <div id="scenario-button-container"></div>
-    <p>
-      Now observe what happens if we add just <em>one</em> "Convert" click at a higher price, say £180.
-    </p>
-    <p>
-      Notice how the entire curve shifts to account for this single new data point.
-      The best-fitting model dramatically shifts its opinions not just about prices near £180,
-      but actually also for prices below £140.
-      Why was there any need to lower the estimate of conversion rate at £120
-      simply because we observed a conversion at £180?
-    </p>
-    <p>
-      The answer to this is that the model we're trying to fit,
-      having only two degrees of freedom, is in fact severely constrained.
-      This is a crucial lesson: in a parametric model like this, every data point informs the entire curve.
-      Even this single conversion at £120, which had a non-trivial probability (around 1/3) of occurring,
-      was enough to dramatically shift our best-fitting model.
-      Indeed, had that conversion been even less expected (say at £200)
-      then the curve would completely reverse direction, implying conversions being more likely at higher prices.
-    </p>
-
-    <h2>Conclusion</h2>
-    <p>
-      Fitting a model is not a purely mechanical exercise. The distribution of our data points matters immensely. As we
-      have seen, a single outlier or a narrow band of prices can have a dramatic and sometimes counter-intuitive impact
-      on the model's parameters and its predictions.
-    </p>
-    <p>
-      A model without a quantification of uncertainty is a key risk:
-      when your data doesn't cover a wide range of prices, your model's extrapolations can be unreliable.
-      The model has no data to learn the "true" elasticity and is just fitting to the local noise.
-      New local data can hugely change our predictions at the extremes of the price range.
-    </p>
-    <p>
-      In future posts we'll look at how to select between model families,
-      how to quantify uncertainty in a useful, decision-relevant way,
-      and how to think more flexibly about data-driven conversion curves.
-    </p>
-
-  </div>
-  <script type="module" src="03-fitting.js"></script>
-
-  <footer>
-    <p>&copy; 2026 TP Prescott</p>
-  </footer>
-</body>
-
-</html>
+<h2>Conclusion</h2>
+<p>
+  Fitting a model is not a purely mechanical exercise. The distribution of our data points matters immensely. As we
+  have seen, a single outlier or a narrow band of prices can have a dramatic and sometimes counter-intuitive impact
+  on the model's parameters and its predictions.
+</p>
+<p>
+  A model without a quantification of uncertainty is a key risk:
+  when your data doesn't cover a wide range of prices, your model's extrapolations can be unreliable.
+  The model has no data to learn the "true" elasticity and is just fitting to the local noise.
+  New local data can hugely change our predictions at the extremes of the price range.
+</p>
+<p>
+  In future posts we'll look at how to select between model families,
+  how to quantify uncertainty in a useful, decision-relevant way,
+  and how to think more flexibly about data-driven conversion curves.
+</p>
