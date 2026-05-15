@@ -45,6 +45,8 @@ jobs:
         run: cd pricing-core && npm install
       - name: Build
         run: npm run build
+        env:
+          PATHPREFIX: /pricing/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
