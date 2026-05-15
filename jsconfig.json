@@ -4,7 +4,11 @@
     "target": "ES2022",
     "moduleResolution": "bundler",
     "checkJs": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "paths": {
+      "/pricing-core/*": ["./pricing-core/*"],
+      "/utils.js": ["./pages/utils.js"]
+    }
   },
   "exclude": ["node_modules"]
 }
