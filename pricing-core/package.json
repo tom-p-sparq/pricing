@@ -1,16 +1,8 @@
 {
-  "scripts": {
-    "build": "esbuild index.js --bundle --format=esm --outfile=bundle.js",
-    "watch": "esbuild index.js --bundle --format=esm --outfile=bundle.js --watch"
-  },
   "dependencies": {
     "@observablehq/inputs": "^0.10.6",
     "@observablehq/plot": "^0.6.13",
     "@observablehq/runtime": "^6.0.0",
     "d3": "^7.9.0"
-  },
-  "devDependencies": {
-    "@types/d3": "^7.4.3",
-    "esbuild": "^0.27.2"
   }
 }
