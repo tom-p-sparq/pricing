@@ -1,4 +1,4 @@
-import { conversion, plotting, inputs, fitting } from './pricing-core/index.js'
+import { conversion, plotting, inputs, fitting } from '/pricing-core/index.js'
 
 const modelSpec = { name: 'Logistic', optimiser: new fitting.Adam({ learningRate: 0.001 }), model: new conversion.LogisticDemandModel({ a: 0, b: 0 }) };
 const stepsPerFrame = 200; // Number of optimization steps per animation frame

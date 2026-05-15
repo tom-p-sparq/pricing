@@ -1,4 +1,4 @@
-import { conversion, plotting, inputs } from './pricing-core/index.js'
+import { conversion, plotting, inputs } from '/pricing-core/index.js'
 
 // Static plot
 const plotConfigs = [
