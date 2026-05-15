@@ -1,15 +1,10 @@
 {
   "type": "module",
   "scripts": {
-    "build:js": "cd pricing-core && npm run build",
-    "build:html": "eleventy",
-    "build": "npm run build:js && npm run build:html",
-    "watch:js": "cd pricing-core && npm run watch",
-    "watch:html": "eleventy --serve",
-    "dev": "npm-run-all --parallel watch:js watch:html"
+    "build": "eleventy",
+    "dev": "eleventy --serve"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.0.0",
-    "npm-run-all2": "^8.0.0"
+    "@11ty/eleventy": "^3.0.0"
   }
 }
