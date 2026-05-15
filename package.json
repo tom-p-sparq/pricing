@@ -4,8 +4,10 @@
     "build": "eleventy",
     "dev": "eleventy --serve"
   },
+  "dependencies": {
+    "@11ty/eleventy": "^3.1.5"
+  },
   "devDependencies": {
-    "@11ty/eleventy": "^3.0.0",
     "@observablehq/inputs": "^0.10.6",
     "@observablehq/plot": "^0.6.13",
     "d3": "^7.9.0",
