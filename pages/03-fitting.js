@@ -1,5 +1,5 @@
-import { conversion, plotting, inputs, fitting } from '/pricing-core/index.js'
-import { requireElement } from '/utils.js'
+import { conversion, plotting, inputs, fitting } from '../pricing-core/index.js'
+import { requireElement } from '../utils.js'
 
 const modelSpec = {
     name: 'Logistic',
