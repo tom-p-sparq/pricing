@@ -43,6 +43,6 @@ export class LogNormalStep extends BaseStep {
       return -Infinity;
     }
     const dx = Math.log(x / xCurrent);
-    return this.parentDistribution.logPdf(dx);
+    return this.parentDistribution.logPdf(dx) - Math.log(x);
   }
 }

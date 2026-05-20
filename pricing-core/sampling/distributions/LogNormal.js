@@ -39,6 +39,6 @@ export class LogNormal extends BaseDistribution {
       return -Infinity;
     }
     const logX = Math.log(x);
-    return this.parentDistribution.logPdf(logX);
+    return this.parentDistribution.logPdf(logX) - logX;
   }
 }

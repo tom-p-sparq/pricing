@@ -37,6 +37,6 @@ export class Normal extends BaseDistribution {
    */
   logPdf(x) {
     const z = (x - this.mu) / this.sigma;
-    return -0.5 * (Math.log(2 * Math.PI) + Math.log(this.sigma) + z * z);
+    return -0.5 * (Math.log(2 * Math.PI) + 2 * Math.log(this.sigma) + z * z);
   }
 }
