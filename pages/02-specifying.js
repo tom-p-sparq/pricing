@@ -1,5 +1,5 @@
-import { conversion, plotting, inputs } from '/pricing-core/index.js'
-import { requireElement } from '/utils.js'
+import { conversion, plotting, inputs } from '../pricing-core/index.js'
+import { requireElement } from '../utils.js'
 
 // Static plot
 const plotConfigs = [
