@@ -15,7 +15,6 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
     super({ a, b })
     /**
      * The constant price elasticity of demand (e).
-     * @protected
      * @type {{a: number, b: number}}
      */
     this.parameters;

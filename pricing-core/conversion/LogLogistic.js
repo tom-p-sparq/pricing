@@ -16,7 +16,6 @@ export class LogLogisticDemandModel extends BaseDemandModel {
   constructor({ a, b }) {
     super({ a, b })
     /**
-     * @protected
      * @type {{a: number, b: number}}
      */
     this.parameters;
