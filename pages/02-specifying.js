@@ -1,4 +1,5 @@
-import { conversion, plotting, inputs } from './pricing-core/index.js'
+import { conversion, plotting, inputs } from '/pricing-core/index.js'
+import { requireElement } from '/utils.js'
 
 // Static plot
 const plotConfigs = [
@@ -10,13 +11,12 @@ const plotConfigs = [
 ];
 
 // Interactive plots
-const interactiveReference = inputs.referenceForm(
-    document.getElementById('reference-controls-container')
-);
-const interactiveInterpolants = inputs.interpolantsForm(
-    document.getElementById('interpolants-controls-container')
-)
+const interactiveReference = inputs.referenceForm(requireElement('reference-controls-container'));
+const interactiveInterpolants = inputs.interpolantsForm(requireElement('interpolants-controls-container'));
 
+// Containers
+const referenceComparisonContainer = requireElement('reference-comparison-container');
+const interpolantsComparisonContainer = requireElement('interpolants-comparison-container');
 
 // Rendering functions
 
@@ -40,11 +40,7 @@ function renderReference() {
         model: models,
         specPoints: [interactiveReference.value],
     });
-    plotting.plot(
-        document.getElementById('reference-comparison-container'),
-        comparisonPlot,
-        singleReferenceTitles,
-    )
+    plotting.plot(referenceComparisonContainer, comparisonPlot, singleReferenceTitles)
 }
 
 function renderInterpolants() {
@@ -61,11 +57,7 @@ function renderInterpolants() {
         model: models,
         specPoints: [point0, point1],
     });
-    plotting.plot(
-        document.getElementById('interpolants-comparison-container'),
-        comparisonPlot,
-        interpolantTitles,
-    )
+    plotting.plot(interpolantsComparisonContainer, comparisonPlot, interpolantTitles)
 }
 
 // Set up listeners

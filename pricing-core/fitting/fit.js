@@ -11,13 +11,13 @@ import { logLikelihood } from "./likelihoods.js"
  * @param {Object} options
  * @param {number} [options.epsilon=1e-5] The convergence threshold
  * @param {number} [options.batchSize=100] The number of steps per iteration
- * @returns {Generator<BaseDemandModel, BaseDemandModel, void>} A generator that yields the model at each step of the fitting process.
+ * @returns {Generator<BaseDemandModel, void, void>} A generator that yields the model at each step of the fitting process.
  */
 export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }) {
     const numPoints = data.length;
     const modelClass = Object.getPrototypeOf(model).constructor
     if (numPoints == 0) {
-        return model
+        yield model
     }
     if (numPoints == 1) {
         const { price, looks, books } = data[0]
@@ -53,14 +53,13 @@ export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }
 }
 
 /**
- * 
- * @param {*} modelClass 
- * @param {{price: number, looks: number, books: number}[]} data 
- * @returns 
+ * @param {typeof BaseDemandModel} modelClass
+ * @param {{price: number, looks: number, books: number}[]} data
+ * @returns {BaseDemandModel}
  */
 function makeFlatModel(modelClass, data) {
     const totalLooks = data.reduce((total, point) => total + point.looks, 0);
     const totalBooks = data.reduce((total, point) => total + point.books, 0);
-    const averageConversion = totalBooks / totalLooks
-    return new modelClass({ a: 0, b: 0 })
+    const averageConversion = Math.max(0.0001, Math.min(0.9999, totalBooks / totalLooks));
+    return modelClass.from_flat(averageConversion);
 }

@@ -38,7 +38,7 @@
     {{ content | safe }}
   </div>
   {% if script %}
-  <script type="module" src="/{{ script }}"></script>
+  <script type="module" src="/{{ page.fileSlug }}/script.js"></script>
   {% endif %}
   <footer>
     <p>&copy; 2026 TP Prescott</p>

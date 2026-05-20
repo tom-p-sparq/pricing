@@ -58,6 +58,16 @@ export class LinearDemandModel extends BaseDemandModel {
   }
 
   /**
+   * Creates a flat model with constant conversion rate equal to `averageConversion`.
+   * @override
+   * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
+   * @returns {LinearDemandModel}
+   */
+  static from_flat(averageConversion) {
+    return new LinearDemandModel({ a: averageConversion, b: 0 });
+  }
+
+  /**
    * Calculates the conversion rate using the point-slope form of a linear equation.
    * @override
    * @protected
@@ -78,7 +88,7 @@ export class LinearDemandModel extends BaseDemandModel {
    *        w.r.t the model parameters in the constructor.
    */
   gradLog(price) {
-    const phi = this._conversion(price)
+    const phi = Math.max(1e-9, Math.min(1 - 1e-9, this._conversion(price)))
     return {
       conversion: { a: 1 / phi, b: price / phi },
       rejection: { a: -1 / (1 - phi), b: -price / (1 - phi) }
