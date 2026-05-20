@@ -92,7 +92,7 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    *        w.r.t the model parameters in the constructor.
    */
   gradLog(price) {
-    const phi = this._conversion(price)
+    const phi = Math.max(1e-9, Math.min(1 - 1e-9, this._conversion(price)))
     const logprice = Math.log(price)
     return {
       conversion: {

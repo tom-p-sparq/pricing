@@ -88,7 +88,7 @@ export class LinearDemandModel extends BaseDemandModel {
    *        w.r.t the model parameters in the constructor.
    */
   gradLog(price) {
-    const phi = this._conversion(price)
+    const phi = Math.max(1e-9, Math.min(1 - 1e-9, this._conversion(price)))
     return {
       conversion: { a: 1 / phi, b: price / phi },
       rejection: { a: -1 / (1 - phi), b: -price / (1 - phi) }
