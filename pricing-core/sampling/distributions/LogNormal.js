@@ -19,6 +19,7 @@ export class LogNormal extends BaseDistribution {
 
   /**
    * Generates a random variate from the Log-Normal distribution.
+   * @override
    * @param {function} rng - A random number generator function (defaults to Math.random).
    * @returns {number} A random variate.
    */
@@ -29,6 +30,7 @@ export class LogNormal extends BaseDistribution {
 
   /**
    * Computes the log probability density of the Log-Normal distribution at x.
+   * @override
    * @param {number} x
    * @returns {number} The log probability density at x.
    */

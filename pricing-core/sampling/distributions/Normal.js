@@ -17,6 +17,7 @@ export class Normal extends BaseDistribution {
 
   /**
    * Generates a random variate from the Normal distribution using the Box-Muller transform.
+   * @override
    * @param {function} rng - A random number generator function (defaults to Math.random).
    * @returns {number} A random variate.
    */
@@ -30,6 +31,7 @@ export class Normal extends BaseDistribution {
 
   /**
    * Computes the log probability density of the Normal distribution at x.
+   * @override
    * @param {number} x
    * @returns {number} The log probability density at x.
    */
