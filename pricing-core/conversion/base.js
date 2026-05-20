@@ -110,6 +110,17 @@ export class BaseDemandModel {
   }
 
   /**
+   * Creates a new model instance representing a flat (price-independent) conversion rate.
+   * This is a factory method.
+   * @abstract
+   * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
+   * @returns {BaseDemandModel} A new instance of the demand model.
+   */
+  static from_flat(averageConversion) {
+    throw new Error("Define the constructor of the flat model parameterised by average conversion in `from_flat`")
+  }
+
+  /**
    * Checks the validity of parameters for creating a model from a reference point.
    * @protected
    * @param {number} price The reference price. Must be positive.
