@@ -4,12 +4,11 @@
  */
 export class BaseDemandModel {
   /**
-   * @param {object} parameters Model parameters.
+   * @param {{[paramName: string]: number}} parameters Model parameters.
    */
   constructor(parameters) {
     /**
-     * @protected
-     * @type {object}
+     * @type {{[paramName: string]: number}}
      */
     this.parameters = parameters;
   }
