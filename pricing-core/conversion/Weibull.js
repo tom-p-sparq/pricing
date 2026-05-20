@@ -61,6 +61,16 @@ export class WeibullDemandModel extends BaseDemandModel {
   }
 
   /**
+   * Creates a flat model with constant conversion rate equal to `averageConversion`.
+   * @override
+   * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
+   * @returns {WeibullDemandModel}
+   */
+  static from_flat(averageConversion) {
+    return new WeibullDemandModel({ a: Math.log(-Math.log(averageConversion)), b: 0 });
+  }
+
+  /**
    * @protected
    * @param {number} price The price for which to calculate the conversion rate.
    * @returns {number} The calculated conversion rate (before clamping).

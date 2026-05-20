@@ -58,6 +58,16 @@ export class LinearDemandModel extends BaseDemandModel {
   }
 
   /**
+   * Creates a flat model with constant conversion rate equal to `averageConversion`.
+   * @override
+   * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
+   * @returns {LinearDemandModel}
+   */
+  static from_flat(averageConversion) {
+    return new LinearDemandModel({ a: averageConversion, b: 0 });
+  }
+
+  /**
    * Calculates the conversion rate using the point-slope form of a linear equation.
    * @override
    * @protected

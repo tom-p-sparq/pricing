@@ -64,6 +64,16 @@ export class LogLogisticDemandModel extends BaseDemandModel {
   }
 
   /**
+   * Creates a flat model with constant conversion rate equal to `averageConversion`.
+   * @override
+   * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
+   * @returns {LogLogisticDemandModel}
+   */
+  static from_flat(averageConversion) {
+    return new LogLogisticDemandModel({ a: Math.log(averageConversion / (1 - averageConversion)), b: 0 });
+  }
+
+  /**
    * @override
    * @protected
    * @param {number} price The price for which to calculate the conversion rate.
