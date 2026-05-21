@@ -9,9 +9,9 @@ import { BaseDemandModel } from '../conversion/base.js'
  * correctly dwells at the current state on rejection.
  *
  * @template {BaseDemandModel} T
- * @param {Array<{price: number, looks: number, books: number}>} data
  * @param {Prior<T>} prior
  * @param {Proposal} proposal
+ * @param {Array<{price: number, looks: number, books: number}>} data
  * @param {object} [options]
  * @param {{[paramName: string]: number}} [options.initialParams] Defaults to prior.sample().
  * @param {number} [options.burnIn=0] Steps to discard before yielding.
@@ -19,7 +19,7 @@ import { BaseDemandModel } from '../conversion/base.js'
  * @param {() => number} [options.rng] A uniform(0,1) RNG; defaults to Math.random.
  * @yields {T}
  */
-export function* mh(data, prior, proposal, { initialParams, burnIn = 0, thin = 1, rng = Math.random } = {}) {
+export function* mh(prior, proposal, data, { initialParams, burnIn = 0, thin = 1, rng = Math.random } = {}) {
   let currentParams = initialParams ?? prior.sample(rng)
   let currentModel = prior.makeModel(currentParams)
   let currentLogPost = logLikelihood(currentModel, data) + prior.logPdf(currentParams)
