@@ -29,8 +29,8 @@ export class LinearDemandModel extends BaseDemandModel {
    * @param {number} params.elasticity The point price elasticity of demand at the reference price.
    * @returns {LinearDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    LinearDemandModel._check_reference(price, conversion, elasticity)
+  static fromReference({ price, conversion, elasticity }) {
+    LinearDemandModel._checkReference(price, conversion, elasticity)
     const a = conversion * (1 - elasticity)
     const b = elasticity * (conversion / price)
     return new LinearDemandModel({ a, b })
@@ -62,7 +62,7 @@ export class LinearDemandModel extends BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {LinearDemandModel}
    */
-  static from_flat(averageConversion) {
+  static fromFlat(averageConversion) {
     return new LinearDemandModel({ a: averageConversion, b: 0 });
   }
 

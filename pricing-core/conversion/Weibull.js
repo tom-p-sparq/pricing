@@ -28,8 +28,8 @@ export class WeibullDemandModel extends BaseDemandModel {
    * @param {number} params.elasticity The point price elasticity of demand at the reference price.
    * @returns {WeibullDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    WeibullDemandModel._check_reference(price, conversion, elasticity)
+  static fromReference({ price, conversion, elasticity }) {
+    WeibullDemandModel._checkReference(price, conversion, elasticity)
     const b = elasticity / Math.log(conversion)
     const a = Math.log(-Math.log(conversion)) - b * Math.log(price)
     return new WeibullDemandModel({ a, b });
@@ -65,7 +65,7 @@ export class WeibullDemandModel extends BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {WeibullDemandModel}
    */
-  static from_flat(averageConversion) {
+  static fromFlat(averageConversion) {
     return new WeibullDemandModel({ a: Math.log(-Math.log(averageConversion)), b: 0 });
   }
 

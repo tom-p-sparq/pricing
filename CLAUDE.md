@@ -41,8 +41,8 @@ Each page is a pair: `pages/NN-name.html` (content/front matter) + `pages/NN-nam
 
 Three top-level modules exported from `pricing-core/index.js`:
 
-- **`conversion/`** — demand model classes. `BaseDemandModel` defines the interface; subclasses must implement `_conversion(price)` (unclamped), `gradLog(price)` (returns `{conversion, rejection}` gradient objects keyed by parameter name), and the static factories `from_reference({price, conversion, elasticity})`, `interpolate(point0, point1)`, and `from_flat(averageConversion)`.
-- **`fitting/`** — gradient-based optimisation. `fit()` is a generator that yields intermediate models during convergence using the Adam optimiser (`adam.js`) and log-likelihoods (`likelihoods.js`). Handles edge cases before entering the optimisation loop: 0 points → yield model as-is; 1 point → `from_reference` with elasticity −2; 2 points → `interpolate`; 3+ points → Adam optimisation. Falls back to a flat model if the initial log-likelihood is extremely poor.
+- **`conversion/`** — demand model classes. `BaseDemandModel` defines the interface; subclasses must implement `_conversion(price)` (unclamped), `gradLog(price)` (returns `{conversion, rejection}` gradient objects keyed by parameter name), and the static factories `fromReference({price, conversion, elasticity})`, `interpolate(point0, point1)`, and `fromFlat(averageConversion)`.
+- **`fitting/`** — gradient-based optimisation. `fit()` is a generator that yields intermediate models during convergence using the Adam optimiser (`adam.js`) and log-likelihoods (`likelihoods.js`). Handles edge cases before entering the optimisation loop: 0 points → yield model as-is; 1 point → `fromReference` with elasticity −2; 2 points → `interpolate`; 3+ points → Adam optimisation. Falls back to a flat model if the initial log-likelihood is extremely poor.
 - **`visualisation/`** — Observable Plot wrappers (`plotting/`) and Observable Input form controls (`inputs/`). Functions accept either a single model or an array of named models.
 
 ### Fitting Data Schema

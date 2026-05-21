@@ -29,8 +29,8 @@ export class LogisticDemandModel extends BaseDemandModel {
    * @param {number} params.elasticity The point price elasticity of demand at the reference price.
    * @returns {LogisticDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    LogisticDemandModel._check_reference(price, conversion, elasticity)
+  static fromReference({ price, conversion, elasticity }) {
+    LogisticDemandModel._checkReference(price, conversion, elasticity)
     const b = elasticity / ((1 - conversion) * price)
     const a = Math.log(conversion) - Math.log(1 - conversion) - b * price
     return new LogisticDemandModel({ a, b })
@@ -64,7 +64,7 @@ export class LogisticDemandModel extends BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {LogisticDemandModel}
    */
-  static from_flat(averageConversion) {
+  static fromFlat(averageConversion) {
     return new LogisticDemandModel({ a: Math.log(averageConversion / (1 - averageConversion)), b: 0 });
   }
 

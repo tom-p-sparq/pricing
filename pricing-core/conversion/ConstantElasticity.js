@@ -29,8 +29,8 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    * @param {number} params.elasticity The point price elasticity of demand at the reference price.
    * @returns {ConstantElasticityDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    ConstantElasticityDemandModel._check_reference(price, conversion, elasticity)
+  static fromReference({ price, conversion, elasticity }) {
+    ConstantElasticityDemandModel._checkReference(price, conversion, elasticity)
     const b = elasticity
     const a = Math.log(conversion) - b * Math.log(price)
     return new ConstantElasticityDemandModel({ a, b })
@@ -66,7 +66,7 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {ConstantElasticityDemandModel}
    */
-  static from_flat(averageConversion) {
+  static fromFlat(averageConversion) {
     return new ConstantElasticityDemandModel({ a: Math.log(averageConversion), b: 0 });
   }
 
