@@ -10,7 +10,7 @@ import { BaseDemandModel } from "../../conversion/base.js";
  * @param {number} [maxPrice=400]
  */
 export function incrementalRevenuePlot(model, cost = 0, maxPrice = 400) {
-  /** @type {Array<{price: number, incrementalRevenue: number, name: string|undefined}>} */
+  /** @type {Array<{price: number, incrementalRevenue: number, name: string}>} */
   let data;
   if (model instanceof BaseDemandModel) {
     data = _singleModelRevenueData(model, cost, maxPrice)
