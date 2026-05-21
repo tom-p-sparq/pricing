@@ -57,14 +57,33 @@ export class ParticleFilterState {
   }
 
   /**
+   * The weights (i.e. not in log space).
+   * @returns {number[]}
+   */
+  get weights() {
+    return this._logWeights.map(Math.exp)
+  }
+  
+  /**
    * The current particle set and normalised weights, without consuming new data.
    * @returns {{ particles: T[], weights: number[] }}
    */
   get current() {
     return {
       particles: this._particles.map(p => this._prior.makeModel(p)),
-      weights: this._logWeights.map(Math.exp),
+      weights: this.weights,
     }
+  }
+
+  /**
+   * The effective sample size (ESS).
+   * Effective sample size measures particle diversity: ESS = 1/Σwᵢ² ranges
+   * from 1 (all weight on one particle) to N (uniform weights). Low ESS means
+   * a handful of particles dominate and the approximation is poor.
+   * @returns { number }
+   */
+  get ess() {
+    return 1 / this.weights.reduce((sum, w) => sum + w * w, 0)
   }
 
   /**
@@ -89,18 +108,12 @@ export class ParticleFilterState {
       // normalising constant, keeping everything in log space until needed.
       const lse = logSumExp(this._logWeights)
       this._logWeights = this._logWeights.map(lw => lw - lse)
-      const weights = this._logWeights.map(Math.exp)
-
-      // Effective sample size measures particle diversity: ESS = 1/Σwᵢ² ranges
-      // from 1 (all weight on one particle) to N (uniform weights). Low ESS means
-      // a handful of particles dominate and the approximation is poor.
-      const ess = 1 / weights.reduce((sum, w) => sum + w * w, 0)
-      if (ess < N * resampleThreshold) {
-
+      
+      if (this.ess < N * resampleThreshold) {
         // Resample N particles with replacement proportional to their weights,
         // then reset to uniform weights. Particles in high-probability regions
         // get multiple copies; low-probability ones are discarded.
-        this._particles = systematicResample(this._particles, weights, N, rng)
+        this._particles = systematicResample(this._particles, this.weights, N, rng)
         this._logWeights = new Array(N).fill(-Math.log(N))
 
         // After resampling, many particles are identical copies. MCMC rejuvenation
