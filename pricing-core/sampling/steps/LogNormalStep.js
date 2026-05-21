@@ -4,15 +4,14 @@ import { Normal } from '../distributions/Normal.js'
 export class LogNormalStep extends BaseStep {
   /**
    * Creates an instance of LogNormalStep.
-   * @param {number} mu Any bias in the underlying normal distribution (default value 0)
-   * @param {number} sigma The standard deviation of the underlying normal distribution.
+   * @param {{mu?: number, sigma: number}} params
    */
-  constructor(mu = 0, sigma) {
+  constructor({ mu = 0, sigma }) {
     if (sigma <= 0) {
       throw new Error("Standard deviation (sigma) must be positive.");
     }
     super();
-    this.parentDistribution = new Normal(mu, sigma);
+    this.parentDistribution = new Normal({ mu, sigma });
     this.mu = mu;
     this.sigma = sigma;
   }

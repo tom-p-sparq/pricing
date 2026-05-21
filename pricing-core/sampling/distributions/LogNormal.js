@@ -4,15 +4,14 @@ import { Normal } from './Normal.js'
 export class LogNormal extends BaseDistribution {
   /**
    * Creates an instance of LogNormal distribution.
-   * @param {number} mu - The mean of the underlying Normal distribution.
-   * @param {number} sigma - The standard deviation of the underlying Normal distribution.
+   * @param {{mu: number, sigma: number}} params
    */
-  constructor(mu, sigma) {
+  constructor({ mu, sigma }) {
     if (sigma <= 0) {
       throw new Error("Standard deviation (sigma) must be positive.");
     }
     super();
-    this.parentDistribution = new Normal(mu, sigma);
+    this.parentDistribution = new Normal({ mu, sigma });
     this.mu = mu;
     this.sigma = sigma
   }

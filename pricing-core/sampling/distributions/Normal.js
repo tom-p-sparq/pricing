@@ -3,10 +3,9 @@ import { BaseDistribution } from './base.js';
 export class Normal extends BaseDistribution {
   /**
    * Creates an instance of Normal distribution.
-   * @param {number} mu - The mean of the distribution.
-   * @param {number} sigma - The standard deviation of the distribution.
+   * @param {{mu: number, sigma: number}} params
    */
-  constructor(mu, sigma) {
+  constructor({ mu, sigma }) {
     if (sigma <= 0) {
       throw new Error("Standard deviation (sigma) must be positive.");
     }
