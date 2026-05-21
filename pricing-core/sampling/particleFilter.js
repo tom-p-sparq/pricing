@@ -1,7 +1,7 @@
 import { logLikelihood } from '../fitting/likelihoods.js'
+import { BaseDemandModel } from '../conversion/base.js'
 import { Prior } from './priors.js'
 import { Proposal } from './proposals.js'
-import { BaseDemandModel } from '../conversion/base.js'
 import { mhStep } from './mcmc.js'
 
 /**
@@ -19,48 +19,119 @@ import { mhStep } from './mcmc.js'
  * @param {() => number} [options.rng] A uniform(0,1) RNG; defaults to Math.random.
  * @yields {{ particles: T[], weights: number[] }}
  */
-export function* particleFilter(prior, proposal, data, { N = 500, resampleThreshold = 0.5, mcmcSteps = 5, rng = Math.random } = {}) {
-  let particles = Array.from({ length: N }, () => prior.sample(rng))
-  let logWeights = new Array(N).fill(-Math.log(N))
-
-  yield { particles: particles.map(p => prior.makeModel(p)), weights: logWeights.map(Math.exp) }
-
-  /** @type {Array<{price: number, looks: number, books: number}>} */
-  const observedData = []
-
+export function* particleFilter(prior, proposal, data, options = {}) {
+  const pf = new ParticleFilterState(prior, proposal, options)
+  yield pf.current
   for (const dataPoint of data) {
-    observedData.push(dataPoint)
+    yield pf.update([dataPoint])
+  }
+}
 
-    // Update log weights with likelihood of new observation
-    logWeights = particles.map((params, i) =>
-      logWeights[i] + logLikelihood(prior.makeModel(params), [dataPoint])
-    )
+/**
+ * Stateful particle filter for incremental posterior updates.
+ * Suitable for interactive use where data arrives in batches over time.
+ *
+ * @template {BaseDemandModel} T
+ */
+export class ParticleFilterState {
+  /**
+   * @param {Prior<T>} prior
+   * @param {Proposal} [proposal] If provided, applies MCMC rejuvenation after resampling.
+   * @param {object} [options]
+   * @param {number} [options.N=500] Number of particles.
+   * @param {number} [options.resampleThreshold=0.5] Resample when ESS < N * resampleThreshold.
+   * @param {number} [options.mcmcSteps=5] Number of MH rejuvenation steps per particle.
+   * @param {() => number} [options.rng] A uniform(0,1) RNG; defaults to Math.random.
+   */
+  constructor(prior, proposal, { N = 500, resampleThreshold = 0.5, mcmcSteps = 5, rng = Math.random } = {}) {
+    this._prior = prior
+    this._proposal = proposal
+    this._N = N
+    this._resampleThreshold = resampleThreshold
+    this._mcmcSteps = mcmcSteps
+    this._rng = rng
+    this._particles = Array.from({ length: N }, () => prior.sample(rng))
+    this._logWeights = new Array(N).fill(-Math.log(N))
+    /** @type {Array<{price: number, looks: number, books: number}>} */
+    this._observedData = []
+  }
 
-    // Normalise via log-sum-exp for numerical stability
-    const lse = logSumExp(logWeights)
-    logWeights = logWeights.map(lw => lw - lse)
-    const weights = logWeights.map(Math.exp)
+  /**
+   * The weights (i.e. not in log space).
+   * @returns {number[]}
+   */
+  get weights() {
+    return this._logWeights.map(Math.exp)
+  }
+  
+  /**
+   * The current particle set and normalised weights, without consuming new data.
+   * @returns {{ particles: T[], weights: number[] }}
+   */
+  get current() {
+    return {
+      particles: this._particles.map(p => this._prior.makeModel(p)),
+      weights: this.weights,
+    }
+  }
 
-    // Resample when ESS drops below threshold
-    const ess = 1 / weights.reduce((sum, w) => sum + w * w, 0)
-    if (ess < N * resampleThreshold) {
-      particles = systematicResample(particles, weights, N, rng)
-      logWeights = new Array(N).fill(-Math.log(N))
+  /**
+   * The effective sample size (ESS).
+   * Effective sample size measures particle diversity: ESS = 1/Σwᵢ² ranges
+   * from 1 (all weight on one particle) to N (uniform weights). Low ESS means
+   * a handful of particles dominate and the approximation is poor.
+   * @returns { number }
+   */
+  get ess() {
+    return 1 / this.weights.reduce((sum, w) => sum + w * w, 0)
+  }
 
-      // Rejuvenate to restore diversity
-      if (mcmcSteps > 0) {
-        particles = particles.map(params => {
-          let currentParams = params
-          let currentLogPost = logLikelihood(prior.makeModel(currentParams), observedData) + prior.logPdf(currentParams)
-          for (let k = 0; k < mcmcSteps; k++) {
-            ({ params: currentParams, logPost: currentLogPost } = mhStep(currentParams, currentLogPost, prior, proposal, observedData, rng))
-          }
-          return currentParams
-        })
+  /**
+   * Updates the particle set with a new batch of observations.
+   * Processes each point in the batch sequentially, resampling and rejuvenating as needed.
+   * @param {Array<{price: number, looks: number, books: number}>} newData
+   * @returns {{ particles: T[], weights: number[] }}
+   */
+  update(newData) {
+    const { _prior: prior, _proposal: proposal, _N: N, _resampleThreshold: resampleThreshold, _mcmcSteps: mcmcSteps, _rng: rng } = this
+
+    for (const dataPoint of newData) {
+      this._observedData.push(dataPoint)
+
+      // Each particle's weight is multiplied by the likelihood of the new observation.
+      // Working in log space avoids underflow when likelihoods are very small.
+      this._logWeights = this._particles.map((params, i) =>
+        this._logWeights[i] + logLikelihood(prior.makeModel(params), [dataPoint])
+      )
+
+      // Normalise so weights sum to 1. Log-sum-exp subtracts the log of the
+      // normalising constant, keeping everything in log space until needed.
+      const lse = logSumExp(this._logWeights)
+      this._logWeights = this._logWeights.map(lw => lw - lse)
+      
+      if (this.ess < N * resampleThreshold) {
+        // Resample N particles with replacement proportional to their weights,
+        // then reset to uniform weights. Particles in high-probability regions
+        // get multiple copies; low-probability ones are discarded.
+        this._particles = systematicResample(this._particles, this.weights, N, rng)
+        this._logWeights = new Array(N).fill(-Math.log(N))
+
+        // After resampling, many particles are identical copies. MCMC rejuvenation
+        // applies MH moves to each particle independently, targeting the full
+        // posterior over all data observed so far, to restore diversity.
+        if (proposal && mcmcSteps > 0) {
+          this._particles = this._particles.map(params => {
+            let currentParams = params
+            let currentLogPost = logLikelihood(prior.makeModel(currentParams), this._observedData) + prior.logPdf(currentParams)
+            for (let k = 0; k < mcmcSteps; k++) {
+              ({ params: currentParams, logPost: currentLogPost } = mhStep(currentParams, currentLogPost, prior, proposal, this._observedData, rng))
+            }
+            return currentParams
+          })
+        }
       }
     }
-
-    yield { particles: particles.map(p => prior.makeModel(p)), weights: logWeights.map(Math.exp) }
+    return this.current
   }
 }
 
