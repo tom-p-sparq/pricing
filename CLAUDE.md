@@ -39,10 +39,11 @@ Each page is a pair: `pages/NN-name.html` (content/front matter) + `pages/NN-nam
 
 ### pricing-core Library
 
-Three top-level modules exported from `pricing-core/index.js`:
+Four top-level modules exported from `pricing-core/index.js`:
 
 - **`conversion/`** — demand model classes. `BaseDemandModel` defines the interface; subclasses must implement `_conversion(price)` (unclamped), `gradLog(price)` (returns `{conversion, rejection}` gradient objects keyed by parameter name), and the static factories `fromReference({price, conversion, elasticity})`, `interpolate(point0, point1)`, and `fromFlat(averageConversion)`.
 - **`fitting/`** — gradient-based optimisation. `fit()` is a generator that yields intermediate models during convergence using the Adam optimiser (`adam.js`) and log-likelihoods (`likelihoods.js`). Handles edge cases before entering the optimisation loop: 0 points → yield model as-is; 1 point → `fromReference` with elasticity −2; 2 points → `interpolate`; 3+ points → Adam optimisation. Falls back to a flat model if the initial log-likelihood is extremely poor.
+- **`sampling/`** — Bayesian inference over model parameters. `Prior` and `Proposal` operate on plain `{[paramName]: number}` objects (decoupled from `BaseDemandModel`); a `factory` function on `Prior` converts sampled parameters to model instances. `distributions/` holds unconditional priors (`Normal`, `LogNormal`); `steps/` holds conditional proposal distributions (`NormalStep`, `LogNormalStep`). Samplers are generators matching `fit()`'s yield pattern: `samplePrior` (i.i.d. prior draws, `iid.js`), `mh` (Metropolis-Hastings, `mcmc.js`), and `particleFilter` (bootstrap particle filter with MCMC rejuvenation, `particleFilter.js`).
 - **`visualisation/`** — Observable Plot wrappers (`plotting/`) and Observable Input form controls (`inputs/`). Functions accept either a single model or an array of named models.
 
 ### Fitting Data Schema
