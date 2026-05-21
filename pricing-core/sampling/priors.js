@@ -1,41 +1,36 @@
-import { BaseDemandModel } from '../conversion/base.js'
 import { BaseDistribution } from './distributions/index.js'
 
 /**
- * Bundles a model class with a prior distribution over its parameters.
- * @template {typeof BaseDemandModel} T
+ * A prior distribution over a named set of parameters.
  */
 export class Prior {
   /**
-   * @param {T} ModelClass The model class to instantiate when sampling.
    * @param {{[paramName: string]: BaseDistribution}} priorSpec
    *   An object mapping each parameter name to a prior distribution.
    */
-  constructor(ModelClass, priorSpec) {
-    this.ModelClass = ModelClass
+  constructor(priorSpec) {
     this.priorSpec = priorSpec
   }
 
   /**
-   * Samples a new model instance by drawing each parameter independently from its prior.
+   * Samples a parameter object by drawing each parameter independently from its prior.
    * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
-   * @returns {InstanceType<T>}
+   * @returns {{[paramName: string]: number}}
    */
   sample(rng = Math.random) {
-    const params = Object.fromEntries(
+    return Object.fromEntries(
       Object.entries(this.priorSpec).map(([name, dist]) => [name, dist.sample(rng)])
     )
-    return /** @type {InstanceType<T>} */ (new this.ModelClass(params))
   }
 
   /**
-   * Computes the log prior density of a model's parameters.
-   * @param {BaseDemandModel} model
+   * Computes the log prior density of a parameter object.
+   * @param {{[paramName: string]: number}} params
    * @returns {number}
    */
-  logPdf(model) {
-    return model.paramEntries.reduce(
-      (sum, [name, value]) => sum + this.priorSpec[name].logPdf(value), 0
+  logPdf(params) {
+    return Object.entries(this.priorSpec).reduce(
+      (sum, [name, dist]) => sum + dist.logPdf(params[name]), 0
     )
   }
 }

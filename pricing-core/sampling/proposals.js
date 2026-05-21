@@ -1,8 +1,7 @@
-import { BaseDemandModel } from '../conversion/base.js'
 import { BaseStep } from './steps/index.js'
 
 /**
- * Bundles a set of step distributions for proposing moves in parameter space.
+ * A proposal distribution over a named set of parameters.
  */
 export class Proposal {
   /**
@@ -14,31 +13,27 @@ export class Proposal {
   }
 
   /**
-   * Proposes a new model by applying a step to each parameter of the current model.
-   * @param {BaseDemandModel} model The current model to step from.
+   * Proposes a new parameter object by stepping each parameter of the current one.
+   * @param {{[paramName: string]: number}} params The current parameters to step from.
    * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
-   * @returns {BaseDemandModel} A new model instance with proposed parameters.
+   * @returns {{[paramName: string]: number}}
    */
-  propose(model, rng = Math.random) {
-    const ModelClass = Object.getPrototypeOf(model).constructor
-    const params = Object.fromEntries(
-      model.paramEntries.map(([name, value]) => [name, this.proposalSpec[name].sample(value, rng)])
+  propose(params, rng = Math.random) {
+    return Object.fromEntries(
+      Object.entries(this.proposalSpec).map(([name, step]) => [name, step.sample(params[name], rng)])
     )
-    return new ModelClass(params)
   }
 
   /**
-   * Computes the log density of proposing `proposedModel` given `currentModel`.
+   * Computes the log density of proposing `proposedParams` given `currentParams`.
    * Required in the MH acceptance ratio when the proposal is asymmetric.
-   * @param {BaseDemandModel} proposedModel
-   * @param {BaseDemandModel} currentModel
+   * @param {{[paramName: string]: number}} proposedParams
+   * @param {{[paramName: string]: number}} currentParams
    * @returns {number}
    */
-  logPdf(proposedModel, currentModel) {
-    return proposedModel.paramEntries.reduce(
-      (sum, [name, proposedValue]) =>
-        sum + this.proposalSpec[name].logPdf(proposedValue, currentModel.parameters[name]),
-      0
+  logPdf(proposedParams, currentParams) {
+    return Object.entries(this.proposalSpec).reduce(
+      (sum, [name, step]) => sum + step.logPdf(proposedParams[name], currentParams[name]), 0
     )
   }
 }
