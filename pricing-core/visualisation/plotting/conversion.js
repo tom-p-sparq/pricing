@@ -13,7 +13,7 @@ import { BaseDemandModel } from "../../conversion/base.js";
  * @param {number} [maxPrice=400]
  */
 export function conversionPlot({ model, specPoints, fitPoints }, maxPrice = 400) {
-  /** @type {Array<{price: number, conversion: number, name: string|undefined}>} */
+  /** @type {Array<{price: number, conversion: number, name: string}>} */
   let data;
   if (model instanceof BaseDemandModel) {
     data = _singleModelConversionData(model, maxPrice)

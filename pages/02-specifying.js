@@ -33,7 +33,7 @@ const interpolantTitles = {
 
 function renderReference() {
     const models = plotConfigs.map(({ modelClass, title }) => ({
-        model: modelClass.from_reference(interactiveReference.value),
+        model: modelClass.fromReference(interactiveReference.value),
         name: title,
     }));
     const comparisonPlot = plotting.conversionPlot({

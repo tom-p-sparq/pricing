@@ -5,7 +5,7 @@ export default function(eleventyConfig) {
   const pathPrefix = process.env.PATHPREFIX ?? "/";
 
   eleventyConfig.addPassthroughCopy("pages/style.css");
-  eleventyConfig.addPassthroughCopy("pages/utils.js");
+  eleventyConfig.addPassthroughCopy({ "utils.js": "utils.js" });
   eleventyConfig.addPassthroughCopy({ "pricing-core": "pricing-core" });
 
   // Co-locate each page's companion JS into its output folder as script.js

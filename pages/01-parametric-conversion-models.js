@@ -17,7 +17,7 @@ const reference = {
 };
 
 plotConfigs.forEach(({ modelClass, title, containerId }) => {
-    const model = modelClass.from_reference(reference);
+    const model = modelClass.fromReference(reference);
     const plot = plotting.conversionPlot({ model: model });
     plotting.plot(requireElement(containerId), plot, { title: title });
 });
@@ -28,7 +28,7 @@ const comparisonContainer = requireElement('conversion-comparison-container');
 
 function render() {
     const models = plotConfigs.map(({ modelClass, title }) => ({
-        model: modelClass.from_reference(interactiveReference.value),
+        model: modelClass.fromReference(interactiveReference.value),
         name: title,
     }));
     const comparisonPlot = plotting.conversionPlot({

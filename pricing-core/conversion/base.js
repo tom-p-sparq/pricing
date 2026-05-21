@@ -4,12 +4,11 @@
  */
 export class BaseDemandModel {
   /**
-   * @param {object} parameters Model parameters.
+   * @param {{[paramName: string]: number}} parameters Model parameters.
    */
   constructor(parameters) {
     /**
-     * @protected
-     * @type {object}
+     * @type {{[paramName: string]: number}}
      */
     this.parameters = parameters;
   }
@@ -89,8 +88,8 @@ export class BaseDemandModel {
    * @param {number} params.conversion The conversion rate at the reference price.
    * @returns {BaseDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `from_reference`")
+  static fromReference({ price, conversion, elasticity }) {
+    throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `fromReference`")
   }
 
   /**
@@ -116,8 +115,8 @@ export class BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {BaseDemandModel} A new instance of the demand model.
    */
-  static from_flat(averageConversion) {
-    throw new Error("Define the constructor of the flat model parameterised by average conversion in `from_flat`")
+  static fromFlat(averageConversion) {
+    throw new Error("Define the constructor of the flat model parameterised by average conversion in `fromFlat`")
   }
 
   /**
@@ -130,7 +129,7 @@ export class BaseDemandModel {
    * @throws {Error} If the elasticity is not negative.
    * @throws {Error} If the conversion is not strictly between 0 and 1.
    */
-  static _check_reference(price, conversion, elasticity) {
+  static _checkReference(price, conversion, elasticity) {
     if (price <= 0) {
       throw new Error('Price must be positive.')
     }

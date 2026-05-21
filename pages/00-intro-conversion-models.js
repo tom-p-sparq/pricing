@@ -10,7 +10,7 @@ const reference = {
     elasticity: -2,
     conversion: 0.5,
 };
-const model = conversion.LogisticDemandModel.from_reference(reference);
+const model = conversion.LogisticDemandModel.fromReference(reference);
 const conversionPlot = plotting.conversionPlot({ model: model, });
 plotting.plot(
     requireElement('conversion-container'),
