@@ -1,5 +1,21 @@
-import { conversion, plotting, inputs, fitting } from '../pricing-core/index.js'
+import { conversion, plotting, inputs, sampling } from '../pricing-core/index.js'
 import { requireElement } from '../utils.js'
+
+const { Prior, Proposal, ParticleFilterState, distributions, steps } = sampling
+const { Normal } = distributions
+const { NormalStep } = steps
+const { LogisticDemandModel } = conversion
+
+const prior = new Prior({
+    conversion: new Normal({mu: 0.5, sigma: 0.1}),
+    elasticity: new Normal({mu: -2, sigma: 0.5}),
+})
+const proposal = new Proposal({
+    conversion: new NormalStep({ sigma: 0.05 }),
+    elasticity: new NormalStep({ sigma: 0.1 })
+})
+const pf = new ParticleFilterState(prior, proposal)
+
 
 const modelSpecs = [
     {
