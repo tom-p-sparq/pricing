@@ -1,6 +1,6 @@
 import { BaseDistribution } from './base.js';
-import { beta as betaRandom } from '@stdlib/random-base'
-import { beta as betaDists } from '@stdlib/stats-base-dists'
+import { factory } from '@stdlib/random-base-beta'
+import logpdf from '@stdlib/stats-base-dists-beta-logpdf'
 
 export class Beta extends BaseDistribution {
   /**
@@ -17,7 +17,7 @@ export class Beta extends BaseDistribution {
     super();
     this._alpha = mean * sampleSize;
     this._beta = (1 - mean) * sampleSize;
-    this._sampler = betaRandom.factory(this._alpha, this._beta, {prng: rng})
+    this._sampler = factory(this._alpha, this._beta, {prng: rng})
   }
 
   /** @override */
@@ -30,6 +30,6 @@ export class Beta extends BaseDistribution {
    * @param {number} x
    */
   logPdf(x) {
-    return betaDists.logpdf(x, this._alpha, this._beta)
+    return logpdf(x, this._alpha, this._beta)
   }
 }
