@@ -1,43 +1,32 @@
 import { BaseDistribution } from './base.js'
-import { Normal } from './Normal.js'
+import lognormal from '@stdlib/random-base-lognormal'
+import logpdf from '@stdlib/stats-base-dists-lognormal-logpdf'
 
 export class LogNormal extends BaseDistribution {
   /**
    * Creates an instance of LogNormal distribution.
    * @param {{mu: number, sigma: number}} params
    */
-  constructor({ mu, sigma }) {
+  constructor({ mu, sigma }, rng = Math.random) {
     if (sigma <= 0) {
       throw new Error("Standard deviation (sigma) must be positive.");
     }
     super();
-    this.parentDistribution = new Normal({ mu, sigma });
-    this.mu = mu;
-    this.sigma = sigma
+    this._mu = mu;
+    this._sigma = sigma
+    this._sampler = lognormal.factory(mu, sigma, {prng: rng})
+  }
+
+  /** @override */
+  sample() {
+    return this._sampler()
   }
 
   /**
-   * Generates a random variate from the Log-Normal distribution.
-   * @override
-   * @param {function} rng - A random number generator function (defaults to Math.random).
-   * @returns {number} A random variate.
-   */
-  sample(rng = Math.random) {
-    const normalVariate = this.parentDistribution.sample(rng);
-    return Math.exp(normalVariate);
-  }
-
-  /**
-   * Computes the log probability density of the Log-Normal distribution at x.
    * @override
    * @param {number} x
-   * @returns {number} The log probability density at x.
    */
   logPdf(x) {
-    if (x <= 0) {
-      return -Infinity;
-    }
-    const logX = Math.log(x);
-    return this.parentDistribution.logPdf(logX) - logX;
+    return logpdf(x, this._mu, this._sigma)
   }
 }

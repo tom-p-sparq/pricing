@@ -9,8 +9,8 @@ export class BaseStep {
    * @param {number} xCurrent The current value to step from
    * @returns {number} A random variate.
    */
-  sample(xCurrent, rng = Math.random) {
-    throw new Error("Method 'sample()' must be implemented in subclasses.");
+  sample(xCurrent) {
+    throw new Error("Method 'sample(xCurrent)' must be implemented in subclasses.");
   }
 
   /**
@@ -21,6 +21,6 @@ export class BaseStep {
    * @returns {number} The log probability density at x.
    */
   logPdf(x, xCurrent) {
-    throw new Error("Method 'logPdf()' must be implemented in subclasses.");
+    throw new Error("Method 'logPdf(x, xCurrent)' must be implemented in subclasses.");
   }
 }
