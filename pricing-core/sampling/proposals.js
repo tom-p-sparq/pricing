@@ -5,7 +5,7 @@
  */
 export class Proposal {
   /**
-   * @param {{ [paramName: string]: [new(params: object, rng?: () => number) => BaseStep, object] }} proposalSpec
+   * @param {{ [paramName: string]: [new(params: any, rng?: () => number) => BaseStep, object] }} proposalSpec
    *   An object mapping each parameter name to a [StepClass, params] tuple.
    * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
    * @example

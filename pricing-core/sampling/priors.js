@@ -7,7 +7,7 @@
  */
 export class Prior {
   /**
-   * @param {{ [paramName: string]: [new(params: object, rng?: () => number) => BaseDistribution, object] }} priorSpec
+   * @param {{ [paramName: string]: [new(params: any, rng?: () => number) => BaseDistribution, object] }} priorSpec
    *   An object mapping each parameter name to a [DistributionClass, params] tuple.
    * @param {(params: {[paramName: string]: number}) => T} [factory]
    *   Converts a parameter object to a model instance.
