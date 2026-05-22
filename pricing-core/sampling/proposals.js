@@ -15,12 +15,11 @@ export class Proposal {
   /**
    * Proposes a new parameter object by stepping each parameter of the current one.
    * @param {{[paramName: string]: number}} params The current parameters to step from.
-   * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
    * @returns {{[paramName: string]: number}}
    */
-  propose(params, rng = Math.random) {
+  propose(params) {
     return Object.fromEntries(
-      Object.entries(this.proposalSpec).map(([name, step]) => [name, step.sample(params[name], rng)])
+      Object.entries(this.proposalSpec).map(([name, step]) => [name, step.sample(params[name])])
     )
   }
 

@@ -19,12 +19,11 @@ export class Prior {
 
   /**
    * Samples a parameter object by drawing each parameter independently from its prior.
-   * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
    * @returns {{[paramName: string]: number}}
    */
-  sample(rng = Math.random) {
+  sample() {
     return Object.fromEntries(
-      Object.entries(this.priorSpec).map(([name, dist]) => [name, dist.sample(rng)])
+      Object.entries(this.priorSpec).map(([name, dist]) => [name, dist.sample()])
     )
   }
 
@@ -51,10 +50,9 @@ export class Prior {
 
   /**
    * Samples a model instance by drawing parameters from the prior and applying the factory.
-   * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
    * @returns {T}
    */
-  sampleModel(rng = Math.random) {
-    return this.makeModel(this.sample(rng))
+  sampleModel() {
+    return this.makeModel(this.sample())
   }
 }
