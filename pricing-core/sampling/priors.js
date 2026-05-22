@@ -1,4 +1,4 @@
-import { BaseDistribution } from './distributions/index.js'
+/** @import { BaseDistribution } from './distributions/base.js' */
 
 /**
  * A prior distribution over a named set of parameters, with an optional factory
@@ -7,14 +7,24 @@ import { BaseDistribution } from './distributions/index.js'
  */
 export class Prior {
   /**
-   * @param {{[paramName: string]: BaseDistribution}} priorSpec
-   *   An object mapping each parameter name to a prior distribution.
+   * @param {{ [paramName: string]: [new(params: object, rng?: () => number) => BaseDistribution, object] }} priorSpec
+   *   An object mapping each parameter name to a [DistributionClass, params] tuple.
    * @param {(params: {[paramName: string]: number}) => T} [factory]
    *   Converts a parameter object to a model instance.
+   * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
+   * @example
+   * new Prior(
+   *   { conversion: [Normal, { mu: 0.4, sigma: 0.05 }], elasticity: [Normal, { mu: -2, sigma: 0.5 }] },
+   *   ({ conversion, elasticity }) => LogisticDemandModel.fromReference({price: 100, conversion, elasticity }),
+   *   rng
+   * )
    */
-  constructor(priorSpec, factory) {
-    this.priorSpec = priorSpec
+  constructor(priorSpec, factory, rng = Math.random) {
+    this.rng = rng
     this.factory = factory
+    this._dists = Object.fromEntries(
+      Object.entries(priorSpec).map(([name, [Dist, params]]) => [name, new Dist(params, rng)])
+    )
   }
 
   /**
@@ -23,7 +33,7 @@ export class Prior {
    */
   sample() {
     return Object.fromEntries(
-      Object.entries(this.priorSpec).map(([name, dist]) => [name, dist.sample()])
+      Object.entries(this._dists).map(([name, dist]) => [name, dist.sample()])
     )
   }
 
@@ -33,7 +43,7 @@ export class Prior {
    * @returns {number}
    */
   logPdf(params) {
-    return Object.entries(this.priorSpec).reduce(
+    return Object.entries(this._dists).reduce(
       (sum, [name, dist]) => sum + dist.logPdf(params[name]), 0
     )
   }
