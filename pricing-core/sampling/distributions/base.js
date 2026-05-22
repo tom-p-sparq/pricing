@@ -8,7 +8,7 @@ export class BaseDistribution {
    * @abstract
    * @returns {number} A random variate.
    */
-  sample(rng = Math.random) {
+  sample() {
     throw new Error("Method 'sample()' must be implemented in subclasses.");
   }
 

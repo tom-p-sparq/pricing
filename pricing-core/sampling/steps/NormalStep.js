@@ -1,31 +1,29 @@
 import { BaseStep } from './base.js';
-import { Normal } from '../distributions/Normal.js'
+import { factory } from '@stdlib/random-base-normal'
+import logpdf from '@stdlib/stats-base-dists-normal-logpdf'
 
 export class NormalStep extends BaseStep {
   /**
    * Creates an instance of NormalStep.
-   * @param {{mu?: number, sigma: number}} params
+   * @param {{sigma: number}} params
    */
-  constructor({ mu = 0, sigma }) {
+  constructor({ sigma }, rng = Math.random) {
     if (sigma <= 0) {
       throw new Error("Standard deviation (sigma) must be positive.");
     }
     super();
-    this.parentDistribution = new Normal({ mu, sigma });
-    this.mu = mu;
-    this.sigma = sigma;
+    this._sigma = sigma;
+    this.factory = factory({prng: rng})
   }
 
   /**
    * Generates a random variate from a normal distribution centered at xCurrent.
    * @override
    * @param {number} xCurrent The current value to step from.
-   * @param {function} rng A random number generator function (defaults to Math.random).
    * @returns {number} A random variate.
    */
-  sample(xCurrent, rng = Math.random) {
-    const normalVariate = this.parentDistribution.sample(rng);
-    return xCurrent + normalVariate;
+  sample(xCurrent) {
+    return this.factory(xCurrent, this._sigma)
   }
 
   /**
@@ -36,7 +34,6 @@ export class NormalStep extends BaseStep {
    * @returns {number} The log probability density at x.
    */
   logPdf(x, xCurrent) {
-    const dx = x - xCurrent;
-    return this.parentDistribution.logPdf(dx);
+    return logpdf(x, xCurrent, this._sigma)
   }
 }

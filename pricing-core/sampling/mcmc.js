@@ -10,11 +10,10 @@ import { BaseDemandModel } from '../conversion/base.js'
  * @param {Prior<any>} prior
  * @param {Proposal} proposal
  * @param {Array<{price: number, looks: number, books: number}>} data
- * @param {() => number} [rng]
  * @returns {{params: {[paramName: string]: number}, logPost: number}}
  */
-export function mhStep(currentParams, currentLogPost, prior, proposal, data, rng = Math.random) {
-  const proposedParams = proposal.propose(currentParams, rng)
+export function mhStep(currentParams, currentLogPost, prior, proposal, data) {
+  const proposedParams = proposal.propose(currentParams)
   const proposedModel = prior.makeModel(proposedParams)
   const proposedLogPost = logLikelihood(proposedModel, data) + prior.logPdf(proposedParams)
 
@@ -22,7 +21,7 @@ export function mhStep(currentParams, currentLogPost, prior, proposal, data, rng
     + proposal.logPdf(currentParams, proposedParams)   // log q(current | proposed) — reverse
     - proposal.logPdf(proposedParams, currentParams)   // log q(proposed | current) — forward
 
-  if (Math.log(rng()) < logAlpha) {
+  if (Math.log(prior.rng()) < logAlpha) {
     return { params: proposedParams, logPost: proposedLogPost }
   }
   return { params: currentParams, logPost: currentLogPost }
@@ -41,15 +40,14 @@ export function mhStep(currentParams, currentLogPost, prior, proposal, data, rng
  * @param {{[paramName: string]: number}} [options.initialParams] Defaults to prior.sample().
  * @param {number} [options.burnIn=0] Steps to discard before yielding.
  * @param {number} [options.thin=1] Yield every nth step after burn-in.
- * @param {() => number} [options.rng] A uniform(0,1) RNG; defaults to Math.random.
  * @yields {T}
  */
-export function* mh(prior, proposal, data, { initialParams, burnIn = 0, thin = 1, rng = Math.random } = {}) {
-  let currentParams = initialParams ?? prior.sample(rng)
+export function* mh(prior, proposal, data, { initialParams, burnIn = 0, thin = 1 } = {}) {
+  let currentParams = initialParams ?? prior.sample()
   let currentLogPost = logLikelihood(prior.makeModel(currentParams), data) + prior.logPdf(currentParams)
 
   for (let step = 0; ; step++) {
-    ({ params: currentParams, logPost: currentLogPost } = mhStep(currentParams, currentLogPost, prior, proposal, data, rng))
+    ({ params: currentParams, logPost: currentLogPost } = mhStep(currentParams, currentLogPost, prior, proposal, data))
 
     if (step >= burnIn && (step - burnIn) % thin === 0) {
       yield prior.makeModel(currentParams)

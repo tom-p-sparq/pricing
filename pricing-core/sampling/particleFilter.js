@@ -16,7 +16,6 @@ import { mhStep } from './mcmc.js'
  * @param {number} [options.N=500] Number of particles.
  * @param {number} [options.resampleThreshold=0.5] Resample when ESS < N * resampleThreshold.
  * @param {number} [options.mcmcSteps=5] Number of MH rejuvenation steps per particle.
- * @param {() => number} [options.rng] A uniform(0,1) RNG; defaults to Math.random.
  * @yields {{ particles: T[], weights: number[] }}
  */
 export function* particleFilter(prior, proposal, data, options = {}) {
@@ -41,16 +40,14 @@ export class ParticleFilterState {
    * @param {number} [options.N=500] Number of particles.
    * @param {number} [options.resampleThreshold=0.5] Resample when ESS < N * resampleThreshold.
    * @param {number} [options.mcmcSteps=5] Number of MH rejuvenation steps per particle.
-   * @param {() => number} [options.rng] A uniform(0,1) RNG; defaults to Math.random.
    */
-  constructor(prior, proposal, { N = 500, resampleThreshold = 0.5, mcmcSteps = 5, rng = Math.random } = {}) {
+  constructor(prior, proposal, { N = 500, resampleThreshold = 0.5, mcmcSteps = 5 } = {}) {
     this._prior = prior
     this._proposal = proposal
     this._N = N
     this._resampleThreshold = resampleThreshold
     this._mcmcSteps = mcmcSteps
-    this._rng = rng
-    this._particles = Array.from({ length: N }, () => prior.sample(rng))
+    this._particles = Array.from({ length: N }, () => prior.sample())
     this._logWeights = new Array(N).fill(-Math.log(N))
     /** @type {Array<{price: number, looks: number, books: number}>} */
     this._observedData = []
@@ -93,7 +90,8 @@ export class ParticleFilterState {
    * @returns {{ particles: T[], weights: number[] }}
    */
   update(newData) {
-    const { _prior: prior, _proposal: proposal, _N: N, _resampleThreshold: resampleThreshold, _mcmcSteps: mcmcSteps, _rng: rng } = this
+    const { _prior: prior, _proposal: proposal, _N: N, _resampleThreshold: resampleThreshold, _mcmcSteps: mcmcSteps } = this
+    const rng = prior.rng
 
     for (const dataPoint of newData) {
       this._observedData.push(dataPoint)
@@ -124,7 +122,7 @@ export class ParticleFilterState {
             let currentParams = params
             let currentLogPost = logLikelihood(prior.makeModel(currentParams), this._observedData) + prior.logPdf(currentParams)
             for (let k = 0; k < mcmcSteps; k++) {
-              ({ params: currentParams, logPost: currentLogPost } = mhStep(currentParams, currentLogPost, prior, proposal, this._observedData, rng))
+              ({ params: currentParams, logPost: currentLogPost } = mhStep(currentParams, currentLogPost, prior, proposal, this._observedData))
             }
             return currentParams
           })

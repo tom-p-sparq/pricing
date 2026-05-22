@@ -1,41 +1,32 @@
 import { BaseDistribution } from './base.js';
+import { factory } from '@stdlib/random-base-normal'
+import logpdf from '@stdlib/stats-base-dists-normal-logpdf'
 
 export class Normal extends BaseDistribution {
   /**
    * Creates an instance of Normal distribution.
    * @param {{mu: number, sigma: number}} params
    */
-  constructor({ mu, sigma }) {
+  constructor({ mu, sigma }, rng = Math.random) {
     if (sigma <= 0) {
       throw new Error("Standard deviation (sigma) must be positive.");
     }
     super();
-    this.mu = mu;
-    this.sigma = sigma;
+    this._mu = mu;
+    this._sigma = sigma;
+    this._sampler = factory(mu, sigma, {prng: rng})
+  }
+
+  /** @override */
+  sample() {
+    return this._sampler()
   }
 
   /**
-   * Generates a random variate from the Normal distribution using the Box-Muller transform.
-   * @override
-   * @param {function} rng - A random number generator function (defaults to Math.random).
-   * @returns {number} A random variate.
-   */
-  sample(rng = Math.random) {
-    let u = 0, v = 0;
-    while (u === 0) u = rng(); // Converting [0,1) to (0,1)
-    while (v === 0) v = rng();
-    const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-    return this.mu + this.sigma * z;
-  }
-
-  /**
-   * Computes the log probability density of the Normal distribution at x.
    * @override
    * @param {number} x
-   * @returns {number} The log probability density at x.
    */
   logPdf(x) {
-    const z = (x - this.mu) / this.sigma;
-    return -0.5 * (Math.log(2 * Math.PI) + 2 * Math.log(this.sigma) + z * z);
+    return logpdf(x, this._mu, this._sigma)
   }
 }
