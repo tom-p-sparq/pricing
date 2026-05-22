@@ -1,6 +1,6 @@
 import { BaseStep } from './base.js';
-import lognormal from '@stdlib/random-base-lognormal'
-import logpdf from '@stdlib/stats-base-dists-lognormal-logpdf'
+import { lognormal as lognormalRandom } from '@stdlib/random-base'
+import { lognormal as lognormalDists } from '@stdlib/stats-base-dists'
 
 
 export class LogNormalStep extends BaseStep {
@@ -14,7 +14,7 @@ export class LogNormalStep extends BaseStep {
     }
     super();
     this._sigma = sigma;
-    this.factory = lognormal.factory({prng: rng})
+    this.factory = lognormalRandom.factory({prng: rng})
   }
 
   /**
@@ -36,6 +36,6 @@ export class LogNormalStep extends BaseStep {
    * @returns {number} The log probability density at x.
    */
   logPdf(x, xCurrent) {
-    return logpdf(x, Math.log(xCurrent), this._sigma);
+    return lognormalDists.logpdf(x, Math.log(xCurrent), this._sigma);
   }
 }
