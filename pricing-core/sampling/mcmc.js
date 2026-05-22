@@ -14,7 +14,7 @@ import { BaseDemandModel } from '../conversion/base.js'
  * @returns {{params: {[paramName: string]: number}, logPost: number}}
  */
 export function mhStep(currentParams, currentLogPost, prior, proposal, data, rng = Math.random) {
-  const proposedParams = proposal.propose(currentParams, rng)
+  const proposedParams = proposal.propose(currentParams)
   const proposedModel = prior.makeModel(proposedParams)
   const proposedLogPost = logLikelihood(proposedModel, data) + prior.logPdf(proposedParams)
 
@@ -45,7 +45,7 @@ export function mhStep(currentParams, currentLogPost, prior, proposal, data, rng
  * @yields {T}
  */
 export function* mh(prior, proposal, data, { initialParams, burnIn = 0, thin = 1, rng = Math.random } = {}) {
-  let currentParams = initialParams ?? prior.sample(rng)
+  let currentParams = initialParams ?? prior.sample()
   let currentLogPost = logLikelihood(prior.makeModel(currentParams), data) + prior.logPdf(currentParams)
 
   for (let step = 0; ; step++) {

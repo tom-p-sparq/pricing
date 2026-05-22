@@ -50,7 +50,7 @@ export class ParticleFilterState {
     this._resampleThreshold = resampleThreshold
     this._mcmcSteps = mcmcSteps
     this._rng = rng
-    this._particles = Array.from({ length: N }, () => prior.sample(rng))
+    this._particles = Array.from({ length: N }, () => prior.sample())
     this._logWeights = new Array(N).fill(-Math.log(N))
     /** @type {Array<{price: number, looks: number, books: number}>} */
     this._observedData = []

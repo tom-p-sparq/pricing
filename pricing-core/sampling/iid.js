@@ -6,12 +6,10 @@ import { BaseDemandModel } from '../conversion/base.js'
  *
  * @template {BaseDemandModel} T
  * @param {Prior<T>} prior
- * @param {object} [options]
- * @param {() => number} [options.rng] A uniform(0,1) RNG; defaults to Math.random.
  * @yields {T}
  */
-export function* samplePrior(prior, { rng = Math.random } = {}) {
+export function* iidSampler(prior) {
   while (true) {
-    yield prior.sampleModel(rng)
+    yield prior.sampleModel()
   }
 }
