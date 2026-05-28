@@ -30,7 +30,7 @@ function _sampleData({ particles, weights, fX, fY }) {
 export function _sampleDots(data) {
     const maxWeight = data.reduce((max, d) => Math.max(max, d.weight), 0)
     return [
-        dot(data, { x: "x", y: "y", fill: "#e05c5c", strokeWidth: 0, r: 3, fillOpacity: d => d.weight / maxWeight }),
+        dot(data, { x: "x", y: "y", fill: "orange", stroke: "black", strokeWidth: 1, r: 3, opacity: d => d.weight / maxWeight }),
     ]
 }
 

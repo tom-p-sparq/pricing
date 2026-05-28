@@ -5,13 +5,15 @@ const { Prior, Proposal, ParticleFilterState, createRng, distributions, steps } 
 const { Beta, Normal } = distributions
 const { NormalStep } = steps
 const { LogisticDemandModel } = conversion
-const { distribution1DPlot, distribution2DPlot, sampleScatterPlot } = plotting
+const { conversionPlot, distribution2DPlot, sampleScatterPlot } = plotting
 
 const RNG = createRng(92)
 const modelPlotContainer = requireElement('model-plot-container');
+const likelihoodRatioContainer = requireElement('likelihood-ratio-container');
+
 
 const priorSpec = {
-    conversion: [ Beta, { mean: 0.5, sampleSize: 5 }],
+    conversion: [ Beta, { mean: 0.5, sampleSize: 10 }],
     elasticity: [ Normal, { mu: -2, sigma: 0.5 }],
 }
 const proposalSpec = {
@@ -36,13 +38,13 @@ const pf = new ParticleFilterState(prior, proposal)
 
 console.log(prior._dists)
 console.log(pf.current.particles)
-const tom = sampleScatterPlot(pf, (x) => x.conversion(150), (x) => x.elasticity(150))
-
-pf.update([{price: 120, looks: 7, books: 6}])
+pf.update([{price: 100, looks: 5, books: 4}])
+pf.update([{price: 150, looks: 10, books: 2}])
+pf.update([{price: 200, looks: 10, books: 0}])
 console.log(pf.current.weights)
 console.log(pf.ess)
 
-
+const tom = sampleScatterPlot(pf, (x) => x.conversion(150), (x) => x.elasticity(150))
 const _modelPlot = distribution2DPlot(
     {
         parameterDist: prior._dists.conversion,
@@ -56,3 +58,11 @@ const _modelPlot = distribution2DPlot(
     }
 )
 plotting.plot(modelPlotContainer, _modelPlot, tom, { title: 'This is a test' })
+
+const { particles, weights } = pf.current
+const maxWeight = Math.max(...weights)
+const _likelihoodRatioPlot = conversionPlot({
+    model: particles.map((p, i) => ({ model: p, name: `Particle ${i}`, weight: weights[i] / maxWeight })),
+    curveOptions: { z: 'name', stroke: 'orange', strokeOpacity: (d) => d.weight * 0.1 },
+})
+plotting.plot(likelihoodRatioContainer, _likelihoodRatioPlot)

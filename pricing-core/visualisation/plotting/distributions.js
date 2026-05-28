@@ -41,7 +41,7 @@ export function distribution2DPlot(x, y) {
     return {
         x: { label: x.parameterName, domain: x.parameterDomain, grid: true},
         y: { label: y.parameterName, domain: y.parameterDomain, grid: true},
-        color: { scheme: "greys", reverse: false },
+        color: { scheme: "blues", reverse: false },
         marks: contourMarks,
     }
 }
