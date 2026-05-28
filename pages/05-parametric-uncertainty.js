@@ -5,8 +5,10 @@ const { Prior, Proposal, ParticleFilterState, createRng, distributions, steps } 
 const { Beta, Normal } = distributions
 const { NormalStep } = steps
 const { LogisticDemandModel } = conversion
+const { distribution1DPlot, distribution2DPlot, sampleScatterPlot } = plotting
 
 const RNG = createRng(92)
+const modelPlotContainer = requireElement('model-plot-container');
 
 const priorSpec = {
     conversion: [ Beta, { mean: 0.5, sampleSize: 5 }],
@@ -32,7 +34,25 @@ const prior = new Prior(priorSpec, atReferencePrice(150), RNG)
 const proposal = new Proposal(proposalSpec, RNG)
 const pf = new ParticleFilterState(prior, proposal)
 
+console.log(prior._dists)
 console.log(pf.current.particles)
-pf.update([{price: 120, looks: 10, books: 6}])
+const tom = sampleScatterPlot(pf, (x) => x.conversion(150), (x) => -2.0)
+
+pf.update([{price: 120, looks: 7, books: 6}])
 console.log(pf.current.weights)
 console.log(pf.ess)
+
+
+const _modelPlot = distribution2DPlot(
+    {
+        parameterDist: prior._dists.conversion,
+        parameterDomain: [0, 1],
+        parameterName: 'Conversion',
+    },
+    {
+        parameterDist: prior._dists.elasticity,
+        parameterDomain: [-4, 0],
+        parameterName: 'Elasticity',
+    }
+)
+plotting.plot(modelPlotContainer, _modelPlot, tom, { title: 'This is a test' })
