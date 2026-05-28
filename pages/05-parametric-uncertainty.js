@@ -36,7 +36,7 @@ const pf = new ParticleFilterState(prior, proposal)
 
 console.log(prior._dists)
 console.log(pf.current.particles)
-const tom = sampleScatterPlot(pf, (x) => x.conversion(150), (x) => -2.0)
+const tom = sampleScatterPlot(pf, (x) => x.conversion(150), (x) => x.elasticity(150))
 
 pf.update([{price: 120, looks: 7, books: 6}])
 console.log(pf.current.weights)

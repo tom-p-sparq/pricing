@@ -41,6 +41,7 @@ export function distribution2DPlot(x, y) {
     return {
         x: { label: x.parameterName, domain: x.parameterDomain, grid: true},
         y: { label: y.parameterName, domain: y.parameterDomain, grid: true},
+        color: { scheme: "greys", reverse: false },
         marks: contourMarks,
     }
 }
@@ -86,8 +87,6 @@ function _pdfContourMarks(dataX, dataY) {
         pdf: Math.exp(x.logPdf + y.logPdf),
     })))
     return [
-        ruleX([0]),
-        ruleY([0]),
         raster(dataZ, { x: "parameterValueX", y: "parameterValueY", fill: "pdf", interpolate: 'barycentric' }),
         //contour(dataZ, { x: "parameterValueX", y: "parameterValueY", fill: "pdf", thresholds: 12 })
     ]
