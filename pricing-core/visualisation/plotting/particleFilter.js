@@ -1,17 +1,18 @@
 import { ruleY, ruleX, lineY, crosshair, tip, pointer, dot } from "@observablehq/plot";
 import { range } from 'd3';
-import { ParticleFilterState } from '../../sampling/index.js'
+import { BaseDemandModel } from "/pricing-core/conversion/index.js";
 
-/**
- * @template T
- */
-
+/** 
+ * @template {BaseDemandModel} T
+*/
 /**
  * 
- * @param {ParticleFilterState<T>} filterState 
+ * @param {object} weightedSample
+ * @param {T[]} weightedSample.particles
+ * @param {number[]} weightedSample.weights
  */
-export function sampleScatterPlot(filterState, fX = (x) => x.parameters.a, fY = (x) => x.parameters.b) {
-    const { particles, weights } = filterState.current
+export function sampleScatterPlot(weightedSample, fX = (/** @type {T} */ x) => x.parameters.a, fY = (/** @type {T} */ x) => x.parameters.b) {
+    const { particles, weights } = weightedSample
     const data = _sampleData({ particles, weights, fX, fY })
     const dots = _sampleDots(data)
     return {
