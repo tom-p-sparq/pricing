@@ -51,7 +51,7 @@ export function distribution2DPlot(x, y) {
  * @returns {DistributionDatum[]}
  */
 function _distributionData({parameterDist, parameterDomain = [0, 1]}) {
-    const dx = Math.abs(parameterDomain[1] - parameterDomain[0])/100;
+    const dx = Math.abs(parameterDomain[1] - parameterDomain[0])/50;
     const points = range(parameterDomain[0], parameterDomain[1], dx)
     const data = points.map((x) => ({
         parameterValue: x,
