@@ -86,10 +86,21 @@ export class LogLogisticDemandModel extends BaseDemandModel {
   }
 
   /**
+   * @override
+   * @protected
+   * @param {number} price
+   * @returns {number}
+   */
+  _elasticity(price) {
+    const { b } = this.parameters
+    return b * (1 - this._conversion(price))
+  }
+
+  /**
    * Calculate gradients with respect to the model parameters.
    * @override
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}} 
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}}
    *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */

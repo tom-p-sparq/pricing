@@ -83,10 +83,20 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
   }
 
   /**
+   * @override
+   * @protected
+   * @param {number} _price
+   * @returns {number}
+   */
+  _elasticity(_price) {
+    return this.parameters.b
+  }
+
+  /**
    * Calculate gradients with respect to the model parameters.
    * @override
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}} 
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}}
    *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */

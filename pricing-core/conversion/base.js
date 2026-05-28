@@ -68,6 +68,28 @@ export class BaseDemandModel {
   }
 
   /**
+   * Calculates the point price elasticity of conversion at a given price.
+   * Returns 0 when the model is at a clamped boundary (raw conversion ≤ 0 or ≥ 1).
+   * @param {number} price
+   * @returns {number} d(log C)/d(log p)
+   */
+  elasticity(price) {
+    const raw = this._conversion(price)
+    if (raw <= 0 || raw >= 1) return 0
+    return this._elasticity(price)
+  }
+
+  /**
+   * @abstract
+   * @protected
+   * @param {number} price
+   * @returns {number}
+   */
+  _elasticity(price) {
+    throw new Error("Define the price elasticity at this price in `_elasticity`")
+  }
+
+  /**
    * @abstract
    * @param {number} price The price at which to calculate the gradients.
    * @returns {{conversion: Record<string, number>, rejection: Record<string, number>}} 
