@@ -5,9 +5,11 @@ const { Prior, Proposal, ParticleFilterState, iidSampler, createRng, distributio
 const { Beta, Normal } = distributions
 const { NormalStep } = steps
 const { LogisticDemandModel } = conversion
-const { conversionPlot, distribution2DPlot, sampleScatterPlot } = plotting
+const { conversionPlot, distribution2DPlot, sampleScatterPlot, sampleConversionCurves, sampleConversionDistribution} = plotting
 
 const RNG = createRng(92)
+const referencePrice = 150
+const sampleSize = 500
 
 // Identify where to place inputs and plots 
 const priorParameterContainer = requireElement('prior-parameter-container');
@@ -38,10 +40,14 @@ function atReferencePrice(price) {
     return ({ conversion, elasticity }) => LogisticDemandModel.fromReference({ price, conversion, elasticity })
 }
 
+function fromReferencePrice(price) {
+    return (demandModel) => ({x: demandModel.conversion(price), y: demandModel.elasticity(price)})
+}
+
 // PRIOR
 
-const prior = new Prior(priorSpec, atReferencePrice(150), RNG)
-const priorParameterSample = Array.from({ length: 200 }, () => prior.sample())
+const prior = new Prior(priorSpec, atReferencePrice(referencePrice), RNG)
+const priorParameterSample = Array.from({ length: sampleSize }, () => prior.sample())
 const priorModelSample = priorParameterSample.map((param) => prior.makeModel(param))
 const priorModelWeightedSample = {
     particles: priorModelSample,
@@ -49,8 +55,7 @@ const priorModelWeightedSample = {
 }
 const priorParameterWeightedSampleScatter = sampleScatterPlot(
     priorModelWeightedSample,
-    (x) => x.conversion(150),
-    (x) => x.elasticity(150),
+    fromReferencePrice(referencePrice),
 )
 const priorParameterDistributionHeatmap = distribution2DPlot(
     {
@@ -68,17 +73,14 @@ plotting.plot(
     priorParameterContainer,
     priorParameterDistributionHeatmap,
     priorParameterWeightedSampleScatter,
-    { title: 'This is a test' },
+    { 
+        title: 'This is a test', 
+    },
 )
 
 const {particles, weights} = priorModelWeightedSample
 const maxWeight = weights.reduce((max, w) => Math.max(max, w), 0)
-const priorModelWeightedSampleCurves = conversionPlot({
-    model: particles.map((p, i) => (
-        { model: p, name: `Particle ${i}`, weight: weights[i] / maxWeight }
-    )),
-    curveOptions: { z: 'name', stroke: 'orange', strokeOpacity: (d) => d.weight * 0.3 },
-})
+const priorModelWeightedSampleCurves = sampleConversionDistribution(priorModelWeightedSample, 400, 1)
 plotting.plot(
     priorCurveContainer,
     priorModelWeightedSampleCurves,
@@ -88,7 +90,7 @@ plotting.plot(
 // POSTERIOR
 
 const proposal = new Proposal(proposalSpec, RNG)
-const pf = new ParticleFilterState(prior, proposal, {N: 200})
+const pf = new ParticleFilterState(prior, proposal, {N: sampleSize})
 
 function renderPosterior() {
     const current = pf.current
@@ -97,8 +99,7 @@ function renderPosterior() {
 
     const posteriorParameterWeightedSampleScatter = sampleScatterPlot(
         current,
-        (x) => x.conversion(150),
-        (x) => x.elasticity(150),
+        fromReferencePrice(referencePrice),
     )
     plotting.plot(
         posteriorParameterContainer,

@@ -1,4 +1,4 @@
-import { ruleY, ruleX, lineY, crosshair, tip, pointer, dot } from "@observablehq/plot";
+import { ruleY, ruleX, lineY, areaY, crosshair, tip, pointer, dot } from "@observablehq/plot";
 import { range } from 'd3';
 import { BaseDemandModel } from "/pricing-core/conversion/index.js";
 
@@ -10,6 +10,8 @@ import { BaseDemandModel } from "/pricing-core/conversion/index.js";
  * @returns {{ x: number, y: number }}
  */
 
+// API
+
 /**
  * @template {BaseDemandModel} T
  * @param {{ particles: T[], weights: number[] }} weightedSample
@@ -18,8 +20,7 @@ import { BaseDemandModel } from "/pricing-core/conversion/index.js";
 export function sampleScatterPlot(weightedSample, fun = demandModel => (
     { x: demandModel.parameters.a, y: demandModel.parameters.b }
 )) {
-    const { particles, weights } = weightedSample
-    const data = _sampleData({ particles, weights, fun })
+    const data = _sampleProjectionData(weightedSample, fun )
     const dots = _sampleDots(data)
     return {
         marks: dots,
@@ -27,15 +28,90 @@ export function sampleScatterPlot(weightedSample, fun = demandModel => (
 }
 
 /**
- * @template {BaseDemandModel} T
- * @param {{ particles: T[], weights: number[], fun: SampleProjection<T> }} options
+ * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {number} [maxPrice] - Upper bound of the price axis (same units as the model).
+ * @param {number} [dPrice] - Price step size; smaller values produce smoother curves.
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-function _sampleData({ particles, weights, fun }) {
+export function sampleConversionCurves(weightedSample, maxPrice = 400, dPrice = 1) {
+    const prices = range(0, maxPrice, dPrice)
+    const data = _sampleConversionData(weightedSample, prices)
+    const curveMarks = _conversionCurveMarks(data)
+    return {marks: curveMarks}
+}
+
+/**
+ * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {number} [maxPrice] - Upper bound of the price axis (same units as the model).
+ * @param {number} [dPrice] - Price step size; smaller values produce a finer raster.
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
+ */
+export function sampleConversionDistribution(weightedSample, maxPrice = 400, dPrice = 1) {
+    const prices = range(0, maxPrice, dPrice)
+    const data = _sampleQuantileData(weightedSample, prices)
+    return _conversionDistributionMarks(data)
+}
+
+// DATA
+
+/**
+ * @template {BaseDemandModel} T
+ * @param {{ particles: T[], weights: number[]}} weightedSample
+ * @param {SampleProjection<T>} fun
+ */
+function _sampleProjectionData({ particles, weights }, fun ) {
     return particles.map((model, i) => ({
         ...fun(model),
         weight: weights[i],
     }))
 }
+
+/**
+ * @typedef {{ idx: number, price: number, conversion: number, weight: number }} ConversionSample
+ */
+
+/**
+ * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {number[]} prices
+ * @returns {ConversionSample[]}
+ */
+function _sampleConversionData({ particles, weights }, prices) {
+    return prices.flatMap((price) =>
+        particles.map(
+            (model, i) => ({idx: i, price: price, conversion: model.conversion(price), weight: weights[i]})
+        )
+    )
+}
+
+/**
+ * @typedef {{ price: number, q10: number, q25: number, q50: number, q75: number, q90: number }} QuantileSample
+ */
+
+/**
+ * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {number[]} prices
+ * @returns {QuantileSample[]}
+ */
+function _sampleQuantileData({ particles, weights }, prices) {
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0)
+    return prices.map(price => {
+        const sorted = particles
+            .map((model, i) => ({ conversion: model.conversion(price), weight: weights[i] }))
+            .sort((a, b) => a.conversion - b.conversion)
+        const quantile = (/** @type {number} */ q) => {
+            const target = q * totalWeight
+            let cumWeight = 0
+            for (const { conversion, weight } of sorted) {
+                cumWeight += weight
+                if (cumWeight >= target) return conversion
+            }
+            return sorted[sorted.length - 1].conversion
+        }
+        return { price, q10: quantile(0.1), q25: quantile(0.25), q50: quantile(0.5), q75: quantile(0.75), q90: quantile(0.9) }
+    })
+}
+
+// DATA TO MARKS
 
 /**
  * @param {{ x: number, y: number, weight: number }[]} data
@@ -48,3 +124,31 @@ function _sampleDots(data) {
     ]
 }
 
+/**
+ * @param {ConversionSample[]} data
+ * @returns {import("@observablehq/plot").Markish[]}
+ */
+function _conversionCurveMarks(data) {
+    const maxWeight = data.reduce((max, d) => Math.max(max, d.weight), 0)
+    return [
+        ruleY([0]),
+        lineY(data, { x: "price", y: "conversion", stroke: d => `Particle ${d.idx}`, z: "idx", strokeOpacity: (d) => d.weight / maxWeight}),
+        crosshair(data, { x: "price", y: "conversion" }),
+        tip(data, pointer({ x: "price", y: "conversion", stroke: d => `Particle ${d.idx}` })),
+    ]
+}
+
+/**
+ * @param {QuantileSample[]} data
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
+ */
+function _conversionDistributionMarks(data) {
+    return {
+        marks: [
+            ruleY([0]),
+            areaY(data, { x: "price", y1: "q10", y2: "q90", fill: "orange", fillOpacity: 0.2 }),
+            areaY(data, { x: "price", y1: "q25", y2: "q75", fill: "orange", fillOpacity: 0.4 }),
+            lineY(data, { x: "price", y: "q50", stroke: "orange" }),
+        ]
+    }
+}
