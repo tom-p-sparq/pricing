@@ -5,11 +5,11 @@ const { Prior, Proposal, ParticleFilterState, iidSampler, createRng, distributio
 const { Beta, Normal } = distributions
 const { NormalStep } = steps
 const { LogisticDemandModel } = conversion
-const { conversionPlot, distribution2DPlot, sampleScatterPlot, sampleConversionCurves, sampleConversionDistribution} = plotting
+const { distribution2DPlot, sampleScatterPlot, sampleConversionCurves, sampleConversionDistribution, fitPointsPlot} = plotting
 
 const RNG = createRng(92)
 const referencePrice = 150
-const sampleSize = 500
+const sampleSize = 1000
 
 // Identify where to place inputs and plots 
 const priorParameterContainer = requireElement('prior-parameter-container');
@@ -78,10 +78,10 @@ plotting.plot(
     },
 )
 
-const priorModelWeightedSampleCurves = sampleConversionDistribution(priorModelWeightedSample, 400, 1)
+const priorModelWeightedSampleDistribution = sampleConversionDistribution(priorModelWeightedSample, 400, 1)
 plotting.plot(
     priorCurveContainer,
-    priorModelWeightedSampleCurves,
+    priorModelWeightedSampleDistribution,
     { title: 'This is a test' },
 )
 
@@ -106,11 +106,15 @@ function renderPosterior() {
         },
     )
 
-    const posteriorModelWeightedSampleCurves = sampleConversionDistribution(posteriorModelWeightedSample, 400, 1)
+    const posteriorModelWeightedSampleDistribution = sampleConversionDistribution(posteriorModelWeightedSample, 400, 1)
+    const fitPoints = inputs.fittingData.get()
+        .filter(d => d.looks > 0)
+        .map(({ price, books, looks }) => ({ price, conversion: books / looks }))
     plotting.plot(
         posteriorCurveContainer,
-        posteriorModelWeightedSampleCurves,
-        { title: 'This is a test' },
+        posteriorModelWeightedSampleDistribution,
+        fitPointsPlot(fitPoints),
+        { title: `This is a test ${pf.ess.toFixed(2)}` },
     )
 }
 

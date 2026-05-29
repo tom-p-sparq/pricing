@@ -26,7 +26,7 @@ export function clearData() {
 }
 
 export function getData() {
-    return Array.from(dataMap.values());
+    return Array.from(dataMap.values(), d => ({ ...d }));
 }
 
 /**

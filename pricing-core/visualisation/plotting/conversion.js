@@ -99,12 +99,22 @@ function _specPointMarks(points) {
 
 /**
  * Generates the marks to Observable Plots.plot from conversion fit data.
- * 
- * @param {Array<{price: number, conversion: number}>} points 
+ *
+ * @param {Array<{price: number, conversion: number}>} points
  * @returns {Array<object>}
  */
 function _fitPointMarks(points) {
   return [
     dot(points, { x: "price", y: "conversion", fill: "black" }),
   ]
+}
+
+/**
+ * Returns a plot spec of observed conversion data points, composable with other specs via `plot()`.
+ *
+ * @param {Array<{price: number, conversion: number}>} points
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
+ */
+export function fitPointsPlot(points) {
+  return { marks: _fitPointMarks(points) }
 }
