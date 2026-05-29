@@ -146,17 +146,13 @@ export class BaseDemandModel {
    * @protected
    * @param {number} price The reference price. Must be positive.
    * @param {number} conversion The conversion rate at the reference price. Must be strictly between 0 and 1.
-   * @param {number} elasticity The point price elasticity of demand at the reference price. Must be negative.
+   * @param {number} elasticity The point price elasticity of demand at the reference price.
    * @throws {Error} If the price is not positive.
-   * @throws {Error} If the elasticity is not negative.
    * @throws {Error} If the conversion is not strictly between 0 and 1.
    */
   static _checkReference(price, conversion, elasticity) {
     if (price <= 0) {
       throw new Error('Price must be positive.')
-    }
-    if (elasticity >= 0) {
-      throw new Error('Elasticity must be negative.')
     }
     if (conversion <= 0 || conversion >= 1) {
       throw new Error('Conversion must be strictly between 0 and 1.')
