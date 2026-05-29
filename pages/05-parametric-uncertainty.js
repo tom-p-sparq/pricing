@@ -78,8 +78,6 @@ plotting.plot(
     },
 )
 
-const {particles, weights} = priorModelWeightedSample
-const maxWeight = weights.reduce((max, w) => Math.max(max, w), 0)
 const priorModelWeightedSampleCurves = sampleConversionDistribution(priorModelWeightedSample, 400, 1)
 plotting.plot(
     priorCurveContainer,
@@ -93,12 +91,9 @@ const proposal = new Proposal(proposalSpec, RNG)
 const pf = new ParticleFilterState(prior, proposal, {N: sampleSize})
 
 function renderPosterior() {
-    const current = pf.current
-    const { particles, weights } = current
-    const maxWeight = weights.reduce((max, w) => Math.max(max, w), 0)
-
+    const posteriorModelWeightedSample = pf.current
     const posteriorParameterWeightedSampleScatter = sampleScatterPlot(
-        current,
+        posteriorModelWeightedSample,
         fromReferencePrice(referencePrice),
     )
     plotting.plot(
@@ -111,12 +106,7 @@ function renderPosterior() {
         },
     )
 
-    const posteriorModelWeightedSampleCurves = conversionPlot({
-        model: particles.map((p, i) => (
-            { model: p, name: `Particle ${i}`, weight: weights[i] / maxWeight }
-        )),
-        curveOptions: { z: 'name', stroke: 'orange', strokeOpacity: (d) => d.weight * 0.3},
-    })
+    const posteriorModelWeightedSampleCurves = sampleConversionDistribution(posteriorModelWeightedSample, 400, 1)
     plotting.plot(
         posteriorCurveContainer,
         posteriorModelWeightedSampleCurves,
