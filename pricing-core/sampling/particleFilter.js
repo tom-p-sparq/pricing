@@ -80,7 +80,8 @@ export class ParticleFilterState {
    * @returns { number }
    */
   get ess() {
-    return 1 / this.weights.reduce((sum, w) => sum + w * w, 0)
+    const logEss = 2*logSumExp(this._logWeights) - logSumExp(this._logWeights.map(lw => 2 * lw))
+    return Math.exp(logEss)
   }
 
   /**

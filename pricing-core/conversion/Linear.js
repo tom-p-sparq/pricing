@@ -79,6 +79,17 @@ export class LinearDemandModel extends BaseDemandModel {
   }
 
   /**
+   * @override
+   * @protected
+   * @param {number} price
+   * @returns {number}
+   */
+  _elasticity(price) {
+    const { b } = this.parameters
+    return b * price / this._conversion(price)
+  }
+
+  /**
    * Calculate gradients with respect to the model parameters.
    * @override
    * @param {number} price The price at which to calculate the gradients.

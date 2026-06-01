@@ -7,7 +7,9 @@ import { plot as observablePlot } from "@observablehq/plot"
  * @returns 
  */
 export function plot(element, ...options) {
-    const flatOptions = Object.assign({}, ...options)
+    const marks = options.flatMap(o => o.marks ?? [])
+    const width = element.clientWidth || undefined
+    const flatOptions = Object.assign({ width }, ...options, { marks })
     element.replaceChildren(
         observablePlot(flatOptions)
     )

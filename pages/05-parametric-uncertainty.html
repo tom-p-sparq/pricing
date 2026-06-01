@@ -1,0 +1,113 @@
+---
+layout: base.njk
+title: Uncertainty in Conversion Modelling
+script: true
+---
+
+<h1>Uncertainty and conversion modelling</h1>
+<p>
+  Up to now, we've been trying answer the question,
+  "what is the conversion curve?"
+  That is, how does the underlying conversion rate depend on the price?
+  Or, expressed another way, what proportion of the population is willing to pay at least this price?
+  And we've been going about it by trying to find <em>the</em> conversion rate at a given price.
+</p>
+<p>
+  But all we have to go on are a few observations of looks, some of which turn into books.
+  Say we see five looks at a given price and one of those booked. 
+  To what extent can we meaningfully conclude that the population-level conversion rate is 20%? 
+  Why not a lucky 5%, or an unlucky 50%?
+  It's only five looks from your population, we could easily see a single book by random chance.
+  How unlikely actually is an underlying 50% conversion rate?
+</p>
+<p>
+  That implies that there remains quite a range of possible conversion rates that underlie our observations.
+  So, we need a principled way of accounting for uncertainty in our modelling,
+  which a Bayesian framework gives us very naturally.
+</p>
+
+<h2>Specifying model distributions</h2>
+<p>
+  Let's focus on the <a href="/01-parametric-conversion-models/#logistic-model">logistic</a> model for now.
+  We've previously talked about how to specify such a model, including
+  specifying its local behaviour at a single reference price,
+  or alternatively specifying its conversion rates at two reference prices.
+  Taking the latter, let's emphasise that we're supplying only <em>estimates</em> of the conversion rate
+  at each of the two reference prices.
+  Together with these specifications, we also supply measures of <em>confidence</em> in them.
+  In the example below, we can think of "confidence" as a certain number of 'virtual' data points supporting that estimate.
+</p>
+</p>
+<div id="prior-curve-container"></div>
+<div id="prior-spec-container"></div>
+<p>
+  The plot above now represents a distribution of uncertain conversion rates according to our specification,
+  looking across the entire range of prices.
+  For any given price, along the x axis, we can "slice" the curves above at that x value
+  and read off our uncertainty in the underlying conversion rate at that price:
+  <ul>
+    <li>the lightest band covers the central 90% of the distribution,</li>
+    <li>the darker band covers the central 50% of the distribution,</li>
+    <li>and the central line represents the median of the distribution.</li>
+  </ul>
+  By changing the specified confidence in the two reference conversion rates,
+  we can push the distribution bands narrower or wider.
+</p>
+
+<h2>Fitting a model distribution to data</h2>
+<p>
+  As we previously saw from <a href="/03-fitting/">fitting a model to data</a>,
+  we can stream data on looks and books and update our beliefs as we go.
+  Up to now, we have been updating our best fit as data comes in,
+  but now we update our distribution from our prior beliefs into a posterior distribution.
+</p>
+<p>
+  As before, we can generate synthetic data by choosing a price
+  and recording a look as either a conversion or rejection at that price.
+  Below, we can see what happens to our prior beliefs as data comes in.
+  Pressing "Import current prior" sets the specified prior distribution as a starting point
+  before then integrating the additional information that the data brings.
+  If you change the prior and want to replay existing data on top,
+  be sure to press "Import current prior" again first.
+</p>
+<div style="display: flex; align-items: flex-start; gap: 2em;">
+  <div id="data-generation-container"></div>
+  <div id="data-table-container"></div>
+</div>
+<p>
+  The plot below shows how the prior gets updated by observed looks and books.
+</p>
+<div id="posterior-curve-container"></div>
+<p>
+  There are some interesting observations we can take away
+  from playing around with both the synthetic data and prior specifications.
+</p>
+<h2>Observations</h2>
+<p>
+  The first useful observation is the interaction between the strength of the prior and the new data.
+  If we set a prior which is very confident in the two estimated conversion rates,
+  say around a sample size of 50,
+  then we need a lot of data to override that.
+  Adding only a handful of points would change nearly nothing about the distribution in that case.
+  Conversely, having a weak prior (i.e. not much confidence) makes the data "speak" much earlier,
+  at the cost of working with inflated uncertainty.
+</p>
+<p>
+  Second, the fact that we're still working with the logistic function
+  (and its two degrees of freedom)
+  means that we still see information gathered at one price propagating a long way towards other prices.
+  The entire curve distribution still shifts when we observe behaviour at extreme prices,
+  especially when that behaviour doesn't conform to the current uncertainty distribution.  
+</p>
+<h2>Conclusion</h2>
+<p>
+  We've seen that we can naturally incorporate uncertainty into our conversion modelling.
+  Rather than working with a single conversion curve, we can work with a distribution of these curves.
+  We've begged an important question here: how do we make decisions under this uncertainty?
+</p>
+<p>
+  OK, we're no longer making price decisions based on a single, over-confident model.
+  We're now hedging our bets a little, but it's not yet clear how we make best use of these distributions.
+  In future posts, we're going to move away from the detail of conversion modelling
+  towards a fuller understanding of how we use a conversion model to set a price. 
+</p>

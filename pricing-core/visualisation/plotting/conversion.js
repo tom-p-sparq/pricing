@@ -10,9 +10,10 @@ import { BaseDemandModel } from "../../conversion/base.js";
  * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string}>} args.model
  * @param {Array<{price: number, conversion: number}>} [args.specPoints]
  * @param {Array<{price: number, conversion: number}>} [args.fitPoints]
+ * @param {object} args.curveOptions
  * @param {number} [maxPrice=400]
  */
-export function conversionPlot({ model, specPoints, fitPoints }, maxPrice = 400) {
+export function conversionPlot({ model, specPoints, fitPoints, curveOptions }, maxPrice = 400) {
   /** @type {Array<{price: number, conversion: number, name: string}>} */
   let data;
   if (model instanceof BaseDemandModel) {
@@ -24,7 +25,7 @@ export function conversionPlot({ model, specPoints, fitPoints }, maxPrice = 400)
   else {
     data = [];
   }
-  const curveMarks = _conversionCurveMarks(data)
+  const curveMarks = _conversionCurveMarks(data, curveOptions)
   const specPointMarks = specPoints ? _specPointMarks(specPoints) : []
   const fitPointMarks = fitPoints ? _fitPointMarks(fitPoints) : []
   return {
@@ -57,11 +58,12 @@ function _singleModelConversionData(model, maxPrice = 400) {
  * @returns {Array<{price: number, conversion: number, name: string}>} (price, conversion, name) coordinates to plot in a set of named curves
  */
 function _multiModelConversionData(models, maxPrice = 400) {
-  return models.flatMap(({ model, name }) =>
+  return models.flatMap(({ model, name, ...rest }) =>
     range(0, maxPrice, 1).map((p) => ({
       price: p,
       conversion: model.conversion(p),
       name: name,
+      ...rest,
     }))
   );
 }
@@ -72,10 +74,10 @@ function _multiModelConversionData(models, maxPrice = 400) {
  * @param {Array<{price: number, conversion: number, name: string}>} data 
  * @returns {Array<object>}
  */
-function _conversionCurveMarks(data) {
+function _conversionCurveMarks(data, curveOptions = {}) {
   return [
     ruleY([0]),
-    lineY(data, { x: "price", y: "conversion", stroke: "name" }),
+    lineY(data, { x: "price", y: "conversion", stroke: "name", ...curveOptions }),
     crosshair(data, { x: "price", y: "conversion" }),
     tip(data, pointer({ x: "price", y: "conversion", stroke: "name" })),
   ]
@@ -97,12 +99,22 @@ function _specPointMarks(points) {
 
 /**
  * Generates the marks to Observable Plots.plot from conversion fit data.
- * 
- * @param {Array<{price: number, conversion: number}>} points 
+ *
+ * @param {Array<{price: number, conversion: number}>} points
  * @returns {Array<object>}
  */
 function _fitPointMarks(points) {
   return [
     dot(points, { x: "price", y: "conversion", fill: "black" }),
   ]
+}
+
+/**
+ * Returns a plot spec of observed conversion data points, composable with other specs via `plot()`.
+ *
+ * @param {Array<{price: number, conversion: number}>} points
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
+ */
+export function fitPointsPlot(points) {
+  return { marks: _fitPointMarks(points) }
 }
