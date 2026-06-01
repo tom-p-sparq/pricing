@@ -106,7 +106,7 @@ function renderPosterior() {
         posteriorModelWeightedSampleDistribution,
         fitPointsPlot(fitPoints),
         { 
-            title: `Posterior conversion curves (ESS: ${pf.ess.toFixed(0)})`,
+            title: `Posterior conversion curves`,
             y: { domain: [0, 1], label: 'Conversion' }
         },
     )

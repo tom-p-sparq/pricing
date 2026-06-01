@@ -18,7 +18,6 @@ function addInput(price, conversion) {
     } else {
         dataMap.set(price, { price, looks: 1, books: conversion ? 1 : 0 })
     }
-    console.log(dataMap)
 }
 
 export function clearData() {
