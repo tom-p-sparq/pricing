@@ -84,7 +84,7 @@ function _sampleConversionData({ particles, weights }, prices) {
 }
 
 /**
- * @typedef {{ price: number, min: number, q10: number, q25: number, q50: number, q75: number, q90: number, max: number }} QuantileSample
+ * @typedef {{ price: number, q10: number, q25: number, q50: number, q75: number, q90: number }} QuantileSample
  */
 
 /**
@@ -107,7 +107,7 @@ function _sampleQuantileData({ particles, weights }, prices) {
             }
             return sorted[sorted.length - 1].conversion
         }
-        return { price, min: sorted[0].conversion, q10: quantile(0.1), q25: quantile(0.25), q50: quantile(0.5), q75: quantile(0.75), q90: quantile(0.9), max: sorted[sorted.length - 1].conversion }
+        return { price, q10: quantile(0.1), q25: quantile(0.25), q50: quantile(0.5), q75: quantile(0.75), q90: quantile(0.9) }
     })
 }
 
@@ -146,8 +146,6 @@ function _conversionDistributionMarks(data) {
     return {
         marks: [
             ruleY([0]),
-            lineY(data, { x: "price", y: "min", stroke: "orange", strokeOpacity: 0.4, strokeDasharray: "2,3" }),
-            lineY(data, { x: "price", y: "max", stroke: "orange", strokeOpacity: 0.4, strokeDasharray: "2,3" }),
             areaY(data, { x: "price", y1: "q10", y2: "q90", fill: "orange", fillOpacity: 0.2 }),
             areaY(data, { x: "price", y1: "q25", y2: "q75", fill: "orange", fillOpacity: 0.4 }),
             lineY(data, { x: "price", y: "q50", stroke: "orange" }),
