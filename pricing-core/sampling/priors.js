@@ -7,14 +7,14 @@
  */
 export class Prior {
   /**
-   * @param {{ [paramName: string]: [new(params: any, rng?: () => number) => BaseDistribution, object] }} priorSpec
-   *   An object mapping each parameter name to a [DistributionClass, params] tuple.
-   * @param {(params: {[paramName: string]: number}) => T} [factory]
+   * @param {{ [paramName: string]: { dist: new(args: any, rng: () => number) => BaseDistribution, args: object } }} priorSpec
+   *   An object mapping each parameter name to a `{ dist, args }` entry.
+   * @param {(params: any) => T} [factory]
    *   Converts a parameter object to a model instance.
    * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
    * @example
    * new Prior(
-   *   { conversion: [Normal, { mu: 0.4, sigma: 0.05 }], elasticity: [Normal, { mu: -2, sigma: 0.5 }] },
+   *   { conversion: { dist: Normal, args: { mu: 0.4, sigma: 0.05 } }, elasticity: { dist: Normal, args: { mu: -2, sigma: 0.5 } } },
    *   ({ conversion, elasticity }) => LogisticDemandModel.fromReference({price: 100, conversion, elasticity }),
    *   rng
    * )
@@ -23,7 +23,7 @@ export class Prior {
     this.rng = rng
     this.factory = factory
     this._dists = Object.fromEntries(
-      Object.entries(priorSpec).map(([name, [Dist, params]]) => [name, new Dist(params, rng)])
+      Object.entries(priorSpec).map(([name, { dist: Dist, args }]) => [name, new Dist(args, rng)])
     )
   }
 

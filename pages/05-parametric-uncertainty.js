@@ -21,12 +21,12 @@ const posteriorCurveContainer = requireElement('posterior-curve-container');
 
 // Create objects
 const priorSpec = {
-    conversion: [ Beta, { mean: 0.5, sampleSize: 10 }],
-    elasticity: [ Normal, { mu: -2, sigma: 0.5 }],
+    conversion: { dist: Beta, args: { mean: 0.5, sampleSize: 10 } },
+    elasticity: { dist: Normal, args: { mu: -2, sigma: 0.5 } },
 }
 const proposalSpec = {
-    conversion: [ NormalStep, { sigma: 0.05 }],
-    elasticity: [ NormalStep, { sigma: 0.1 }],
+    conversion: { dist: NormalStep, args: { sigma: 0.05 } },
+    elasticity: { dist: NormalStep, args: { sigma: 0.1 } },
 }
 
 /**
@@ -40,6 +40,13 @@ function atReferencePrice(price) {
     return ({ conversion, elasticity }) => LogisticDemandModel.fromReference({ price, conversion, elasticity })
 }
 
+/**
+ * Creates an inverse of the factory function for the Prior.
+ * We take the sampled LogisticDemandModel and find the non-canonical parameters (i.e. conversion and elasticity)
+ * that would have produced that model at a fixed given reference price.
+ * @param {number} price 
+ * @returns {(demandModel: conversion.LogisticDemandModel) => {x: number, y: number}}
+ */
 function fromReferencePrice(price) {
     return (demandModel) => ({x: demandModel.conversion(price), y: demandModel.elasticity(price)})
 }
@@ -120,6 +127,7 @@ function renderPosterior() {
 
 // DATA INPUT
 
+/** @type {{price: number, looks: number, books: number}[]} */
 let prevData = []
 const { conversionButtons } = inputs.fittingData.input(dataGenerationContainer)
 

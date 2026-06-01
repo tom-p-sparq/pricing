@@ -5,18 +5,18 @@
  */
 export class Proposal {
   /**
-   * @param {{ [paramName: string]: [new(params: any, rng?: () => number) => BaseStep, object] }} proposalSpec
-   *   An object mapping each parameter name to a [StepClass, params] tuple.
+   * @param {{ [paramName: string]: { dist: new(args: any, rng: () => number) => BaseStep, args: object } }} proposalSpec
+   *   An object mapping each parameter name to a `{ dist, args }` entry.
    * @param {() => number} [rng] A uniform(0,1) RNG; defaults to Math.random.
    * @example
    * new Proposal(
-   *   { conversion: [NormalStep, { sigma: 0.1 }], elasticity: [NormalStep, { sigma: 0.1 }] },
+   *   { conversion: { dist: NormalStep, args: { sigma: 0.1 } }, elasticity: { dist: NormalStep, args: { sigma: 0.1 } } },
    *   rng
    * )
    */
   constructor(proposalSpec, rng = Math.random) {
     this._steps = Object.fromEntries(
-      Object.entries(proposalSpec).map(([name, [Step, params]]) => [name, new Step(params, rng)])
+      Object.entries(proposalSpec).map(([name, { dist: Step, args }]) => [name, new Step(args, rng)])
     )
   }
 
