@@ -1,6 +1,7 @@
 export { costSlider } from './cost.js';
 export { referenceForm } from './reference.js';
 export { interpolantsForm } from './interpolants.js';
+export { priorForm } from './prior.js';
 import {
     getData,
     clearData,

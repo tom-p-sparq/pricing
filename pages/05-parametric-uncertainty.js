@@ -8,26 +8,16 @@ const { LogisticDemandModel } = conversion
 const { distribution2DPlot, sampleScatterPlot, sampleConversionCurves, sampleConversionDistribution, fitPointsPlot} = plotting
 
 const RNG = createRng(92)
-const referencePrice = 150
 const sampleSize = 1000
 
-// Identify where to place inputs and plots 
+// Identify where to place inputs and plots
+const priorSpecContainer = requireElement('prior-spec-container');
 const priorParameterContainer = requireElement('prior-parameter-container');
 const priorCurveContainer = requireElement('prior-curve-container');
 const dataGenerationContainer = requireElement('data-generation-container');
 const dataTableContainer = requireElement('data-table-container');
 const posteriorParameterContainer = requireElement('posterior-parameter-container');
 const posteriorCurveContainer = requireElement('posterior-curve-container');
-
-// Create objects
-const priorSpec = {
-    conversion: { dist: Beta, args: { mean: 0.5, sampleSize: 10 } },
-    elasticity: { dist: Normal, args: { mu: -2, sigma: 0.5 } },
-}
-const proposalSpec = {
-    conversion: { dist: NormalStep, args: { sigma: 0.05 } },
-    elasticity: { dist: NormalStep, args: { sigma: 0.1 } },
-}
 
 /**
  * Creates a factory function for the Prior. This factory takes sampled parameters
@@ -44,60 +34,87 @@ function atReferencePrice(price) {
  * Creates an inverse of the factory function for the Prior.
  * We take the sampled LogisticDemandModel and find the non-canonical parameters (i.e. conversion and elasticity)
  * that would have produced that model at a fixed given reference price.
- * @param {number} price 
+ * @param {number} price
  * @returns {(demandModel: conversion.LogisticDemandModel) => {x: number, y: number}}
  */
 function fromReferencePrice(price) {
     return (demandModel) => ({x: demandModel.conversion(price), y: demandModel.elasticity(price)})
 }
 
-// PRIOR
+// PRIOR FORM
 
-const prior = new Prior(priorSpec, atReferencePrice(referencePrice), RNG)
-const priorParameterSample = Array.from({ length: sampleSize }, () => prior.sample())
-const priorModelSample = priorParameterSample.map((param) => prior.makeModel(param))
-const priorModelWeightedSample = {
-    particles: priorModelSample,
-    weights: priorModelSample.map(() => 1.0),
+const proposalSpec = {
+    conversion: { dist: NormalStep, args: { sigma: 0.05 } },
+    elasticity: { dist: NormalStep, args: { sigma: 0.1 } },
 }
-const priorParameterWeightedSampleScatter = sampleScatterPlot(
-    priorModelWeightedSample,
-    fromReferencePrice(referencePrice),
-)
-const priorParameterDistributionHeatmap = distribution2DPlot(
-    {
-        parameterDist: prior._dists.conversion,
-        parameterDomain: [0, 1],
-        parameterName: 'Conversion',
-    },
-    {
-        parameterDist: prior._dists.elasticity,
-        parameterDomain: [-4, 0],
-        parameterName: 'Elasticity',
-    }
-)
-plotting.plot(
-    priorParameterContainer,
-    priorParameterDistributionHeatmap,
-    priorParameterWeightedSampleScatter,
-    { 
-        title: 'This is a test', 
-    },
-)
-
-const priorModelWeightedSampleDistribution = sampleConversionDistribution(priorModelWeightedSample, 400, 1)
-plotting.plot(
-    priorCurveContainer,
-    priorModelWeightedSampleDistribution,
-    { title: 'This is a test' },
-)
-
-// POSTERIOR
-
 const proposal = new Proposal(proposalSpec, RNG)
-const pf = new ParticleFilterState(prior, proposal, {N: sampleSize})
+
+const priorSliders = inputs.priorForm(priorSpecContainer)
+
+/**
+ * Builds a priorSpec object from the current slider values.
+ * @returns {{ conversion: { dist: typeof Beta, args: { mean: number, sampleSize: number } }, elasticity: { dist: typeof Normal, args: { mu: number, sigma: number } } }}
+ */
+function buildPriorSpec() {
+    const { conversionMean, conversionSampleSize, elasticityMu, elasticitySigma } = priorSliders.value
+    return {
+        conversion: { dist: Beta, args: { mean: conversionMean, sampleSize: conversionSampleSize } },
+        elasticity: { dist: Normal, args: { mu: elasticityMu, sigma: elasticitySigma } },
+    }
+}
+
+let prior = new Prior(buildPriorSpec(), atReferencePrice(priorSliders.value.referencePrice), RNG)
+let pf = new ParticleFilterState(prior, proposal, {N: sampleSize})
+
+// PRIOR RENDER
+
+function renderPrior() {
+    const { referencePrice, conversionMean, conversionSampleSize, elasticityMu, elasticitySigma } = priorSliders.value
+    const priorParameterSample = Array.from({ length: sampleSize }, () => prior.sample())
+    const priorModelSample = priorParameterSample.map((param) => prior.makeModel(param))
+    const priorModelWeightedSample = {
+        particles: priorModelSample,
+        weights: priorModelSample.map(() => 1.0),
+    }
+    const priorParameterWeightedSampleScatter = sampleScatterPlot(
+        priorModelWeightedSample,
+        fromReferencePrice(referencePrice),
+    )
+    const alphaDist = new Beta({ mean: conversionMean, sampleSize: conversionSampleSize }, RNG)
+    const elasticityDist = new Normal({ mu: elasticityMu, sigma: elasticitySigma }, RNG)
+    const priorParameterDistributionHeatmap = distribution2DPlot(
+        {
+            parameterDist: alphaDist,
+            parameterDomain: [0, 1],
+            parameterName: 'Conversion',
+        },
+        {
+            parameterDist: elasticityDist,
+            parameterDomain: [-4, 0],
+            parameterName: 'Elasticity',
+        }
+    )
+    plotting.plot(
+        priorParameterContainer,
+        priorParameterDistributionHeatmap,
+        priorParameterWeightedSampleScatter,
+        {
+            title: 'This is a test',
+        },
+    )
+
+    const priorModelWeightedSampleDistribution = sampleConversionDistribution(priorModelWeightedSample, 400, 1)
+    plotting.plot(
+        priorCurveContainer,
+        priorModelWeightedSampleDistribution,
+        { title: 'This is a test' },
+    )
+}
+
+// POSTERIOR RENDER
 
 function renderPosterior() {
+    const { referencePrice } = priorSliders.value
     const posteriorModelWeightedSample = pf.current
     const posteriorParameterWeightedSampleScatter = sampleScatterPlot(
         posteriorModelWeightedSample,
@@ -125,6 +142,13 @@ function renderPosterior() {
     )
 }
 
+// PRIOR REACTIVITY
+
+priorSliders.addEventListener('input', () => {
+    prior = new Prior(buildPriorSpec(), atReferencePrice(priorSliders.value.referencePrice), RNG)
+    renderPrior()
+})
+
 // DATA INPUT
 
 /** @type {{price: number, looks: number, books: number}[]} */
@@ -145,4 +169,23 @@ conversionButtons.addEventListener('input', () => {
     renderPosterior()
 })
 
+// IMPORT PRIOR BUTTON
+
+const importPriorButton = document.createElement('button')
+importPriorButton.textContent = 'Import current prior'
+dataGenerationContainer.append(importPriorButton)
+
+importPriorButton.addEventListener('click', () => {
+    const allData = inputs.fittingData.get().filter(d => d.looks > 0)
+    pf = new ParticleFilterState(prior, proposal, {N: sampleSize})
+    if (allData.length > 0) {
+        pf.update(allData)
+    }
+    prevData = allData
+    renderPosterior()
+})
+
+// INITIAL RENDER
+
+renderPrior()
 renderPosterior()
