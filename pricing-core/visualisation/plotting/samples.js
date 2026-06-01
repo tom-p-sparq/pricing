@@ -29,11 +29,10 @@ export function sampleScatterPlot(weightedSample, fun = demandModel => (
 
 /**
  * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
- * @param {number} [maxPrice] - Upper bound of the price axis (same units as the model).
- * @param {number} [dPrice] - Price step size; smaller values produce smoother curves.
+ * @param {{ maxPrice?: number, dPrice?: number }} [opts]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function sampleConversionCurves(weightedSample, maxPrice = 400, dPrice = 1) {
+export function sampleConversionCurves(weightedSample, { maxPrice = 400, dPrice = 1 } = {}) {
     const prices = range(0, maxPrice, dPrice)
     const data = _sampleConversionData(weightedSample, prices)
     const curveMarks = _conversionCurveMarks(data)
@@ -42,12 +41,14 @@ export function sampleConversionCurves(weightedSample, maxPrice = 400, dPrice = 
 
 /**
  * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
- * @param {number} [maxPrice] - Upper bound of the price axis (same units as the model).
- * @param {number} [dPrice] - Price step size; smaller values produce smoother quantile bands.
+ * @param {{ maxPrice?: number, dPrice?: number, anchorPrices?: number[] }} [opts]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function sampleConversionDistribution(weightedSample, maxPrice = 400, dPrice = 1) {
-    const prices = range(0, maxPrice, dPrice)
+export function sampleConversionDistribution(weightedSample, { maxPrice = 400, dPrice = 1, anchorPrices = [] } = {}) {
+    const baseGrid = range(0, maxPrice, dPrice)
+    const prices = anchorPrices.length > 0
+        ? [...new Set([...baseGrid, ...anchorPrices])].sort((a, b) => a - b)
+        : baseGrid
     const data = _sampleQuantileData(weightedSample, prices)
     return _conversionDistributionMarks(data)
 }
@@ -84,7 +85,7 @@ function _sampleConversionData({ particles, weights }, prices) {
 }
 
 /**
- * @typedef {{ price: number, q10: number, q25: number, q50: number, q75: number, q90: number }} QuantileSample
+ * @typedef {{ price: number, q05: number, q25: number, q50: number, q75: number, q95: number }} QuantileSample
  */
 
 /**
@@ -107,7 +108,7 @@ function _sampleQuantileData({ particles, weights }, prices) {
             }
             return sorted[sorted.length - 1].conversion
         }
-        return { price, q10: quantile(0.1), q25: quantile(0.25), q50: quantile(0.5), q75: quantile(0.75), q90: quantile(0.9) }
+        return { price, q05: quantile(0.05), q25: quantile(0.25), q50: quantile(0.5), q75: quantile(0.75), q95: quantile(0.95) }
     })
 }
 
@@ -146,7 +147,7 @@ function _conversionDistributionMarks(data) {
     return {
         marks: [
             ruleY([0]),
-            areaY(data, { x: "price", y1: "q10", y2: "q90", fill: "orange", fillOpacity: 0.2 }),
+            areaY(data, { x: "price", y1: "q05", y2: "q95", fill: "orange", fillOpacity: 0.2 }),
             areaY(data, { x: "price", y1: "q25", y2: "q75", fill: "orange", fillOpacity: 0.4 }),
             lineY(data, { x: "price", y: "q50", stroke: "orange" }),
         ]

@@ -8,11 +8,11 @@ const { LogisticDemandModel } = conversion
 const { distribution2DPlot, sampleScatterPlot, sampleConversionCurves, sampleConversionDistribution, fitPointsPlot} = plotting
 
 const RNG = createRng(92)
-const sampleSize = 1000
+const sampleSize = 2000
 
 // Identify where to place inputs and plots
 const priorSpecContainer = requireElement('prior-spec-container');
-const priorParameterContainer = requireElement('prior-parameter-container');
+// const priorParameterContainer = requireElement('prior-parameter-container');
 const priorCurveContainer = requireElement('prior-curve-container');
 const dataGenerationContainer = requireElement('data-generation-container');
 const dataTableContainer = requireElement('data-table-container');
@@ -69,41 +69,41 @@ let pf = new ParticleFilterState(prior, proposal, {N: sampleSize})
 // PRIOR RENDER
 
 function renderPrior() {
-    const { referencePrice, conversionMean, conversionSampleSize, elasticityMu, elasticitySigma } = priorSliders.value
+    const { referencePrice } = priorSliders.value
     const priorParameterSample = Array.from({ length: sampleSize }, () => prior.sample())
     const priorModelSample = priorParameterSample.map((param) => prior.makeModel(param))
     const priorModelWeightedSample = {
         particles: priorModelSample,
         weights: priorModelSample.map(() => 1.0),
     }
-    const priorParameterWeightedSampleScatter = sampleScatterPlot(
-        priorModelWeightedSample,
-        fromReferencePrice(referencePrice),
-    )
-    const alphaDist = new Beta({ mean: conversionMean, sampleSize: conversionSampleSize }, RNG)
-    const elasticityDist = new Normal({ mu: elasticityMu, sigma: elasticitySigma }, RNG)
-    const priorParameterDistributionHeatmap = distribution2DPlot(
-        {
-            parameterDist: alphaDist,
-            parameterDomain: [0, 1],
-            parameterName: 'Conversion',
-        },
-        {
-            parameterDist: elasticityDist,
-            parameterDomain: [-4, 0],
-            parameterName: 'Elasticity',
-        }
-    )
-    plotting.plot(
-        priorParameterContainer,
-        priorParameterDistributionHeatmap,
-        priorParameterWeightedSampleScatter,
-        {
-            title: 'This is a test',
-        },
-    )
+    // const priorParameterWeightedSampleScatter = sampleScatterPlot(
+    //     priorModelWeightedSample,
+    //     fromReferencePrice(referencePrice),
+    // )
+    // const alphaDist = new Beta({ mean: conversionMean, sampleSize: conversionSampleSize }, RNG)
+    // const elasticityDist = new Normal({ mu: elasticityMu, sigma: elasticitySigma }, RNG)
+    // // const priorParameterDistributionHeatmap = distribution2DPlot(
+    //     {
+    //         parameterDist: alphaDist,
+    //         parameterDomain: [0, 1],
+    //         parameterName: 'Conversion',
+    //     },
+    //     {
+    //         parameterDist: elasticityDist,
+    //         parameterDomain: [-4, 0],
+    //         parameterName: 'Elasticity',
+    //     }
+    // )
+    // plotting.plot(
+    //     priorParameterContainer,
+    //     priorParameterDistributionHeatmap,
+    //     priorParameterWeightedSampleScatter,
+    //     {
+    //         title: 'This is a test',
+    //     },
+    // )
 
-    const priorModelWeightedSampleDistribution = sampleConversionDistribution(priorModelWeightedSample, 400, 1)
+    const priorModelWeightedSampleDistribution = sampleConversionDistribution(priorModelWeightedSample, { maxPrice: 400, dPrice: 4, anchorPrices: [referencePrice] })
     plotting.plot(
         priorCurveContainer,
         priorModelWeightedSampleDistribution,
@@ -130,7 +130,7 @@ function renderPosterior() {
         },
     )
 
-    const posteriorModelWeightedSampleDistribution = sampleConversionDistribution(posteriorModelWeightedSample, 400, 1)
+    const posteriorModelWeightedSampleDistribution = sampleConversionDistribution(posteriorModelWeightedSample, { maxPrice: 400, dPrice: 4, anchorPrices: [referencePrice] })
     const fitPoints = inputs.fittingData.get()
         .filter(d => d.looks > 0)
         .map(({ price, books, looks }) => ({ price, conversion: books / looks }))
