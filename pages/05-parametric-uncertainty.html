@@ -29,30 +29,28 @@ script: true
 <h2>Specifying model distributions</h2>
 <p>
   Let's focus on the <a href="/01-parametric-conversion-models/#logistic-model">logistic</a> model for now.
-  We've previously talked about how to specify such a model based on its local behaviour at a single reference price.
-  Suppose we supply those specifications once more,
-  but now we emphasise that we're supplying only an <em>estimated</em> conversion rate and elasticity at that price.
+  We've previously talked about how to specify such a model, including
+  specifying its local behaviour at a single reference price,
+  or alternatively specifying its conversion rates at two reference prices.
+  Taking the latter, let's emphasise that we're supplying only <em>estimates</em> of the conversion rate
+  at each of the two reference prices.
   Together with these specifications, we also supply measures of <em>confidence</em> in them.
-  This could be done two ways, both of which are shown in the example below:
-  <ul>
-    <li>A traditional standard deviation around the estimate, or</li>
-    <li>A "confidence", which can be interpreted as a certain number of 'virtual' data points supporting that estimate.</li>
-  </ul>
+  In the example below, we can think of "confidence" as a certain number of 'virtual' data points supporting that estimate.
 </p>
 </p>
 <div id="prior-curve-container"></div>
 <div id="prior-spec-container"></div>
 <p>
-  The plot above now represents a distribution of uncertain conversion rates according to our specification.
+  The plot above now represents a distribution of uncertain conversion rates according to our specification,
+  looking across the entire range of prices.
   Reading upwards at each price we can represent our uncertainty in the underlying conversion rate at that price:
   <ul>
     <li>the lightest band covers the central 90% of the distribution,</li>
     <li>the darker band covers the central 50% of the distribution,</li>
     <li>and the central line represents the median of the distribution.</li>
   </ul>
-  Specifying a greater confidence in the reference conversion rate
-  or a lower standard deviation in the reference elasticity,
-  each push the distribution bands narrower.
+  By changing the specified confidence in the two reference conversion rates,
+  we can push the distribution bands narrower or wider.
 </p>
 
 <h2>Fitting a model distribution</h2>
