@@ -6,16 +6,54 @@ script: true
 
 <h1>Uncertainty and conversion modelling</h1>
 <p>
-  Blah blah
+  Up to now, we've been trying answer the question,
+  "what is the conversion curve?"
+  That is, how does the underlying conversion rate depend on the price?
+  Or, expressed another way, what proportion of the population is willing to pay at least this price?
+  And we've been going about it by trying to find <em>the</em> conversion rate at a given price.
+</p>
+<p>
+  But all we have to go on are a few observations of looks, some of which turn into books.
+  Say we see five looks at a given price and one of those booked. 
+  To what extent can we meaningfully conclude that the population-level conversion rate is 20%? 
+  Why not a lucky 5%, or an unlucky 50%?
+  It's only five looks from your population, we could easily see a single book by random chance.
+  How unlikely actually is an underlying 50% conversion rate?
+</p>
+<p>
+  That implies that there remains quite a range of possible conversion rates that underlie our observations.
+  So, we need a principled way of accounting for uncertainty in our modelling,
+  which a Bayesian framework gives us very naturally.
 </p>
 
 <h2>Specifying model distributions</h2>
 <p>
-  This is a prior.
+  Let's focus on the <a href="/01-parametric-conversion-models/#logistic-model">logistic</a> model for now.
+  We've previously talked about how to specify such a model based on its local behaviour at a single reference price.
+  Suppose we supply those specifications once more,
+  but now we emphasise that we're supplying only an <em>estimated</em> conversion rate and elasticity at that price.
+  Together with these specifications, we also supply measures of <em>confidence</em> in them.
+  This could be done two ways, both of which are shown in the example below:
+  <ul>
+    <li>A traditional standard deviation around the estimate, or</li>
+    <li>A "confidence", which can be interpreted as a certain number of 'virtual' data points supporting that estimate.</li>
+  </ul>
 </p>
-<div id="prior-spec-container"></div>
-<div id="prior-parameter-container"></div>
+</p>
 <div id="prior-curve-container"></div>
+<div id="prior-spec-container"></div>
+<p>
+  The plot above now represents a distribution of uncertain conversion rates according to our specification.
+  Reading upwards at each price we can represent our uncertainty in the underlying conversion rate at that price:
+  <ul>
+    <li>the lightest band covers the central 90% of the distribution,</li>
+    <li>the darker band covers the central 50% of the distribution,</li>
+    <li>and the central line represents the median of the distribution.</li>
+  </ul>
+  Specifying a greater confidence in the reference conversion rate
+  or a lower standard deviation in the reference elasticity,
+  each push the distribution bands narrower.
+</p>
 
 <h2>Fitting a model distribution</h2>
 <p>
