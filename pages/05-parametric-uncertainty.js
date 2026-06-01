@@ -102,7 +102,7 @@ function renderPosterior() {
         {
             title: 'This is a test',
             x: {domain: [0, 1], label: "Conversion"},
-            y: {domain: [-4, 0], label: "Elasticity"},
+            y: {label: "Elasticity", pretty: true},
         },
     )
 

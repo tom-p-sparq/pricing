@@ -14,8 +14,12 @@ import { BaseDemandModel } from '../conversion/base.js'
  */
 export function mhStep(currentParams, currentLogPost, prior, proposal, data) {
   const proposedParams = proposal.propose(currentParams)
+  const proposedLogPrior = prior.logPdf(proposedParams)
+  if (!isFinite(proposedLogPrior)) {
+    return { params: currentParams, logPost: currentLogPost }
+  }
   const proposedModel = prior.makeModel(proposedParams)
-  const proposedLogPost = logLikelihood(proposedModel, data) + prior.logPdf(proposedParams)
+  const proposedLogPost = logLikelihood(proposedModel, data) + proposedLogPrior
 
   const logAlpha = proposedLogPost - currentLogPost
     + proposal.logPdf(currentParams, proposedParams)   // log q(current | proposed) — reverse
