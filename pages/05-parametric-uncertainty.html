@@ -53,26 +53,60 @@ script: true
   we can push the distribution bands narrower or wider.
 </p>
 
-<h2>Fitting a model distribution</h2>
+<h2>Fitting a model distribution to data</h2>
 <p>
-  As data streams in, we update a model distribution using a <em>particle filter</em>.
-  This reweights curves in an sample as being more or less likely, given the data.
-  When the weighting becomes so imbalanced that enough curves essentially "vanish",
-  we rejuvenate the sample by resampling and exploring around the remaining best fits.
+  As we previously saw from <a href="/03-fitting/">fitting a model to data</a>,
+  we can stream data on looks and books and update our beliefs as we go.
+  Up to now, we have been updating our best fit as data comes in,
+  but now we update our distribution from our prior beliefs into a posterior distribution.
 </p>
-
-<h2>Data generation</h2>
 <p>
-  We need to generate data.
+  As before, we can generate synthetic data by choosing a price
+  and recording a look as either a conversion or rejection at that price.
+  Below, we can see what happens to our prior beliefs as data comes in.
+  Pressing "Import current prior" sets the specified prior distribution as a starting point
+  before then integrating the additional information that the data brings.
+  If you change the prior and want to replay existing data on top,
+  be sure to press "Import current prior" again first.
 </p>
 <div style="display: flex; align-items: flex-start; gap: 2em;">
   <div id="data-generation-container"></div>
   <div id="data-table-container"></div>
 </div>
 <p>
-  Then we show what happens.
+  The plot below shows how the prior gets updated by observed looks and books.
 </p>
-<div id="posterior-parameter-container"></div>
 <div id="posterior-curve-container"></div>
-
-Ta-daaa!
+<p>
+  There are some interesting observations we can take away
+  from playing around with both the synthetic data and prior specifications.
+</p>
+<h2>Observations</h2>
+<p>
+  The first useful observation is the interaction between the strength of the prior and the new data.
+  If we set a prior which is very confident in the two estimated conversion rates,
+  say around a sample size of 50,
+  then we need a lot of data to override that.
+  Adding only a handful of points would change nearly nothing about the distribution in that case.
+  Conversely, having a weak prior (i.e. not much confidence) makes the data "speak" much earlier,
+  at the cost of working with inflated uncertainty.
+</p>
+<p>
+  Second, the fact that we're still working with the logistic function
+  (and its two degrees of freedom)
+  means that we still see information gathered at one price propagating a long way towards other prices.
+  The entire curve distribution still shifts when we observe behaviour at extreme prices,
+  especially when that behaviour doesn't conform to the current uncertainty distribution.  
+</p>
+<h2>Conclusion</h2>
+<p>
+  We've seen that we can naturally incorporate uncertainty into our conversion modelling.
+  Rather than working with a single conversion curve, we can work with a distribution of these curves.
+  We've begged an important question here: how do we make decisions under this uncertainty?
+</p>
+<p>
+  OK, we're no longer making price decisions based on a single, over-confident model.
+  We're now hedging our bets a little, but it's not yet clear how we make best use of these distributions.
+  In future posts, we're going to move away from the detail of conversion modelling
+  towards a fuller understanding of how we use a conversion model to set a price. 
+</p>

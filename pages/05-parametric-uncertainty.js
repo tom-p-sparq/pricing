@@ -15,7 +15,6 @@ const priorSpecContainer = requireElement('prior-spec-container');
 const priorCurveContainer = requireElement('prior-curve-container');
 const dataGenerationContainer = requireElement('data-generation-container');
 const dataTableContainer = requireElement('data-table-container');
-const posteriorParameterContainer = requireElement('posterior-parameter-container');
 const posteriorCurveContainer = requireElement('posterior-curve-container');
 
 /**
@@ -86,7 +85,10 @@ function renderPrior() {
     plotting.plot(
         priorCurveContainer,
         priorModelWeightedSampleDistribution,
-        { title: 'Prior conversion curves' },
+        {
+            title: 'Prior conversion curves',
+            y: { domain: [0, 1], label: 'Conversion' }
+        },
     )
 }
 
@@ -95,20 +97,6 @@ function renderPrior() {
 function renderPosterior() {
     const { price0, price1 } = priorSliders.value
     const posteriorModelWeightedSample = pf.current
-    const posteriorParameterWeightedSampleScatter = sampleScatterPlot(
-        posteriorModelWeightedSample,
-        fromInterpolantPrices(price0, price1),
-    )
-    plotting.plot(
-        posteriorParameterContainer,
-        posteriorParameterWeightedSampleScatter,
-        {
-            title: 'Posterior parameter samples',
-            x: { domain: [0, 1], label: `Conversion at £${price0}` },
-            y: { domain: [0, 1], label: `Conversion at £${price1}`, pretty: true },
-        },
-    )
-
     const posteriorModelWeightedSampleDistribution = sampleConversionDistribution(posteriorModelWeightedSample, { maxPrice: 400, dPrice: 4, anchorPrices: [price0, price1] })
     const fitPoints = inputs.fittingData.get()
         .filter(d => d.looks > 0)
@@ -117,7 +105,10 @@ function renderPosterior() {
         posteriorCurveContainer,
         posteriorModelWeightedSampleDistribution,
         fitPointsPlot(fitPoints),
-        { title: `Posterior conversion curves (ESS: ${pf.ess.toFixed(0)})` },
+        { 
+            title: `Posterior conversion curves (ESS: ${pf.ess.toFixed(0)})`,
+            y: { domain: [0, 1], label: 'Conversion' }
+        },
     )
 }
 
