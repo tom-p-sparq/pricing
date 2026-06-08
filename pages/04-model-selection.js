@@ -93,11 +93,14 @@ function renderModelPlots() {
         fitPoints: fitPoints,
     })
     const _logLikelihoodPlot = plotting.logLikelihoodPlot(toLogLikelihoodPlot)
-    const _incrementalRevenuePlot = plotting.incrementalRevenuePlot(modelSpecs, costSlider.value)
-
     plotting.plot(modelPlotContainer, _conversionPlot, { color: { legend: true }, title: 'Maximum likelihood models' })
     plotting.plot(likelihoodRatioContainer, _logLikelihoodPlot, { title: 'Selection via log-likelihood ratio' })
-    plotting.plot(incrementalRevenueContainer, _incrementalRevenuePlot, { title: 'Modelled expected incremental revenue' })
+    plotting.plot(
+        incrementalRevenueContainer,
+        plotting.incrementalRevenueCurvePlot(modelSpecs, costSlider.value),
+        { x: { label: 'Price' }, y: { grid: true, label: 'Incremental revenue', nice: true } },
+        { title: 'Modelled expected incremental revenue' },
+    )
 }
 
 // Initialise

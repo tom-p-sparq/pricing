@@ -1,22 +1,15 @@
 import { ruleY, lineY, crosshair, tip, pointer } from "@observablehq/plot";
-import { max } from "d3";
 import { modelData } from "./_models.js";
 
 /**
- * Generates plot specification for a model or model array (with names)
- *
  * @param {import("../../conversion/base.js").BaseDemandModel | Array<{model: import("../../conversion/base.js").BaseDemandModel, name: string}>} model
  * @param {number} [cost=0] The cost base to measure incremental revenue against.
  * @param {number} [maxPrice=400]
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function incrementalRevenuePlot(model, cost = 0, maxPrice = 400) {
+export function incrementalRevenueCurvePlot(model, cost = 0, maxPrice = 400) {
   const data = modelData(model, maxPrice, (m, p) => ({ incrementalRevenue: m.conversion(p) * (p - cost) }))
-  const curveMarks = _incrementalRevenueCurveMarks(data)
-  return {
-    x: { label: "Price" },
-    y: { domain: [0, max(data, (d) => d.incrementalRevenue)], grid: true, label: "Incremental revenue", nice: true },
-    marks: curveMarks,
-  }
+  return { marks: _incrementalRevenueCurveMarks(data) }
 }
 
 /**

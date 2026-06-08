@@ -21,10 +21,10 @@ plotting.plot(
 // Interactive plot
 const incrementalRevenueContainer = requireElement('incremental-revenue-container');
 function render() {
-    const incrementalRevenuePlot = plotting.incrementalRevenuePlot(model, costSlider.value)
     plotting.plot(
         incrementalRevenueContainer,
-        incrementalRevenuePlot,
+        plotting.incrementalRevenueCurvePlot(model, costSlider.value),
+        { x: { label: 'Price' }, y: { grid: true, label: 'Incremental revenue', nice: true } },
         { title: 'Modelled expected incremental revenue' },
     )
 }
