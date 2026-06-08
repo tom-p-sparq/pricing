@@ -27,7 +27,7 @@ export function specPointsPlot(points) {
  * Generates the marks to Observable Plots.plot from conversion curve data.
  * 
  * @param {Array<{price: number, conversion: number, name: string}>} data 
- * @returns {Array<object>}
+ * @returns {import("@observablehq/plot").Markish[]}
  */
 function _conversionCurveMarks(data, curveOptions = {}) {
   return [
@@ -42,7 +42,7 @@ function _conversionCurveMarks(data, curveOptions = {}) {
  * Generates the marks to Observable Plots.plot from conversion point specification data.
  * 
  * @param {Array<{price: number, conversion: number}>} points 
- * @returns {Array<object>}
+ * @returns {import("@observablehq/plot").Markish[]}
  */
 function _specPointMarks(points) {
   return [
@@ -56,7 +56,7 @@ function _specPointMarks(points) {
  * Generates the marks to Observable Plots.plot from conversion fit data.
  *
  * @param {Array<{price: number, conversion: number}>} points
- * @returns {Array<object>}
+ * @returns {import("@observablehq/plot").Markish[]}
  */
 function _fitPointMarks(points) {
   return [
