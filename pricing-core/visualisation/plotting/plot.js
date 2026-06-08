@@ -3,7 +3,7 @@ import { plot as observablePlot } from "@observablehq/plot"
 /**
  * 
  * @param {HTMLElement} element Where we plot into
- * @param {...{marks?: import("@observablehq/plot").Markish[]}} options
+ * @param {...import("@observablehq/plot").PlotOptions} options
  * @returns 
  */
 export function plot(element, ...options) {
