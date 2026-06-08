@@ -1,6 +1,6 @@
 import { ruleY, ruleX, lineY, areaY, crosshair, tip, pointer, dot } from "@observablehq/plot";
 import { range } from 'd3';
-import { BaseDemandModel } from "/pricing-core/conversion/index.js";
+import { BaseDemandModel } from "../../conversion/base.js";
 
 /**
  * Projects a demand model onto a 2-D point for scatter plotting.
@@ -50,7 +50,8 @@ export function sampleConversionDistribution(weightedSample, { maxPrice = 400, d
         ? [...new Set([...baseGrid, ...anchorPrices])].sort((a, b) => a - b)
         : baseGrid
     const data = _sampleQuantileData(weightedSample, prices)
-    return _conversionDistributionMarks(data)
+    const marks = _conversionDistributionMarks(data)
+    return { marks }
 }
 
 // DATA
@@ -133,7 +134,7 @@ function _conversionCurveMarks(data) {
     const maxWeight = data.reduce((max, d) => Math.max(max, d.weight), 0)
     return [
         ruleY([0]),
-        lineY(data, { x: "price", y: "conversion", stroke: d => `Particle`, z: "idx", strokeOpacity: (d) => 0.4 * d.weight / maxWeight}),
+        lineY(data, { x: "price", y: "conversion", stroke: "Particle", z: "idx", strokeOpacity: (d) => 0.4 * d.weight / maxWeight}),
         crosshair(data, { x: "price", y: "conversion" }),
         tip(data, pointer({ x: "price", y: "conversion", stroke: d => `Particle ${d.idx}` })),
     ]
@@ -141,15 +142,13 @@ function _conversionCurveMarks(data) {
 
 /**
  * @param {QuantileSample[]} data
- * @returns {{ marks: import("@observablehq/plot").Markish[] }}
+ * @returns {import("@observablehq/plot").Markish[]}
  */
 function _conversionDistributionMarks(data) {
-    return {
-        marks: [
-            ruleY([0]),
-            areaY(data, { x: "price", y1: "q05", y2: "q95", fill: "orange", fillOpacity: 0.2 }),
-            areaY(data, { x: "price", y1: "q25", y2: "q75", fill: "orange", fillOpacity: 0.4 }),
-            lineY(data, { x: "price", y: "q50", stroke: "orange" }),
-        ]
-    }
+    return [
+        ruleY([0]),
+        areaY(data, { x: "price", y1: "q05", y2: "q95", fill: "orange", fillOpacity: 0.2 }),
+        areaY(data, { x: "price", y1: "q25", y2: "q75", fill: "orange", fillOpacity: 0.4 }),
+        lineY(data, { x: "price", y: "q50", stroke: "orange" }),
+    ]
 }

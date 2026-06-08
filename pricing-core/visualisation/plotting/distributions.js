@@ -1,4 +1,4 @@
-import { ruleY, ruleX, lineY, crosshair, tip, pointer, contour, raster } from "@observablehq/plot";
+import { ruleY, lineY, crosshair, tip, pointer, raster } from "@observablehq/plot";
 import { range } from 'd3';
 import { BaseDistribution } from '../../sampling/distributions/index.js'
 
@@ -14,36 +14,25 @@ import { BaseDistribution } from '../../sampling/distributions/index.js'
  */
 
 /**
- * Builds Observable Plot options for a 1D PDF line chart.
+ * Builds Observable Plot marks for a 1D PDF line chart.
  * @param {DistributionConfig} config
- * @returns {object} Plot options — pass directly to `Plot.plot()`
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function distribution1DPlot({parameterDist, parameterDomain = [0, 1], parameterName = "Parameter"}) {
+export function distribution1DCurvePlot({parameterDist, parameterDomain = [0, 1]}) {
     const data = _distributionData({parameterDist, parameterDomain})
-    const curveMarks = _pdfCurveMarks(data)
-    return {
-        x: { label: parameterName, domain: parameterDomain },
-        y: { grid: true, label: "PDF", nice: true },
-        marks: curveMarks,
-    }
+    return { marks: _pdfCurveMarks(data) }
 }
 
 /**
- * Builds Observable Plot options for a 2D joint PDF contour chart.
+ * Builds Observable Plot marks for a 2D joint PDF contour chart.
  * @param {DistributionConfig} x - distribution config for the horizontal axis
  * @param {DistributionConfig} y - distribution config for the vertical axis
- * @returns {object} Plot options — pass directly to `Plot.plot()`
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function distribution2DPlot(x, y) {
+export function distribution2DContourPlot(x, y) {
     const dataX = _distributionData(x)
     const dataY = _distributionData(y)
-    const contourMarks = _pdfContourMarks(dataX, dataY)
-    return {
-        x: { label: x.parameterName, domain: x.parameterDomain, grid: true},
-        y: { label: y.parameterName, domain: y.parameterDomain, grid: true},
-        color: { scheme: "blues", reverse: false },
-        marks: contourMarks,
-    }
+    return { marks: _pdfContourMarks(dataX, dataY) }
 }
 
 /**
@@ -88,6 +77,5 @@ function _pdfContourMarks(dataX, dataY) {
     })))
     return [
         raster(dataZ, { x: "parameterValueX", y: "parameterValueY", fill: "pdf", interpolate: 'barycentric' }),
-        //contour(dataZ, { x: "parameterValueX", y: "parameterValueY", fill: "pdf", thresholds: 12 })
     ]
 }

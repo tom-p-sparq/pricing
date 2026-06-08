@@ -35,7 +35,7 @@ export function logLikelihoodPlot(modelSpecs) {
         color: {
             type: "linear",
             scheme: "Oranges",
-            domain: [0, 12], // Your hard-coded fixed scale
+            domain: [0, 12],
             legend: true,
             label: "Log-likelihood difference"
         },

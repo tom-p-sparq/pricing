@@ -36,11 +36,13 @@ function renderReference() {
         model: modelClass.fromReference(interactiveReference.value),
         name: title,
     }));
-    const comparisonPlot = plotting.conversionPlot({
-        model: models,
-        specPoints: [interactiveReference.value],
-    });
-    plotting.plot(referenceComparisonContainer, comparisonPlot, singleReferenceTitles)
+    plotting.plot(
+        referenceComparisonContainer,
+        plotting.conversionCurvePlot({ model: models }),
+        plotting.specPointsPlot([interactiveReference.value]),
+        { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
+        singleReferenceTitles,
+    )
 }
 
 function renderInterpolants() {
@@ -53,11 +55,13 @@ function renderInterpolants() {
         model: modelClass.interpolate(point0, point1),
         name: title,
     }));
-    const comparisonPlot = plotting.conversionPlot({
-        model: models,
-        specPoints: [point0, point1],
-    });
-    plotting.plot(interpolantsComparisonContainer, comparisonPlot, interpolantTitles)
+    plotting.plot(
+        interpolantsComparisonContainer,
+        plotting.conversionCurvePlot({ model: models }),
+        plotting.specPointsPlot([point0, point1]),
+        { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
+        interpolantTitles,
+    )
 }
 
 // Set up listeners
