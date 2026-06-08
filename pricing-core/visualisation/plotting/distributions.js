@@ -88,6 +88,5 @@ function _pdfContourMarks(dataX, dataY) {
     })))
     return [
         raster(dataZ, { x: "parameterValueX", y: "parameterValueY", fill: "pdf", interpolate: 'barycentric' }),
-        //contour(dataZ, { x: "parameterValueX", y: "parameterValueY", fill: "pdf", thresholds: 12 })
     ]
 }

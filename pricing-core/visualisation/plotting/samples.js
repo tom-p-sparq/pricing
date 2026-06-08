@@ -133,7 +133,7 @@ function _conversionCurveMarks(data) {
     const maxWeight = data.reduce((max, d) => Math.max(max, d.weight), 0)
     return [
         ruleY([0]),
-        lineY(data, { x: "price", y: "conversion", stroke: d => `Particle`, z: "idx", strokeOpacity: (d) => 0.4 * d.weight / maxWeight}),
+        lineY(data, { x: "price", y: "conversion", stroke: "Particle", z: "idx", strokeOpacity: (d) => 0.4 * d.weight / maxWeight}),
         crosshair(data, { x: "price", y: "conversion" }),
         tip(data, pointer({ x: "price", y: "conversion", stroke: d => `Particle ${d.idx}` })),
     ]
