@@ -88,12 +88,14 @@ function renderModelPlots() {
         llh: llh === undefined ? 0 : llh,
     }))
 
-    const _conversionPlot = plotting.conversionPlot({
-        model: toConversionPlot,
-        fitPoints: fitPoints,
-    })
     const _logLikelihoodPlot = plotting.logLikelihoodPlot(toLogLikelihoodPlot)
-    plotting.plot(modelPlotContainer, _conversionPlot, { color: { legend: true }, title: 'Maximum likelihood models' })
+    plotting.plot(
+        modelPlotContainer,
+        plotting.conversionCurvePlot({ model: toConversionPlot }),
+        plotting.fitPointsPlot(fitPoints),
+        { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
+        { color: { legend: true }, title: 'Maximum likelihood models' },
+    )
     plotting.plot(likelihoodRatioContainer, _logLikelihoodPlot, { title: 'Selection via log-likelihood ratio' })
     plotting.plot(
         incrementalRevenueContainer,

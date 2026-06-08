@@ -11,10 +11,10 @@ const reference = {
     conversion: 0.5,
 };
 const model = conversion.LogisticDemandModel.fromReference(reference);
-const conversionPlot = plotting.conversionPlot({ model: model, });
 plotting.plot(
     requireElement('conversion-container'),
-    conversionPlot,
+    plotting.conversionCurvePlot({ model }),
+    { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
     { title: 'Example conversion model' },
 )
 

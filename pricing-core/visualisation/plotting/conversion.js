@@ -4,25 +4,23 @@ import { modelData } from "./_models.js";
 
 
 /**
- * Generates plot specification for a model or model array (with names)
- *
  * @param {object} args
  * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string}>} args.model
- * @param {Array<{price: number, conversion: number}>} [args.specPoints]
- * @param {Array<{price: number, conversion: number}>} [args.fitPoints]
- * @param {object} args.curveOptions
+ * @param {object} [args.curveOptions]
  * @param {number} [maxPrice=400]
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function conversionPlot({ model, specPoints, fitPoints, curveOptions }, maxPrice = 400) {
+export function conversionCurvePlot({ model, curveOptions }, maxPrice = 400) {
   const data = modelData(model, maxPrice, (m, p) => ({ conversion: m.conversion(p) }))
-  const curveMarks = _conversionCurveMarks(data, curveOptions)
-  const specPointMarks = specPoints ? _specPointMarks(specPoints) : []
-  const fitPointMarks = fitPoints ? _fitPointMarks(fitPoints) : []
-  return {
-    x: { label: "Price" },
-    y: { domain: [0, 1], grid: true, label: "Conversion", nice: true },
-    marks: [...curveMarks, ...specPointMarks, ...fitPointMarks],
-  }
+  return { marks: _conversionCurveMarks(data, curveOptions) }
+}
+
+/**
+ * @param {Array<{price: number, conversion: number}>} points
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
+ */
+export function specPointsPlot(points) {
+  return { marks: _specPointMarks(points) }
 }
 
 /**

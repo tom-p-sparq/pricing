@@ -1,4 +1,4 @@
-export { conversionPlot, fitPointsPlot } from "./conversion.js";
+export { conversionCurvePlot, specPointsPlot, fitPointsPlot } from "./conversion.js";
 export { incrementalRevenueCurvePlot } from "./revenue.js";
 export { logLikelihoodPlot } from "./likelihoods.js";
 export { distribution1DPlot, distribution2DPlot } from "./distributions.js";
