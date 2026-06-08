@@ -71,7 +71,7 @@ let pf = new ParticleFilterState(prior, proposal, {N: sampleSize})
 // PRIOR RENDER
 
 function renderPrior() {
-    const { price0, price1 } = priorSliders.value
+    const { price0, price1, conversion0Mean, conversion1Mean } = priorSliders.value
     const priorModelSample = Array.from({ length: sampleSize }, () => prior.sampleModel())
     const priorModelWeightedSample = {
         particles: priorModelSample,
@@ -82,9 +82,16 @@ function renderPrior() {
         priorModelWeightedSample,
         { maxPrice: 400, dPrice: 4, anchorPrices: [price0, price1] },
     )
+
+    const priorSpecificationPlot = plotting.specPointsPlot([
+        {price: price0, conversion: conversion0Mean},
+        {price: price1, conversion: conversion1Mean},
+    ])
+
     plotting.plot(
         priorCurveContainer,
         priorModelWeightedSampleDistribution,
+        priorSpecificationPlot,
         {
             title: 'Prior conversion curves',
             y: { domain: [0, 1], label: 'Conversion' }
