@@ -16,7 +16,7 @@ export function incrementalRevenueCurvePlot(model, cost = 0, maxPrice = 400) {
  * Generates the marks to Observable Plots.plot from incremental revenue curve data.
  * 
  * @param {Array<{price: number, incrementalRevenue: number, name: string}>} data 
- * @returns {Array<object>}
+ * @returns {import("@observablehq/plot").Markish[]}
  */
 function _incrementalRevenueCurveMarks(data) {
   return [
