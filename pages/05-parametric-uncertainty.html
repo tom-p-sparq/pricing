@@ -6,42 +6,51 @@ script: true
 
 <h1>Uncertainty and conversion modelling</h1>
 <p>
-  Up to now, we've been trying answer the question,
-  "what is the conversion curve?"
-  That is, how does the underlying conversion rate depend on the price?
-  Or, expressed another way, what proportion of the population is willing to pay at least this price?
-  And we've been going about it by trying to find <em>the</em> conversion rate at a given price.
+  Up to now, we've been trying to model how the underlying conversion rate depends on the price.
+  Or, expressed another way, model what proportion of the population is willing to pay at least this price.
+  And we've been going about it by trying to assert that we know <em>the</em> conversion rate at a given price;
+  <em>the</em> proportion of the population willing to pay at least that price.
 </p>
 <p>
-  But all we have to go on are a few observations of looks, some of which turn into books.
-  Say we see five looks at a given price and one of those booked. 
-  To what extent can we meaningfully conclude that the population-level conversion rate is 20%? 
-  Why not a lucky 5%, or an unlucky 50%?
-  It's only five looks from your population, we could easily see a single book by random chance.
-  How unlikely actually is an underlying 50% conversion rate?
+  But all we have to go on are very few, sparse, observations of looks, some of which may be converted.
+  Let's say we see five looks at a given price, but none of those booked. 
+  To what extent can we meaningfully infer <em>the</em> population-level conversion rate at this price? 
+  It may well be 0%: perhaps nobody at all was ever going to purchase at that price.
+  But the conversion rate could easily be 5%,
+  where we simply didn't see any of those customers willing to the pay that price within those 5 looks. 
+  Indeed, the conversion rate might be 50%,
+  but our five "coin tosses" produced an unlucky five "tails" (no-buys) in a row.
 </p>
 <p>
-  That implies that there remains quite a range of possible conversion rates that underlie our observations.
-  So, we need a principled way of accounting for uncertainty in our modelling,
+  Realistically, all we should say about this evidence of zero bookings from five looks 
+  is that it changes the <em>relative likelihoods</em> of the possible conversion rates.
+  So we need a principled way of accounting for uncertainty in our modelling,
   which a Bayesian framework gives us very naturally.
+</p>
+<p>
+  In this post, we'll adapt the likelihood-driven approach to <a href="/03-fitting">model fitting</a>
+  to the Bayesian approach of fitting a distribution of models to data. 
 </p>
 
 <h2>Specifying model distributions</h2>
 <p>
-  Let's focus on the <a href="/01-parametric-conversion-models/#logistic-model">logistic</a> model for now.
-  We've previously talked about how to specify such a model, including
-  specifying its local behaviour at a single reference price,
-  or alternatively specifying its conversion rates at two reference prices.
-  Taking the latter, let's emphasise that we're supplying only <em>estimates</em> of the conversion rate
-  at each of the two reference prices.
-  Together with these specifications, we also supply measures of <em>confidence</em> in them.
-  In the example below, we can think of "confidence" as a certain number of 'virtual' data points supporting that estimate.
+  For simplicity, let's focus only on the <a href="/01-parametric-conversion-models/#logistic-model">logistic</a> model for now.
+  Recall that we can specify this conversion model by supplying the conversion rates at two reference prices.
+  But now, let's not be so confident.
+</p>
+<p>
+  Instead, the conversion rates provided at each of the two reference prices are now understood as estimates.
+  With those estimated rates, we will also provide measures of <em>confidence</em> in those estimates.
+  In the interactive figure below, we have quantified this confidence
+  to be interpreted as a certain number of "virtual" data points that support that estimate.
 </p>
 </p>
 <div id="prior-curve-container"></div>
 <div id="prior-spec-container"></div>
 <p>
-  The plot above now represents a distribution of uncertain conversion rates according to our specification,
+  Having provided estimates of the uncertain conversion rates at the two specified prices, 
+  the plot above shows how the logistic conversion model 
+  induces the uncertain distribution of conversion rate,
   looking across the entire range of prices.
   For any given price, along the x axis, we can "slice" the curves above at that x value
   and read off our uncertainty in the underlying conversion rate at that price:
@@ -57,16 +66,16 @@ script: true
 <h2>Fitting a model distribution to data</h2>
 <p>
   As we previously saw from <a href="/03-fitting/">fitting a model to data</a>,
-  we can stream data on looks and books and update our beliefs as we go.
-  Up to now, we have been updating our best fit as data comes in,
-  but now we update our distribution from our prior beliefs into a posterior distribution.
+  we can stream data on looks and conversions, and update our beliefs as we go.
+  Up to now, we have been updating the <em>best</em> fit as data comes in,
+  but here we will update the distribution sequentially as new data arrives.
 </p>
 <p>
   As before, we can generate synthetic data by choosing a price
   and recording a look as either a conversion or rejection at that price.
   Below, we can see what happens to our prior beliefs as data comes in.
-  Pressing "Import current prior" sets the specified prior distribution as a starting point
-  before then integrating the additional information that the data brings.
+  Pressing "Import current prior" sets the prior distribution specified above as a starting point.
+  The additional information provided by the data is then integrated into that prior.
   If you change the prior and want to replay existing data on top,
   be sure to press "Import current prior" again first.
 </p>
@@ -86,7 +95,7 @@ script: true
 <p>
   The first useful observation is the interaction between the strength of the prior and the new data.
   If we set a prior which is very confident in the two estimated conversion rates,
-  say around a sample size of 50,
+  say around a virtual sample size of 50,
   then we need a lot of data to override that.
   Adding only a handful of points would change nearly nothing about the distribution in that case.
   Conversely, having a weak prior (i.e. not much confidence) makes the data "speak" much earlier,
@@ -95,19 +104,18 @@ script: true
 <p>
   Second, the fact that we're still working with the logistic function
   (and its two degrees of freedom)
-  means that we still see information gathered at one price propagating a long way towards other prices.
-  The entire curve distribution still shifts when we observe behaviour at extreme prices,
+  means that we still see information gathered at one price propagating a long way,
+  signficantly influencing the conversion rate distribution at other prices.
+  The entire distribution still shifts when we observe behaviour at extreme prices,
   especially when that behaviour doesn't conform to the current uncertainty distribution.  
 </p>
 <h2>Conclusion</h2>
 <p>
   We've seen that we can naturally incorporate uncertainty into our conversion modelling.
   Rather than working with a single conversion curve, we can work with a distribution of these curves.
-  We've begged an important question here: how do we make decisions under this uncertainty?
-</p>
-<p>
-  OK, we're no longer making price decisions based on a single, over-confident model.
-  We're now hedging our bets a little, but it's not yet clear how we make best use of these distributions.
-  In future posts, we're going to move away from the detail of conversion modelling
-  towards a fuller understanding of how we use a conversion model to set a price. 
+  This was because we don't want to make price decisions based on a single, over-confident model.
+  But we've begged an important question here: how do we make decisions under this uncertainty?
+  To answer this question, in the next sequence of posts,
+  we're going to move away from the detail of conversion modelling
+  towards getting a fuller understanding of how we use a conversion model to set a price. 
 </p>
