@@ -15,7 +15,6 @@ export class LogisticDemandModel extends BaseDemandModel {
   constructor({ a, b }) {
     super({ a, b })
     /**
-     * @protected
      * @type {{a: number, b: number}}
      */
     this.parameters;
@@ -30,8 +29,8 @@ export class LogisticDemandModel extends BaseDemandModel {
    * @param {number} params.elasticity The point price elasticity of demand at the reference price.
    * @returns {LogisticDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    LogisticDemandModel._check_reference(price, conversion, elasticity)
+  static fromReference({ price, conversion, elasticity }) {
+    LogisticDemandModel._checkReference(price, conversion, elasticity)
     const b = elasticity / ((1 - conversion) * price)
     const a = Math.log(conversion) - Math.log(1 - conversion) - b * price
     return new LogisticDemandModel({ a, b })
@@ -65,7 +64,7 @@ export class LogisticDemandModel extends BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {LogisticDemandModel}
    */
-  static from_flat(averageConversion) {
+  static fromFlat(averageConversion) {
     return new LogisticDemandModel({ a: Math.log(averageConversion / (1 - averageConversion)), b: 0 });
   }
 
@@ -82,10 +81,21 @@ export class LogisticDemandModel extends BaseDemandModel {
   }
 
   /**
+   * @override
+   * @protected
+   * @param {number} price
+   * @returns {number}
+   */
+  _elasticity(price) {
+    const { b } = this.parameters
+    return b * price * (1 - this._conversion(price))
+  }
+
+  /**
    * Calculate gradients with respect to the model parameters.
    * @override
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}} 
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}}
    *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */

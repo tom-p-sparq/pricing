@@ -7,7 +7,7 @@
     "noImplicitAny": true,
     "paths": {
       "/pricing-core/*": ["./pricing-core/*"],
-      "/utils.js": ["./pages/utils.js"]
+      "/utils.js": ["./utils.js"]
     }
   },
   "exclude": ["node_modules"]

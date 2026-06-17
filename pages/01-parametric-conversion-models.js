@@ -17,9 +17,13 @@ const reference = {
 };
 
 plotConfigs.forEach(({ modelClass, title, containerId }) => {
-    const model = modelClass.from_reference(reference);
-    const plot = plotting.conversionPlot({ model: model });
-    plotting.plot(requireElement(containerId), plot, { title: title });
+    const model = modelClass.fromReference(reference);
+    plotting.plot(
+        requireElement(containerId),
+        plotting.conversionCurvePlot({ model }),
+        { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
+        { title },
+    );
 });
 
 // Interactive plot
@@ -28,18 +32,16 @@ const comparisonContainer = requireElement('conversion-comparison-container');
 
 function render() {
     const models = plotConfigs.map(({ modelClass, title }) => ({
-        model: modelClass.from_reference(interactiveReference.value),
+        model: modelClass.fromReference(interactiveReference.value),
         name: title,
     }));
-    const comparisonPlot = plotting.conversionPlot({
-        model: models,
-        specPoints: [interactiveReference.value],
-    });
-    plotting.plot(comparisonContainer, comparisonPlot, {
-        title: 'The Conversion Model Zoo',
-        subtitle: 'Comparing conversion probability models',
-        color: { legend: true },
-    });
+    plotting.plot(
+        comparisonContainer,
+        plotting.conversionCurvePlot({ model: models }),
+        plotting.specPointsPlot([interactiveReference.value]),
+        { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
+        { title: 'The Conversion Model Zoo', subtitle: 'Comparing conversion probability models', color: { legend: true } },
+    );
 }
 
 interactiveReference.addEventListener('input', render);

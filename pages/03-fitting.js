@@ -51,15 +51,13 @@ function renderModel() {
 
     const logLikelihood = fitting.logLikelihood(modelSpec.model, data);
 
-    const plot = plotting.conversionPlot({
-        model: modelSpec.model,
-        fitPoints: fitPoints,
-    })
-    const options = {
-        title: 'Maximum likelihood model',
-        subtitle: `Log-Likelihood: ${logLikelihood.toFixed(4)}`
-    };
-    plotting.plot(modelPlotContainer, plot, options);
+    plotting.plot(
+        modelPlotContainer,
+        plotting.conversionCurvePlot({ model: modelSpec.model }),
+        plotting.fitPointsPlot(fitPoints),
+        { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
+        { title: 'Maximum likelihood model', subtitle: `Log-Likelihood: ${logLikelihood.toFixed(4)}` },
+    );
 }
 
 // Initialise

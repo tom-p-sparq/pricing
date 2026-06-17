@@ -26,7 +26,7 @@ export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }
             conversion: Math.max(0.0001, Math.min(0.9999, books / looks)),
             elasticity: -2,
         }
-        yield modelClass.from_reference(referencePoint)
+        yield modelClass.fromReference(referencePoint)
     } else if (numPoints == 2) {
         const points = data.map(({ price, looks, books }) => ({
             price: price,
@@ -61,5 +61,5 @@ function makeFlatModel(modelClass, data) {
     const totalLooks = data.reduce((total, point) => total + point.looks, 0);
     const totalBooks = data.reduce((total, point) => total + point.books, 0);
     const averageConversion = Math.max(0.0001, Math.min(0.9999, totalBooks / totalLooks));
-    return modelClass.from_flat(averageConversion);
+    return modelClass.fromFlat(averageConversion);
 }

@@ -15,7 +15,6 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
     super({ a, b })
     /**
      * The constant price elasticity of demand (e).
-     * @protected
      * @type {{a: number, b: number}}
      */
     this.parameters;
@@ -30,8 +29,8 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    * @param {number} params.elasticity The point price elasticity of demand at the reference price.
    * @returns {ConstantElasticityDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    ConstantElasticityDemandModel._check_reference(price, conversion, elasticity)
+  static fromReference({ price, conversion, elasticity }) {
+    ConstantElasticityDemandModel._checkReference(price, conversion, elasticity)
     const b = elasticity
     const a = Math.log(conversion) - b * Math.log(price)
     return new ConstantElasticityDemandModel({ a, b })
@@ -67,7 +66,7 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {ConstantElasticityDemandModel}
    */
-  static from_flat(averageConversion) {
+  static fromFlat(averageConversion) {
     return new ConstantElasticityDemandModel({ a: Math.log(averageConversion), b: 0 });
   }
 
@@ -84,10 +83,20 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
   }
 
   /**
+   * @override
+   * @protected
+   * @param {number} _price
+   * @returns {number}
+   */
+  _elasticity(_price) {
+    return this.parameters.b
+  }
+
+  /**
    * Calculate gradients with respect to the model parameters.
    * @override
    * @param {number} price The price at which to calculate the gradients.
-   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}} 
+   * @returns {{conversion: {a: number, b: number}, rejection:  {a: number, b: number}}}
    *        The gradient of log of conversion probability and rejection probability
    *        w.r.t the model parameters in the constructor.
    */

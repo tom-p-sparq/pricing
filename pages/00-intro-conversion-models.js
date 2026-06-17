@@ -10,21 +10,21 @@ const reference = {
     elasticity: -2,
     conversion: 0.5,
 };
-const model = conversion.LogisticDemandModel.from_reference(reference);
-const conversionPlot = plotting.conversionPlot({ model: model, });
+const model = conversion.LogisticDemandModel.fromReference(reference);
 plotting.plot(
     requireElement('conversion-container'),
-    conversionPlot,
+    plotting.conversionCurvePlot({ model }),
+    { x: { label: 'Price' }, y: { domain: [0, 1], grid: true, label: 'Conversion', nice: true } },
     { title: 'Example conversion model' },
 )
 
 // Interactive plot
 const incrementalRevenueContainer = requireElement('incremental-revenue-container');
 function render() {
-    const incrementalRevenuePlot = plotting.incrementalRevenuePlot(model, costSlider.value)
     plotting.plot(
         incrementalRevenueContainer,
-        incrementalRevenuePlot,
+        plotting.incrementalRevenueCurvePlot(model, costSlider.value),
+        { x: { label: 'Price' }, y: { grid: true, label: 'Incremental revenue', nice: true } },
         { title: 'Modelled expected incremental revenue' },
     )
 }

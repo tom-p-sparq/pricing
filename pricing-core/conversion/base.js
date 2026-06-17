@@ -4,12 +4,11 @@
  */
 export class BaseDemandModel {
   /**
-   * @param {object} parameters Model parameters.
+   * @param {{[paramName: string]: number}} parameters Model parameters.
    */
   constructor(parameters) {
     /**
-     * @protected
-     * @type {object}
+     * @type {{[paramName: string]: number}}
      */
     this.parameters = parameters;
   }
@@ -69,6 +68,28 @@ export class BaseDemandModel {
   }
 
   /**
+   * Calculates the point price elasticity of conversion at a given price.
+   * Returns 0 when the model is at a clamped boundary (raw conversion ≤ 0 or ≥ 1).
+   * @param {number} price
+   * @returns {number} d(log C)/d(log p)
+   */
+  elasticity(price) {
+    const raw = this._conversion(price)
+    if (raw <= 0 || raw >= 1) return 0
+    return this._elasticity(price)
+  }
+
+  /**
+   * @abstract
+   * @protected
+   * @param {number} price
+   * @returns {number}
+   */
+  _elasticity(price) {
+    throw new Error("Define the price elasticity at this price in `_elasticity`")
+  }
+
+  /**
    * @abstract
    * @param {number} price The price at which to calculate the gradients.
    * @returns {{conversion: Record<string, number>, rejection: Record<string, number>}} 
@@ -89,8 +110,8 @@ export class BaseDemandModel {
    * @param {number} params.conversion The conversion rate at the reference price.
    * @returns {BaseDemandModel} A new instance of the demand model.
    */
-  static from_reference({ price, conversion, elasticity }) {
-    throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `from_reference`")
+  static fromReference({ price, conversion, elasticity }) {
+    throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `fromReference`")
   }
 
   /**
@@ -116,8 +137,8 @@ export class BaseDemandModel {
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
    * @returns {BaseDemandModel} A new instance of the demand model.
    */
-  static from_flat(averageConversion) {
-    throw new Error("Define the constructor of the flat model parameterised by average conversion in `from_flat`")
+  static fromFlat(averageConversion) {
+    throw new Error("Define the constructor of the flat model parameterised by average conversion in `fromFlat`")
   }
 
   /**
@@ -125,17 +146,13 @@ export class BaseDemandModel {
    * @protected
    * @param {number} price The reference price. Must be positive.
    * @param {number} conversion The conversion rate at the reference price. Must be strictly between 0 and 1.
-   * @param {number} elasticity The point price elasticity of demand at the reference price. Must be negative.
+   * @param {number} elasticity The point price elasticity of demand at the reference price.
    * @throws {Error} If the price is not positive.
-   * @throws {Error} If the elasticity is not negative.
    * @throws {Error} If the conversion is not strictly between 0 and 1.
    */
-  static _check_reference(price, conversion, elasticity) {
+  static _checkReference(price, conversion, elasticity) {
     if (price <= 0) {
       throw new Error('Price must be positive.')
-    }
-    if (elasticity >= 0) {
-      throw new Error('Elasticity must be negative.')
     }
     if (conversion <= 0 || conversion >= 1) {
       throw new Error('Conversion must be strictly between 0 and 1.')
