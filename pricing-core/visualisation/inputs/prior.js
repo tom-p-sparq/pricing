@@ -15,22 +15,48 @@ export function interpolantsPriorForm(element) {
         throw new Error('interpolantsPriorForm: the provided element is not a valid HTMLElement.')
     }
 
-    const price0 = range([50, 400], { step: 1, value: 100, label: 'Price 1' })
-    const conversion0Mean = range([0.01, 0.99], { step: 0.01, value: 0.7, label: 'Expected conversion at price 1' })
-    const conversion0SampleSize = range([2, 100], { step: 1, value: 10, label: 'Confidence' })
-    const price1 = range([50, 400], { step: 1, value: 200, label: 'Price 2' })
-    const conversion1Mean = range([0.01, 0.99], { step: 0.01, value: 0.3, label: 'Expected conversion at price 2' })
-    const conversion1SampleSize = range([2, 100], { step: 1, value: 10, label: 'Confidence' })
+    const price0 = range([50, 400], {
+        step: 1,
+        value: 100,
+        label: 'Price 1'
+    })
+    const conversion0Mean = range([0.01, 0.99], {
+        step: 0.01,
+        value: 0.7,
+        label: 'Expected conversion at price 1'
+    })
+    const conversion0SampleSize = range([2, 100], {
+        step: 0.1,
+        value: 10,
+        label: 'Confidence',
+        transform: Math.sqrt,
+        invert: (/** @type {number} */ x) => x ** 2
+    })
+    const price1 = range([50, 400], {
+        step: 1,
+        value: 200,
+        label: 'Price 2'
+    })
+    const conversion1Mean = range([0.01, 0.99], {
+        step: 0.01,
+        value: 0.3,
+        label: 'Expected conversion at price 2'
+    })
+    const conversion1SampleSize = range([2, 100], {
+        step: 0.1,
+        value: 10,
+        label: 'Confidence',
+        transform: Math.sqrt,
+        invert: (/** @type {number} */ x) => x ** 2
+    })
 
     const priorSliders = form(
         { price0, conversion0Mean, conversion0SampleSize, price1, conversion1Mean, conversion1SampleSize },
         {
-            template: ({ price0, conversion0Mean, conversion0SampleSize, price1, conversion1Mean, conversion1SampleSize }) =>
-                html`<div style="display: flex; flex-wrap: wrap; gap: 1em;">
-                    <div>${price0}${conversion0Mean}${conversion0SampleSize}</div>
-                    <div>${price1}${conversion1Mean}${conversion1SampleSize}</div>
-                </div>`
-        }
+            template: (/** @type {Record<string, Element>} */ inputs) => html`<div style="display: flex; flex-wrap: wrap; gap: 1em;">
+                    <div>${inputs.price0}${inputs.conversion0Mean}${inputs.conversion0SampleSize}</div>
+                    <div>${inputs.price1}${inputs.conversion1Mean}${inputs.conversion1SampleSize}</div>
+                </div>` }
     )
 
     element.append(priorSliders)
@@ -63,9 +89,11 @@ export function priorForm(element) {
         label: 'Expected conversion',
     })
     const conversionSampleSize = range([2, 100], {
-        step: 1,
+        step: 0.1,
         value: 10,
         label: 'Confidence',
+        transform: Math.sqrt,
+        invert: (/** @type {number} */ x) => x ** 2,
     })
     const elasticityMu = range([-5, -0.1], {
         step: 0.1,
@@ -81,13 +109,11 @@ export function priorForm(element) {
     const priorSliders = form(
         { referencePrice, conversionMean, conversionSampleSize, elasticityMu, elasticitySigma },
         {
-            template: ({ referencePrice, conversionMean, conversionSampleSize, elasticityMu, elasticitySigma }) =>
-                html`<div style="display: flex; flex-wrap: wrap; gap: 1em;">
-                    <div>${referencePrice}</div>
-                    <div>${conversionMean}${conversionSampleSize}</div>
-                    <div>${elasticityMu}${elasticitySigma}</div>
-                </div>`
-        }
+            template: (/** @type {Record<string, Element>} */ inputs) => html`<div style="display: flex; flex-wrap: wrap; gap: 1em;">
+                    <div>${inputs.referencePrice}</div>
+                    <div>${inputs.conversionMean}${inputs.conversionSampleSize}</div>
+                    <div>${inputs.elasticityMu}${inputs.elasticitySigma}</div>
+                </div>` }
     )
 
     element.append(priorSliders)
