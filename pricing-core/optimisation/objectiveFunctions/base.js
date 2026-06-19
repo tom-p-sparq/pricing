@@ -1,10 +1,17 @@
 import { BaseDemandModel } from '../../demand/base.js'
 import { logSumExp } from '../../utils.js'
 
+/**
+ * Abstract base class for pricing objective functions.
+ * All objectives are designed to be **maximised** over price.
+ *
+ * Subclasses implement `_J(samples, price)`, which receives a normalised array
+ * of weighted posterior samples `{model, logWeight}[]`. The public `J` method
+ * handles the single-model case by wrapping it as a unit-weight sample.
+ */
 export class BaseObjectiveFunction {
     /**
-     * 
-     * @param {Object} args 
+     * @param {Object} args
      * @param {{[paramName: string]: number}} args.parameters Objective function (hyper)parameters
      * @param {number} args.cost Underlying cost defining incremental revenue
      */
@@ -20,7 +27,7 @@ export class BaseObjectiveFunction {
     }
 
     /**
-     *
+     * Revenue above cost at a given price: `price − cost`.
      * @param {number} price
      * @returns {number}
      */
@@ -29,9 +36,9 @@ export class BaseObjectiveFunction {
     }
 
     /**
-     * Objective function value. Accepts a single demand model or an array of
-     * weighted posterior samples `{model, logWeight}[]`.
-     * Normalises the single-model case to a unit-weight sample and delegates to `_J`.
+     * Objective value at a given price — **higher is better**.
+     * Accepts either a single demand model (known parameters) or an array of
+     * weighted posterior samples `{model, logWeight}[]` (uncertain parameters).
      * @param {BaseDemandModel | {model: BaseDemandModel, logWeight: number}[]} demandModel
      * @param {number} price
      * @returns {number}
