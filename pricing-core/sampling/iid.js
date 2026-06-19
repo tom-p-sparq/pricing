@@ -1,10 +1,10 @@
 import { Prior } from './priors.js'
-import { BaseDemandModel } from '../conversion/base.js'
+import { BaseConversionModel } from '../conversion/base.js'
 
 /**
  * Draws independent samples from the prior. An infinite generator — the caller controls termination.
  *
- * @template {BaseDemandModel} T
+ * @template {BaseConversionModel} T
  * @param {Prior<T>} prior
  * @yields {T}
  */

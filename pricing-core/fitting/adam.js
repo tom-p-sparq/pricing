@@ -1,4 +1,4 @@
-import { BaseDemandModel } from "../conversion/base.js"
+import { BaseConversionModel } from "../conversion/base.js"
 import { gradLogLikelihood } from "./likelihoods.js"
 
 export class Adam {
@@ -23,7 +23,7 @@ export class Adam {
 
     /**
      * Initializes or resets the Adam optimizer's moment vectors and time step.
-     * @param {BaseDemandModel} model The current demand model.
+     * @param {BaseConversionModel} model The current conversion model.
      */
     reset(model) {
         this.m = Object.fromEntries(model.paramNames.map(name => [name, 0]))
@@ -33,9 +33,9 @@ export class Adam {
 
     /**
      * Step the model parameters based on data array
-     * @param {BaseDemandModel} currentModel The current model parameters ([name, value][]) 
+     * @param {BaseConversionModel} currentModel The current model parameters ([name, value][]) 
      * @param {{price: number, looks: number, books:number}[]} points  Data being fit as an array of price, looks, books triples.
-     * @returns {BaseDemandModel} The new model and the step applied to each of the parameters.
+     * @returns {BaseConversionModel} The new model and the step applied to each of the parameters.
      */
     step(currentModel, points) {
         if (points.length === 0) {
@@ -71,10 +71,10 @@ export class Adam {
 
     /**
      * Iterate through Adam and return the last model
-     * @param {BaseDemandModel} currentModel The starting point of the batch run
+     * @param {BaseConversionModel} currentModel The starting point of the batch run
      * @param {{price: number, looks: number, books:number}[]} points The data to fit
      * @param {number} batchSize The maximum number of iterations to generate
-     * @returns {BaseDemandModel}
+     * @returns {BaseConversionModel}
      */
     batchRun(currentModel, points, batchSize) {
         for (let i = 0; i < batchSize; i++) {

@@ -94,7 +94,7 @@ array into plot data — differing only in the computed field. Extract a shared 
 ```js
 // _models.js (or top of plot.js)
 function modelData(model, maxPrice, fn) {
-    if (model instanceof BaseDemandModel) {
+    if (model instanceof BaseConversionModel) {
         return range(0, maxPrice, 1).map(p => ({ price: p, name: model.constructor.name, ...fn(model, p) }))
     }
     if (Array.isArray(model)) {
@@ -128,10 +128,10 @@ relative paths per the constraint in CLAUDE.md.
 
 ```js
 // before
-import { BaseDemandModel } from "/pricing-core/conversion/index.js";
+import { BaseConversionModel } from "/pricing-core/conversion/index.js";
 
 // after
-import { BaseDemandModel } from "../../conversion/base.js";
+import { BaseConversionModel } from "../../conversion/base.js";
 ```
 
 ---

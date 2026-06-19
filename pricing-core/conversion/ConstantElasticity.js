@@ -1,20 +1,20 @@
-import { BaseDemandModel } from './base.js'
+import { BaseConversionModel } from './base.js'
 
 /**
- * Implements a constant elasticity demand model (also known as isoelastic).
- * In this model, the price elasticity of demand is constant regardless of the price.
+ * Implements a constant elasticity conversion model (also known as isoelastic).
+ * In this model, the price elasticity of conversion is constant regardless of the price.
  *
  * The conversion rate is given by the formula: log(C(p)) = a + b*log(p),
  * where `a` and `b` are the intercept and gradient of a straight line in log-log space.
  */
-export class ConstantElasticityDemandModel extends BaseDemandModel {
+export class ConstantElasticityConversionModel extends BaseConversionModel {
   /**
    * @param {{a: number, b: number}} model_params
    */
   constructor({ a, b }) {
     super({ a, b })
     /**
-     * The constant price elasticity of demand (e).
+     * The constant price elasticity of conversion (e).
      * @type {{a: number, b: number}}
      */
     this.parameters;
@@ -26,21 +26,21 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    * @param {object} params
    * @param {number} params.price The reference price.
    * @param {number} params.conversion The conversion rate at the reference price.
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
-   * @returns {ConstantElasticityDemandModel} A new instance of the demand model.
+   * @param {number} params.elasticity The point price elasticity of conversion at the reference price.
+   * @returns {ConstantElasticityConversionModel} A new instance of the conversion model.
    */
   static fromReference({ price, conversion, elasticity }) {
-    ConstantElasticityDemandModel._checkReference(price, conversion, elasticity)
+    ConstantElasticityConversionModel._checkReference(price, conversion, elasticity)
     const b = elasticity
     const a = Math.log(conversion) - b * Math.log(price)
-    return new ConstantElasticityDemandModel({ a, b })
+    return new ConstantElasticityConversionModel({ a, b })
   }
 
   /**
    * Creates a new model instance by interpolating between two points.
-   * This method calculates the shape of the constant elasticity demand curve that passes
+   * This method calculates the shape of the constant elasticity conversion curve that passes
    * through two given points (p0, c0) and (p1, c1), and then creates a new
-   * `ConstantElasticityDemandModel` instance.
+   * `ConstantElasticityConversionModel` instance.
    * @override
    * @param {object} point0 An object representing the first point, with `price` and `conversion` properties.
    * @param {number} point0.price The price at the first point.
@@ -48,7 +48,7 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
    * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
    * @param {number} point1.price The price at the second point.
    * @param {number} point1.conversion The conversion rate at the second point.
-   * @returns {ConstantElasticityDemandModel} A new instance of the demand model.
+   * @returns {ConstantElasticityConversionModel} A new instance of the conversion model.
    */
   static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
     const logPrice0 = Math.log(price0);
@@ -57,17 +57,17 @@ export class ConstantElasticityDemandModel extends BaseDemandModel {
     const logConv1 = Math.log(conversion1);
     const b = (logConv1 - logConv0) / (logPrice1 - logPrice0);
     const a = (logConv0 * logPrice1 - logConv1 * logPrice0) / (logPrice1 - logPrice0)
-    return new ConstantElasticityDemandModel({ a, b });
+    return new ConstantElasticityConversionModel({ a, b });
   }
 
   /**
    * Creates a flat model with constant conversion rate equal to `averageConversion`.
    * @override
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
-   * @returns {ConstantElasticityDemandModel}
+   * @returns {ConstantElasticityConversionModel}
    */
   static fromFlat(averageConversion) {
-    return new ConstantElasticityDemandModel({ a: Math.log(averageConversion), b: 0 });
+    return new ConstantElasticityConversionModel({ a: Math.log(averageConversion), b: 0 });
   }
 
   /**

@@ -1,8 +1,8 @@
 /**
  * @abstract
- * Base class for demand models.
+ * Base class for conversion models.
  */
-export class BaseDemandModel {
+export class BaseConversionModel {
   /**
    * @param {{[paramName: string]: number}} parameters Model parameters.
    */
@@ -106,9 +106,9 @@ export class BaseDemandModel {
    * @abstract
    * @param {object} params
    * @param {number} params.price The reference price.
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
+   * @param {number} params.elasticity The point price elasticity of conversion at the reference price.
    * @param {number} params.conversion The conversion rate at the reference price.
-   * @returns {BaseDemandModel} A new instance of the demand model.
+   * @returns {BaseConversionModel} A new instance of the conversion model.
    */
   static fromReference({ price, conversion, elasticity }) {
     throw new Error("Define the constructor of the model parameterised by a conversion and elasticity at a reference price in `fromReference`")
@@ -124,7 +124,7 @@ export class BaseDemandModel {
    * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
    * @param {number} point1.price The price at the second point.
    * @param {number} point1.conversion The conversion rate at the second point.
-   * @returns {BaseDemandModel} A new instance of the demand model.
+   * @returns {BaseConversionModel} A new instance of the conversion model.
    */
   static interpolate(point0, point1) {
     throw new Error("Define the constructor of the model parameterised by two points in `interpolate`")
@@ -135,7 +135,7 @@ export class BaseDemandModel {
    * This is a factory method.
    * @abstract
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
-   * @returns {BaseDemandModel} A new instance of the demand model.
+   * @returns {BaseConversionModel} A new instance of the conversion model.
    */
   static fromFlat(averageConversion) {
     throw new Error("Define the constructor of the flat model parameterised by average conversion in `fromFlat`")
@@ -146,7 +146,7 @@ export class BaseDemandModel {
    * @protected
    * @param {number} price The reference price. Must be positive.
    * @param {number} conversion The conversion rate at the reference price. Must be strictly between 0 and 1.
-   * @param {number} elasticity The point price elasticity of demand at the reference price.
+   * @param {number} elasticity The point price elasticity of conversion at the reference price.
    * @throws {Error} If the price is not positive.
    * @throws {Error} If the conversion is not strictly between 0 and 1.
    */

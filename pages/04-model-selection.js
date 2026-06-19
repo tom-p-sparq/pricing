@@ -5,31 +5,31 @@ const modelSpecs = [
     {
         name: 'Logistic',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
-        /** @type {conversion.BaseDemandModel} */
-        model: new conversion.LogisticDemandModel({ a: 0, b: 0 }),
+        /** @type {conversion.BaseConversionModel} */
+        model: new conversion.LogisticConversionModel({ a: 0, b: 0 }),
         /** @type {number | undefined} */
         llh: undefined,
     },
     {
         name: 'Log Logistic',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
-        /** @type {conversion.BaseDemandModel} */
-        model: new conversion.LogLogisticDemandModel({ a: 0, b: 0 }),
+        /** @type {conversion.BaseConversionModel} */
+        model: new conversion.LogLogisticConversionModel({ a: 0, b: 0 }),
         /** @type {number | undefined} */
         llh: undefined,
     },
     {
         name: 'Weibull',
         optimiser: new fitting.Adam({ learningRate: 0.001 }),
-        /** @type {conversion.BaseDemandModel} */
-        model: new conversion.WeibullDemandModel({ a: Math.log(Math.log(2)), b: 0 }),
+        /** @type {conversion.BaseConversionModel} */
+        model: new conversion.WeibullConversionModel({ a: Math.log(Math.log(2)), b: 0 }),
         /** @type {number | undefined} */
         llh: undefined,
     },
 ]
 const stepsPerFrame = 200; // Number of optimization steps per animation frame
 
-/** @param {Generator<conversion.BaseDemandModel>[]} fitGenerators */
+/** @param {Generator<conversion.BaseConversionModel>[]} fitGenerators */
 function animateStep(fitGenerators) {
     const stepped = fitGenerators.map(
         generator => generator.next()

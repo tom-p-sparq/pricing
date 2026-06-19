@@ -15,7 +15,7 @@ export class Prior {
    * @example
    * new Prior(
    *   { conversion: { dist: Normal, args: { mu: 0.4, sigma: 0.05 } }, elasticity: { dist: Normal, args: { mu: -2, sigma: 0.5 } } },
-   *   ({ conversion, elasticity }) => LogisticDemandModel.fromReference({price: 100, conversion, elasticity }),
+   *   ({ conversion, elasticity }) => LogisticConversionModel.fromReference({price: 100, conversion, elasticity }),
    *   rng
    * )
    */

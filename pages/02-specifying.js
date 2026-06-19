@@ -3,11 +3,11 @@ import { requireElement } from '../utils.js'
 
 // Static plot
 const plotConfigs = [
-    { modelClass: conversion.LinearDemandModel, title: 'Linear' },
-    { modelClass: conversion.LogisticDemandModel, title: 'Logistic' },
-    { modelClass: conversion.LogLogisticDemandModel, title: 'Log-logistic' },
-    { modelClass: conversion.WeibullDemandModel, title: 'Weibull' },
-    { modelClass: conversion.ConstantElasticityDemandModel, title: 'Constant elasticity' },
+    { modelClass: conversion.LinearConversionModel, title: 'Linear' },
+    { modelClass: conversion.LogisticConversionModel, title: 'Logistic' },
+    { modelClass: conversion.LogLogisticConversionModel, title: 'Log-logistic' },
+    { modelClass: conversion.WeibullConversionModel, title: 'Weibull' },
+    { modelClass: conversion.ConstantElasticityConversionModel, title: 'Constant elasticity' },
 ];
 
 // Interactive plots

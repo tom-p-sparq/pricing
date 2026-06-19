@@ -1,7 +1,7 @@
 import { logLikelihood } from '../fitting/likelihoods.js'
 import { Prior } from './priors.js'
 import { Proposal } from './proposals.js'
-import { BaseDemandModel } from '../conversion/base.js'
+import { BaseConversionModel } from '../conversion/base.js'
 
 /**
  * Performs a single Metropolis-Hastings step.
@@ -36,7 +36,7 @@ export function mhStep(currentParams, currentLogPost, prior, proposal, data) {
  * Yields the current model after each step (including rejected proposals), so the chain
  * correctly dwells at the current state on rejection.
  *
- * @template {BaseDemandModel} T
+ * @template {BaseConversionModel} T
  * @param {Prior<T>} prior
  * @param {Proposal} proposal
  * @param {Array<{price: number, looks: number, books: number}>} data
