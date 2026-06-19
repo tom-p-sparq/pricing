@@ -4,7 +4,7 @@
 
 `fitting/` finds the maximum likelihood estimate of model parameters. This gives a single
 best-fit model but no representation of uncertainty — two datasets that are consistent with
-very different demand curves produce the same point estimate. Bayesian inference addresses
+very different conversion curves produce the same point estimate. Bayesian inference addresses
 this by maintaining a distribution over parameters (the posterior), enabling uncertainty
 quantification, prior knowledge incorporation, and richer visualisations (e.g. posterior
 predictive bands).
@@ -17,12 +17,12 @@ generator-based samplers.
 
 Several architectural choices were made:
 
-**Decoupled from `BaseDemandModel`**: `Prior` and `Proposal` operate on plain
+**Decoupled from `BaseConversionModel`**: `Prior` and `Proposal` operate on plain
 `{[paramName]: number}` objects rather than model instances. The conversion to a model
 is the caller's responsibility via a `factory` function on `Prior`. This means the
 sampling module is agnostic about what the parameters represent — you can place priors on
 the internal `{a, b}` parameterisation, on natural parameters `{conversion, elasticity}`
-via `fromReference`, or on interpolating points. The `BaseDemandModel` constraint appears
+via `fromReference`, or on interpolating points. The `BaseConversionModel` constraint appears
 only in `mh` and `particleFilter` (which call `logLikelihood`), not in `Prior` or
 `Proposal` themselves.
 

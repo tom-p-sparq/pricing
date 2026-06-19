@@ -1,17 +1,17 @@
-import { BaseDemandModel } from "../conversion/base.js";
+import { BaseConversionModel } from "../conversion/base.js";
 import { Adam } from "./adam.js"
 import { logLikelihood } from "./likelihoods.js"
 
 /**
  * Create an iterator that fits a model to data
  * 
- * @param {BaseDemandModel} model The model to fit
+ * @param {BaseConversionModel} model The model to fit
  * @param {Adam} optimiser The optimiser to use for fitting
  * @param {{price: number, looks: number, books: number}[]} data The data to fit the model to
  * @param {Object} options
  * @param {number} [options.epsilon=1e-5] The convergence threshold
  * @param {number} [options.batchSize=100] The number of steps per iteration
- * @returns {Generator<BaseDemandModel, void, void>} A generator that yields the model at each step of the fitting process.
+ * @returns {Generator<BaseConversionModel, void, void>} A generator that yields the model at each step of the fitting process.
  */
 export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }) {
     const numPoints = data.length;
@@ -53,9 +53,9 @@ export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }
 }
 
 /**
- * @param {typeof BaseDemandModel} modelClass
+ * @param {typeof BaseConversionModel} modelClass
  * @param {{price: number, looks: number, books: number}[]} data
- * @returns {BaseDemandModel}
+ * @returns {BaseConversionModel}
  */
 function makeFlatModel(modelClass, data) {
     const totalLooks = data.reduce((total, point) => total + point.looks, 0);

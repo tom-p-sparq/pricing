@@ -3,11 +3,11 @@ import { requireElement } from '../utils.js'
 
 // Static plot
 const plotConfigs = [
-    { modelClass: conversion.LinearDemandModel, title: 'Linear', containerId: 'linear-conversion-container' },
-    { modelClass: conversion.LogisticDemandModel, title: 'Logistic', containerId: 'logistic-conversion-container' },
-    { modelClass: conversion.LogLogisticDemandModel, title: 'Log-logistic', containerId: 'log-logistic-conversion-container' },
-    { modelClass: conversion.WeibullDemandModel, title: 'Weibull', containerId: 'weibull-conversion-container' },
-    { modelClass: conversion.ConstantElasticityDemandModel, title: 'Constant elasticity', containerId: 'constant-elasticity-conversion-container' },
+    { modelClass: conversion.LinearConversionModel, title: 'Linear', containerId: 'linear-conversion-container' },
+    { modelClass: conversion.LogisticConversionModel, title: 'Logistic', containerId: 'logistic-conversion-container' },
+    { modelClass: conversion.LogLogisticConversionModel, title: 'Log-logistic', containerId: 'log-logistic-conversion-container' },
+    { modelClass: conversion.WeibullConversionModel, title: 'Weibull', containerId: 'weibull-conversion-container' },
+    { modelClass: conversion.ConstantElasticityConversionModel, title: 'Constant elasticity', containerId: 'constant-elasticity-conversion-container' },
 ];
 
 const reference = {

@@ -1,5 +1,5 @@
 import { logLikelihood } from '../fitting/likelihoods.js'
-import { BaseDemandModel } from '../conversion/base.js'
+import { BaseConversionModel } from '../conversion/base.js'
 import { Prior } from './priors.js'
 import { Proposal } from './proposals.js'
 import { mhStep } from './mcmc.js'
@@ -8,7 +8,7 @@ import { mhStep } from './mcmc.js'
  * Bootstrap particle filter with optional MCMC rejuvenation.
  * Processes data points sequentially, yielding the particle set after each observation.
  *
- * @template {BaseDemandModel} T
+ * @template {BaseConversionModel} T
  * @param {Prior<T>} prior
  * @param {Proposal} proposal Applies MCMC rejuvenation after resampling.
  * @param {Array<{price: number, looks: number, books: number}>} data
@@ -30,7 +30,7 @@ export function* particleFilter(prior, proposal, data, options = {}) {
  * Stateful particle filter for incremental posterior updates.
  * Suitable for interactive use where data arrives in batches over time.
  *
- * @template {BaseDemandModel} T
+ * @template {BaseConversionModel} T
  */
 export class ParticleFilterState {
   /**

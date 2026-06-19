@@ -1,11 +1,11 @@
-import { BaseDemandModel } from "../conversion/base.js"
+import { BaseConversionModel } from "../conversion/base.js"
 
 /**
  * Checks if the log-likelihood for a given model and data points is finite.
  * The log-likelihood becomes non-finite (-Infinity) if we need to compute log(0). This happens when:
  * - The conversion rate is 0, but there are observed bookings (books > 0).
  * - The conversion rate is 1, but there are observed instances of no bookings (looks > books).
- * @param {import('../conversion/base.js').BaseDemandModel} model The demand model to evaluate.
+ * @param {import('../conversion/base.js').BaseConversionModel} model The conversion model to evaluate.
  * @param {Array<{price: number, looks: number, books: number}>} points An array of data points.
  * @returns {boolean} `true` if the log-likelihood is finite for all points, `false` otherwise.
  */
@@ -19,7 +19,7 @@ function hasFiniteLogLikelihood(model, points) {
 /**
  * Calculates the total log-likelihood for a given model and a set of data points.
  *
- * @param {BaseDemandModel} model The demand model to evaluate.
+ * @param {BaseConversionModel} model The conversion model to evaluate.
  * @param {Array<{price: number, looks: number, books: number}>} points An array of data points, each with `price`, `looks`, and `books`.
  * @returns {number} The total log-likelihood of the data given the model.
  */
@@ -41,7 +41,7 @@ export function logLikelihood(model, points) {
 /**
  * Calculates the gradient of the log-likelihood for a given model and a set of data points.
  *
- * @param {BaseDemandModel} model The demand model to evaluate.
+ * @param {BaseConversionModel} model The conversion model to evaluate.
  * @param {Array<{price: number, looks: number, books: number}>} points An array of data points, each with `price`, `looks`, and `books`.
  * @returns {Record<string, number> | undefined} An object where keys are model parameter names and values are the corresponding gradients.
  *               Returns undefined if the log-likelihood is not finite.

@@ -1,24 +1,24 @@
 import { ruleY, ruleX, lineY, areaY, crosshair, tip, pointer, dot } from "@observablehq/plot";
 import { range } from 'd3';
-import { BaseDemandModel } from "../../conversion/base.js";
+import { BaseConversionModel } from "../../conversion/base.js";
 
 /**
- * Projects a demand model onto a 2-D point for scatter plotting.
- * @template {BaseDemandModel} T
+ * Projects a conversion model onto a 2-D point for scatter plotting.
+ * @template {BaseConversionModel} T
  * @callback SampleProjection
- * @param {T} demandModel
+ * @param {T} conversionModel
  * @returns {{ x: number, y: number }}
  */
 
 // API
 
 /**
- * @template {BaseDemandModel} T
+ * @template {BaseConversionModel} T
  * @param {{ particles: T[], weights: number[] }} weightedSample
  * @param {SampleProjection<T>} [fun] - Defaults to plotting parameters `a` vs `b`.
  */
-export function sampleScatterPlot(weightedSample, fun = demandModel => (
-    { x: demandModel.parameters.a, y: demandModel.parameters.b }
+export function sampleScatterPlot(weightedSample, fun = conversionModel => (
+    { x: conversionModel.parameters.a, y: conversionModel.parameters.b }
 )) {
     const data = _sampleProjectionData(weightedSample, fun )
     const dots = _sampleDots(data)
@@ -28,7 +28,7 @@ export function sampleScatterPlot(weightedSample, fun = demandModel => (
 }
 
 /**
- * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {{ particles: BaseConversionModel[], weights: number[] }} weightedSample
  * @param {{ maxPrice?: number, dPrice?: number }} [opts]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
@@ -40,7 +40,7 @@ export function sampleConversionCurves(weightedSample, { maxPrice = 400, dPrice 
 }
 
 /**
- * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {{ particles: BaseConversionModel[], weights: number[] }} weightedSample
  * @param {{ maxPrice?: number, dPrice?: number, anchorPrices?: number[] }} [opts]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
@@ -57,7 +57,7 @@ export function sampleConversionDistribution(weightedSample, { maxPrice = 400, d
 // DATA
 
 /**
- * @template {BaseDemandModel} T
+ * @template {BaseConversionModel} T
  * @param {{ particles: T[], weights: number[]}} weightedSample
  * @param {SampleProjection<T>} fun
  */
@@ -73,7 +73,7 @@ function _sampleProjectionData({ particles, weights }, fun ) {
  */
 
 /**
- * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {{ particles: BaseConversionModel[], weights: number[] }} weightedSample
  * @param {number[]} prices
  * @returns {ConversionSample[]}
  */
@@ -90,7 +90,7 @@ function _sampleConversionData({ particles, weights }, prices) {
  */
 
 /**
- * @param {{ particles: BaseDemandModel[], weights: number[] }} weightedSample
+ * @param {{ particles: BaseConversionModel[], weights: number[] }} weightedSample
  * @param {number[]} prices
  * @returns {QuantileSample[]}
  */

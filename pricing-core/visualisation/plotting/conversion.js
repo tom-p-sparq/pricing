@@ -1,11 +1,11 @@
 import { ruleY, ruleX, dot, lineY, crosshair, tip, pointer } from "@observablehq/plot";
-import { BaseDemandModel } from "../../conversion/base.js";
+import { BaseConversionModel } from "../../conversion/base.js";
 import { modelData } from "./_models.js";
 
 
 /**
  * @param {object} args
- * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string}>} args.model
+ * @param {BaseConversionModel | Array<{model: BaseConversionModel, name: string}>} args.model
  * @param {object} [args.curveOptions]
  * @param {number} [maxPrice=400]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
