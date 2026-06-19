@@ -43,9 +43,11 @@ Each page is a pair: `pages/NN-name.html` (content/front matter) + `pages/NN-nam
 
 ### pricing-core Library
 
-Four top-level modules exported from `pricing-core/index.js`:
+Top-level modules exported from `pricing-core/index.js`. `pricing-core/utils.js` exports `logSumExp` (used internally; import directly from `pricing-core/utils.js` if needed).
 
 - **`conversion/`** — conversion model classes. `BaseConversionModel` defines the interface; subclasses must implement `_conversion(price)` (unclamped), `gradLog(price)` (returns `{conversion, rejection}` gradient objects keyed by parameter name), and the static factories `fromReference({price, conversion, elasticity})`, `interpolate(point0, point1)`, and `fromFlat(averageConversion)`.
+- **`demand/`** — demand model classes, each comprising a looks process and a `BaseConversionModel`. `BaseDemandModel` defines the interface; subclasses must implement `_logMgfConversions(t, phi)` (log-MGF of converted looks, the required primitive) and `_expectedConversions(phi)`. `_mgfConversions` defaults to `exp(_logMgfConversions)` and need not be overridden. Three concrete models: `FixedDemandModel` (`{n}` fixed looks), `PoissonDemandModel` (`{lambda}` Poisson rate), `NegativeBinomialDemandModel` (`{lambda, r}` — overdispersed Poisson; `r → ∞` recovers Poisson).
+- **`optimisation/`** — pricing objective functions (price optimisation algorithms to follow). `objectiveFunctions/` contains `BaseObjectiveFunction`, which exposes `J(demandModel, price)` — **always maximised** — accepting either a single demand model or `{model, logWeight}[]` posterior samples. Subclasses implement `_J(samples, price)`. Three implementations: `ExpectedRevenue` (risk-neutral, `m · E[N]`), `CARA` (CARA utility, `−E[M_N(−ρm)]`, bounded in `(−1, 0)`), `EntropicRiskMeasure` (certainty-equivalent profit, `−(1/ρ) log E[M_N(−ρm)]`; equivalent optimum to CARA but on the monetary scale of profit).
 - **`fitting/`** — gradient-based optimisation. `fit()` is a generator that yields intermediate models during convergence using the Adam optimiser (`adam.js`) and log-likelihoods (`likelihoods.js`). Handles edge cases before entering the optimisation loop: 0 points → yield model as-is; 1 point → `fromReference` with elasticity −2; 2 points → `interpolate`; 3+ points → Adam optimisation. Falls back to a flat model if the initial log-likelihood is extremely poor.
 - **`sampling/`** — Bayesian inference over model parameters. `Prior` and `Proposal` operate on plain `{[paramName]: number}` objects (decoupled from `BaseConversionModel`); a `factory` function on `Prior` converts sampled parameters to model instances. `distributions/` holds unconditional priors (`Normal`, `LogNormal`, `Beta`); `steps/` holds conditional proposal distributions (`NormalStep`, `LogNormalStep`). Samplers are generators matching `fit()`'s yield pattern: `iidSampler` (i.i.d. prior draws, `iid.js`), `mh` (Metropolis-Hastings, `mcmc.js`), and `particleFilter` (bootstrap particle filter with MCMC rejuvenation, `particleFilter.js`). `rng.js` exports `createRng()` — a seedable MT19937 RNG from `@stdlib/random`.
 - **`visualisation/`** — Observable Plot wrappers (`plotting/`) and Observable Input form controls (`inputs/`). Functions accept either a single model or an array of named models.
@@ -78,6 +80,7 @@ For fitting convergence animation, pages drive a `requestAnimationFrame` loop ov
 - `migrate-to-11ty.md` — rationale for 11ty over Vite/bundled approaches
 - `sampling-module.md` — architecture of the Bayesian sampling subsystem and parameterisation trade-offs
 - `particle-filter-state.md` — stateful particle filter design for incremental (streaming) data updates
+- `objective-functions.md` — demand module design, objective function API, LSE aggregation under posterior uncertainty, and ERM vs CARA
 
 ## Deployment
 
