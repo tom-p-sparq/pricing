@@ -1,4 +1,5 @@
 import { logLikelihood } from '../fitting/likelihoods.js'
+import { logSumExp } from '../utils.js'
 import { BaseConversionModel } from '../conversion/base.js'
 import { Prior } from './priors.js'
 import { Proposal } from './proposals.js'
@@ -132,15 +133,6 @@ export class ParticleFilterState {
     }
     return this.current
   }
-}
-
-/**
- * @param {number[]} logValues
- * @returns {number}
- */
-function logSumExp(logValues) {
-  const max = Math.max(...logValues)
-  return max + Math.log(logValues.reduce((sum, lv) => sum + Math.exp(lv - max), 0))
 }
 
 /**

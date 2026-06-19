@@ -1,4 +1,5 @@
-import { BaseObjectiveFunction, logSumExp } from './base.js'
+import { BaseObjectiveFunction } from './base.js'
+import { logSumExp } from '../../utils.js'
 import { BaseDemandModel } from '../../demand/base.js'
 
 export class ExpectedRevenue extends BaseObjectiveFunction {
