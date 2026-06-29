@@ -1,6 +1,7 @@
 import { BaseDistribution } from './base.js'
 import { factory } from '@stdlib/random-base-lognormal'
 import logpdf from '@stdlib/stats-base-dists-lognormal-logpdf'
+import quantile from '@stdlib/stats-base-dists-lognormal-quantile'
 
 export class LogNormal extends BaseDistribution {
   /**
@@ -29,4 +30,7 @@ export class LogNormal extends BaseDistribution {
   logPdf(x) {
     return logpdf(x, this._mu, this._sigma)
   }
+
+  /** @override @param {number} p */
+  quantile(p) { return quantile(p, this._mu, this._sigma) }
 }

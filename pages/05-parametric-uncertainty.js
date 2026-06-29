@@ -62,11 +62,16 @@ function buildPriorSpec() {
 let prior = new sampling.Prior(buildPriorSpec(), interpolantFactory(priorSliders.value.price0, priorSliders.value.price1), RNG)
 let pf = new sampling.ParticleFilterState(prior, proposal, { N: sampleSize })
 
+const fixedUniformSamples = Array.from({ length: sampleSize }, () => ({
+    conversion0: RNG(),
+    conversion1: RNG(),
+}))
+
 // PRIOR RENDER
 
 function renderPrior() {
     const { price0, price1, conversion0Mean, conversion1Mean } = priorSliders.value
-    const priorModelSample = Array.from({ length: sampleSize }, () => prior.sampleModel())
+    const priorModelSample = prior.quantileSampleModels(fixedUniformSamples)
     const priorModelWeightedSample = {
         particles: priorModelSample,
         weights: priorModelSample.map(() => 1.0),
