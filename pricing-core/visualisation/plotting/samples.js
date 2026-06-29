@@ -1,5 +1,5 @@
 import { ruleY, ruleX, lineY, areaY, crosshair, tip, pointer, dot } from "@observablehq/plot";
-import { range } from 'd3';
+import { range } from 'd3-array';
 import { BaseConversionModel } from "../../conversion/base.js";
 
 /**
