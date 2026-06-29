@@ -12,15 +12,15 @@ const dataTableContainer = requireElement('data-table-container');
 const posteriorCurveContainer = requireElement('posterior-curve-container');
 
 /**
- * Factory: given sampled {conversion0, conversion1} at two fixed prices, build a LogisticDemandModel
+ * Factory: given sampled {conversion0, conversion1} at two fixed prices, build a LogisticConversionModel
  * by interpolation through those two (price, conversion) points.
  * @param {number} price0
  * @param {number} price1
- * @returns {(params: {conversion0: number, conversion1: number}) => conversion.LogisticDemandModel}
+ * @returns {(params: {conversion0: number, conversion1: number}) => conversion.LogisticConversionModel}
  */
 function interpolantFactory(price0, price1) {
     return ({ conversion0, conversion1 }) =>
-        conversion.LogisticDemandModel.interpolate(
+        conversion.LogisticConversionModel.interpolate(
             { price: price0, conversion: conversion0 },
             { price: price1, conversion: conversion1 },
         )
@@ -31,10 +31,10 @@ function interpolantFactory(price0, price1) {
  * for the 2D scatter plot of posterior parameter samples.
  * @param {number} price0
  * @param {number} price1
- * @returns {(demandModel: conversion.LogisticDemandModel) => {x: number, y: number}}
+ * @returns {(conversionModel: conversion.LogisticConversionModel) => {x: number, y: number}}
  */
 function fromInterpolantPrices(price0, price1) {
-    return (demandModel) => ({ x: demandModel.conversion(price0), y: demandModel.conversion(price1) })
+    return (conversionModel) => ({ x: conversionModel.conversion(price0), y: conversionModel.conversion(price1) })
 }
 
 // PRIOR FORM
@@ -62,11 +62,16 @@ function buildPriorSpec() {
 let prior = new sampling.Prior(buildPriorSpec(), interpolantFactory(priorSliders.value.price0, priorSliders.value.price1), RNG)
 let pf = new sampling.ParticleFilterState(prior, proposal, { N: sampleSize })
 
+const fixedUniformSamples = Array.from({ length: sampleSize }, () => ({
+    conversion0: RNG(),
+    conversion1: RNG(),
+}))
+
 // PRIOR RENDER
 
 function renderPrior() {
     const { price0, price1, conversion0Mean, conversion1Mean } = priorSliders.value
-    const priorModelSample = Array.from({ length: sampleSize }, () => prior.sampleModel())
+    const priorModelSample = prior.quantileSampleModels(fixedUniformSamples)
     const priorModelWeightedSample = {
         particles: priorModelSample,
         weights: priorModelSample.map(() => 1.0),

@@ -15,7 +15,7 @@ export class Prior {
    * @example
    * new Prior(
    *   { conversion: { dist: Normal, args: { mu: 0.4, sigma: 0.05 } }, elasticity: { dist: Normal, args: { mu: -2, sigma: 0.5 } } },
-   *   ({ conversion, elasticity }) => LogisticDemandModel.fromReference({price: 100, conversion, elasticity }),
+   *   ({ conversion, elasticity }) => LogisticConversionModel.fromReference({price: 100, conversion, elasticity }),
    *   rng
    * )
    */
@@ -64,5 +64,22 @@ export class Prior {
    */
   sampleModel() {
     return this.makeModel(this.sample())
+  }
+
+  /**
+   * Maps an array of uniform base samples through each parameter's quantile function,
+   * then through the factory. Reusing the same `uniformSamples` across calls produces
+   * smooth, noise-free updates when prior parameters change.
+   * @param {{[paramName: string]: number}[]} uniformSamples
+   * @returns {T[]}
+   */
+  quantileSampleModels(uniformSamples) {
+    return uniformSamples.map(u =>
+      this.makeModel(
+        Object.fromEntries(
+          Object.entries(this._dists).map(([name, dist]) => [name, dist.quantile(u[name])])
+        )
+      )
+    )
   }
 }

@@ -2,7 +2,7 @@ import { ruleY, lineY, crosshair, tip, pointer } from "@observablehq/plot";
 import { modelData } from "./_models.js";
 
 /**
- * @param {import("../../conversion/base.js").BaseDemandModel | Array<{model: import("../../conversion/base.js").BaseDemandModel, name: string}>} model
+ * @param {import("../../conversion/base.js").BaseConversionModel | Array<{model: import("../../conversion/base.js").BaseConversionModel, name: string}>} model
  * @param {number} [cost=0] The cost base to measure incremental revenue against.
  * @param {number} [maxPrice=400]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}

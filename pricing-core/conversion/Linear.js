@@ -1,14 +1,14 @@
-import { BaseDemandModel } from './base.js'
+import { BaseConversionModel } from './base.js'
 
 /**
- * Implements a linear demand model parameterized by price elasticity at a reference point.
+ * Implements a linear conversion model parameterized by price elasticity at a reference point.
  * The conversion rate is modeled as a linear function of price, defined by a known
- * conversion rate `c0` at a given price `p0`, and the price elasticity of demand `e`.
+ * conversion rate `c0` at a given price `p0`, and the price elasticity of conversion `e`.
  *
  * The linear function is of the form: C(p) = c0 + b * (p - p0)
  * where the slope `b` is derived from elasticity: b = e * (c0 / p0).
  */
-export class LinearDemandModel extends BaseDemandModel {
+export class LinearConversionModel extends BaseConversionModel {
   /**
    * @param {{a: number, b: number}} model_params
    */
@@ -26,21 +26,21 @@ export class LinearDemandModel extends BaseDemandModel {
    * @param {object} params
    * @param {number} params.price The reference price.
    * @param {number} params.conversion The conversion rate at the reference price.
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
-   * @returns {LinearDemandModel} A new instance of the demand model.
+   * @param {number} params.elasticity The point price elasticity of conversion at the reference price.
+   * @returns {LinearConversionModel} A new instance of the conversion model.
    */
   static fromReference({ price, conversion, elasticity }) {
-    LinearDemandModel._checkReference(price, conversion, elasticity)
+    LinearConversionModel._checkReference(price, conversion, elasticity)
     const a = conversion * (1 - elasticity)
     const b = elasticity * (conversion / price)
-    return new LinearDemandModel({ a, b })
+    return new LinearConversionModel({ a, b })
   }
 
   /**
    * Creates a new model instance by interpolating between two points.
-   * This method calculates the slope `b` of the linear demand curve that passes
+   * This method calculates the slope `b` of the linear conversion curve that passes
    * through two given points (p0, c0) and (p1, c1), and then creates a new
-   * `LinearDemandModel` instance.
+   * `LinearConversionModel` instance.
    * @override
    * @param {object} point0 An object representing the first point, with `price` and `conversion` properties.
    * @param {number} point0.price The price at the first point.
@@ -48,22 +48,22 @@ export class LinearDemandModel extends BaseDemandModel {
    * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
    * @param {number} point1.price The price at the second point.
    * @param {number} point1.conversion The conversion rate at the second point.
-   * @returns {LinearDemandModel} A new instance of the demand model.
+   * @returns {LinearConversionModel} A new instance of the conversion model.
    */
   static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
     const a = (conversion0 * price1 - conversion1 * price0) / (price1 - price0);
     const b = (conversion1 - conversion0) / (price1 - price0);
-    return new LinearDemandModel({ a, b });
+    return new LinearConversionModel({ a, b });
   }
 
   /**
    * Creates a flat model with constant conversion rate equal to `averageConversion`.
    * @override
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
-   * @returns {LinearDemandModel}
+   * @returns {LinearConversionModel}
    */
   static fromFlat(averageConversion) {
-    return new LinearDemandModel({ a: averageConversion, b: 0 });
+    return new LinearConversionModel({ a: averageConversion, b: 0 });
   }
 
   /**

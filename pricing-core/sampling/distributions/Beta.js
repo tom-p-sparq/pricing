@@ -1,6 +1,7 @@
 import { BaseDistribution } from './base.js';
-import { factory } from '@stdlib/random-base-beta'
+import betaRng from '@stdlib/random-base-beta'
 import logpdf from '@stdlib/stats-base-dists-beta-logpdf'
+import quantile from '@stdlib/stats-base-dists-beta-quantile'
 
 export class Beta extends BaseDistribution {
   /**
@@ -17,7 +18,7 @@ export class Beta extends BaseDistribution {
     super();
     this._alpha = mean * sampleSize;
     this._beta = (1 - mean) * sampleSize;
-    this._sampler = factory(this._alpha, this._beta, {prng: rng})
+    this._sampler = betaRng.factory(this._alpha, this._beta, {prng: rng})
   }
 
   /** @override */
@@ -32,4 +33,7 @@ export class Beta extends BaseDistribution {
   logPdf(x) {
     return logpdf(x, this._alpha, this._beta)
   }
+
+  /** @override @param {number} p */
+  quantile(p) { return quantile(p, this._alpha, this._beta) }
 }

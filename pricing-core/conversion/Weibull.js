@@ -1,13 +1,13 @@
-import { BaseDemandModel } from './base.js'
+import { BaseConversionModel } from './base.js'
 
 /**
- * Implements a demand model based on the Weibull distribution's survival function.
- * This model is highly flexible and can represent various shapes of demand curves.
+ * Implements a conversion model based on the Weibull distribution's survival function.
+ * This model is highly flexible and can represent various shapes of conversion curves.
  *
  * The conversion rate is given by the Weibull survival function: log(-log(C(p))) = a + b*log(p),
  * where `a` and `b` are the intercept and gradient of a straight line in cloglog-log space.
  */
-export class WeibullDemandModel extends BaseDemandModel {
+export class WeibullConversionModel extends BaseConversionModel {
   /**
    * @param {{a: number, b: number}} model_params
    */
@@ -25,21 +25,21 @@ export class WeibullDemandModel extends BaseDemandModel {
    * @param {object} params
    * @param {number} params.price The reference price.
    * @param {number} params.conversion The conversion rate at the reference price.
-   * @param {number} params.elasticity The point price elasticity of demand at the reference price.
-   * @returns {WeibullDemandModel} A new instance of the demand model.
+   * @param {number} params.elasticity The point price elasticity of conversion at the reference price.
+   * @returns {WeibullConversionModel} A new instance of the conversion model.
    */
   static fromReference({ price, conversion, elasticity }) {
-    WeibullDemandModel._checkReference(price, conversion, elasticity)
+    WeibullConversionModel._checkReference(price, conversion, elasticity)
     const b = elasticity / Math.log(conversion)
     const a = Math.log(-Math.log(conversion)) - b * Math.log(price)
-    return new WeibullDemandModel({ a, b });
+    return new WeibullConversionModel({ a, b });
   }
 
   /**
    * Creates a new model instance by interpolating between two points.
-   * This method calculates the shape of the Weibull demand curve that passes
+   * This method calculates the shape of the Weibull conversion curve that passes
    * through two given points (p0, c0) and (p1, c1), and then creates a new
-   * `WeibullDemandModel` instance.
+   * `WeibullConversionModel` instance.
    * @override
    * @param {object} point0 An object representing the first point, with `price` and `conversion` properties.
    * @param {number} point0.price The price at the first point.
@@ -47,7 +47,7 @@ export class WeibullDemandModel extends BaseDemandModel {
    * @param {object} point1 An object representing the second point, with `price` and `conversion` properties.
    * @param {number} point1.price The price at the second point.
    * @param {number} point1.conversion The conversion rate at the second point.
-   * @returns {WeibullDemandModel} A new instance of the demand model.
+   * @returns {WeibullConversionModel} A new instance of the conversion model.
    */
   static interpolate({ price: price0, conversion: conversion0 }, { price: price1, conversion: conversion1 }) {
     const logprice0 = Math.log(price0);
@@ -56,17 +56,17 @@ export class WeibullDemandModel extends BaseDemandModel {
     const cloglog1 = Math.log(-Math.log(conversion1));
     const b = (cloglog1 - cloglog0) / (logprice1 - logprice0);
     const a = (cloglog0 * logprice1 - cloglog1 * logprice0) / (logprice1 - logprice0);
-    return new WeibullDemandModel({ a, b });
+    return new WeibullConversionModel({ a, b });
   }
 
   /**
    * Creates a flat model with constant conversion rate equal to `averageConversion`.
    * @override
    * @param {number} averageConversion The constant conversion rate, strictly between 0 and 1.
-   * @returns {WeibullDemandModel}
+   * @returns {WeibullConversionModel}
    */
   static fromFlat(averageConversion) {
-    return new WeibullDemandModel({ a: Math.log(-Math.log(averageConversion)), b: 0 });
+    return new WeibullConversionModel({ a: Math.log(-Math.log(averageConversion)), b: 0 });
   }
 
   /**
