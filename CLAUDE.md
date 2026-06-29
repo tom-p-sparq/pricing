@@ -81,6 +81,7 @@ For fitting convergence animation, pages drive a `requestAnimationFrame` loop ov
 - `sampling-module.md` — architecture of the Bayesian sampling subsystem and parameterisation trade-offs
 - `particle-filter-state.md` — stateful particle filter design for incremental (streaming) data updates
 - `objective-functions.md` — demand module design, objective function API, LSE aggregation under posterior uncertainty, and ERM vs CARA
+- `price-optimiser.md` — Brent's method for scalar price optimisation, algorithm choice, and trade-offs
 
 ## Deployment
 
