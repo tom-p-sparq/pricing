@@ -1,5 +1,5 @@
 import { BaseStep } from './base.js';
-import { factory } from '@stdlib/random-base-normal'
+import normalRng from '@stdlib/random-base-normal'
 import logpdf from '@stdlib/stats-base-dists-normal-logpdf'
 
 export class NormalStep extends BaseStep {
@@ -13,7 +13,7 @@ export class NormalStep extends BaseStep {
     }
     super();
     this._sigma = sigma;
-    this.factory = factory({prng: rng})
+    this.factory = normalRng.factory({prng: rng})
   }
 
   /**

@@ -1,5 +1,5 @@
 import { BaseDistribution } from './base.js';
-import { factory } from '@stdlib/random-base-normal'
+import normalRng from '@stdlib/random-base-normal'
 import logpdf from '@stdlib/stats-base-dists-normal-logpdf'
 import quantile from '@stdlib/stats-base-dists-normal-quantile'
 
@@ -15,7 +15,7 @@ export class Normal extends BaseDistribution {
     super();
     this._mu = mu;
     this._sigma = sigma;
-    this._sampler = factory(mu, sigma, {prng: rng})
+    this._sampler = normalRng.factory(mu, sigma, {prng: rng})
   }
 
   /** @override */
