@@ -1,12 +1,24 @@
 import fs from "fs";
 import path from "path";
+import esbuild from "esbuild";
 
 export default function(eleventyConfig) {
   const pathPrefix = process.env.PATHPREFIX ?? "/";
 
+  eleventyConfig.on("eleventy.before", async () => {
+    await esbuild.build({
+      entryPoints: ["pricing-core/index.js"],
+      bundle: true,
+      format: "esm",
+      outfile: "_site/pricing-core/index.js",
+      sourcemap: true,
+      platform: "browser",
+    });
+  });
+  eleventyConfig.addWatchTarget("pricing-core/");
+
   eleventyConfig.addPassthroughCopy("pages/style.css");
   eleventyConfig.addPassthroughCopy({ "utils.js": "utils.js" });
-  eleventyConfig.addPassthroughCopy({ "pricing-core": "pricing-core" });
 
   // Co-locate each page's companion JS into its output folder as script.js
   const passthroughMap = {};

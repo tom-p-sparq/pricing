@@ -1,5 +1,5 @@
 import { ruleY, lineY, crosshair, tip, pointer, raster } from "@observablehq/plot";
-import { range } from 'd3';
+import { range } from 'd3-array';
 import { BaseDistribution } from '../../sampling/distributions/index.js'
 
 /**
