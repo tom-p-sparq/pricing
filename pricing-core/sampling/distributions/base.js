@@ -21,4 +21,14 @@ export class BaseDistribution {
   logPdf(x) {
     throw new Error("Method 'logPdf()' must be implemented in subclasses.");
   }
+
+  /**
+   * Computes the quantile (inverse CDF) of the distribution at probability p.
+   * @abstract
+   * @param {number} p A probability in [0, 1].
+   * @returns {number} The quantile at p.
+   */
+  quantile(p) {
+    throw new Error("Method 'quantile()' must be implemented in subclasses.");
+  }
 }
