@@ -10,9 +10,14 @@
   "devDependencies": {
     "@observablehq/inputs": "^0.10.6",
     "@observablehq/plot": "^0.6.13",
-    "d3": "^7.9.0",
-    "htl": "^0.3.1",
     "@stdlib/random-base": "^0.2.3",
-    "@stdlib/stats-base-dists": "^0.3.1"
+    "@stdlib/stats-base-dists": "^0.3.1",
+    "d3": "^7.9.0",
+    "esbuild": "^0.28.1",
+    "htl": "^0.3.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "fsevents@2.3.3": true
   }
 }
