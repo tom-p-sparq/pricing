@@ -99,14 +99,14 @@ function renderModelPlots() {
     plotting.plot(likelihoodRatioContainer, _logLikelihoodPlot, { title: 'Selection via log-likelihood ratio' })
     const objective = new optimisation.objectiveFunctions.ExpectedRevenue({ cost: costSlider.value })
     const toDemandModels = modelSpecs.map(({ model, name }) => ({
-        model: new demand.FixedDemandModel({ n: 1, conversionModel: model }),
+        model: new demand.FixedDemandModel({ parameters: { n: 1 }, conversionModel: model }),
         name,
     }))
     plotting.plot(
         incrementalRevenueContainer,
         plotting.objectiveCurvePlot(toDemandModels, objective),
         { x: { label: 'Price' }, y: { grid: true, label: 'Incremental revenue', nice: true } },
-        { title: 'Modelled expected incremental revenue' },
+        { color: { legend: true }, title: 'Modelled expected incremental revenue' },
     )
 }
 

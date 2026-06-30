@@ -22,7 +22,7 @@ plotting.plot(
 const incrementalRevenueContainer = requireElement('incremental-revenue-container');
 function render() {
     const objective = new optimisation.objectiveFunctions.ExpectedRevenue({ cost: costSlider.value })
-    const demandModel = new demand.FixedDemandModel({ n: 1, conversionModel: model })
+    const demandModel = new demand.FixedDemandModel({ parameters: { n: 1 }, conversionModel: model })
     const optimalPrice = optimisation.optimisePrice(objective, demandModel, 1, 400)
     const optimalObjective = objective.J(demandModel, optimalPrice)
     plotting.plot(
