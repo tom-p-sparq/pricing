@@ -1,0 +1,147 @@
+---
+layout: base.njk
+title: Maximising Expected Revenue
+script: true
+---
+
+<h1>Maximising Expected Revenue</h1>
+<p>
+  Recall our first <a href="/00-intro-conversion-models/">introduction</a> to conversion modelling.
+  The idea was introduced that these models tell us what proportion of the population are willing to pay at least a given price.
+  From the perspective of an <em>arrival process</em> of a sequence of individuals in the population,
+  the conversion probability at a price is the probability that each arrival would pay that price.
+</p>
+<p>
+  In this post, we'll revisit the idea of using conversion models to set an optimal price.
+  As usual, we'll consider only pricing a single product, without any constraints on capacity or time to sell.
+  We assume that we set a price to apply for one time unit, which might be a day or week.
+  At this stage, we're aiming to choose a price in order to maximise how much profit we expect to make in that time interval.
+</p>
+<p>
+  For the moment, let's step back from our exploration of <a href="/05-parametric-uncertainty/">uncertain conversion models</a>
+  and assume for now that we know exactly what our conversion model is.
+  How do we price, given this model?
+</p>
+<hr>
+<h2>
+  Modelling Profit with Arrival Processes
+</h2>
+<p>
+  Before trying to price to optimise the profit accrued over our time unit of interest,
+  we will need to think in more detail about how to use our modelling to relate price and profit. 
+</p>
+<p>
+  In the introduction above we mentioned the idea of an arrival process,
+  by which members of the population "look" at our price and make a buy/no-buy decision on whether to "book".
+  In our explorations of <a href="/03-fitting/">fitting</a> and <a href="/05-parametric-uncertainty/">uncertainty</a>,
+  this arrival process was the click of a button.
+  In reality, arrivals are real potential customers arriving at random over our time unit. 
+</p>
+<h3>
+  Deterministic Arrivals
+</h3>
+<p>
+  For the time unit we're pricing, let's drop the "at random" element for now,
+  and make the (unrealistic) assumption that we know exactly how many looks we will get,
+  which we denote by $n$.
+</p>
+<p>
+  Each of these arrivals decides whether to buy based on their willingness to pay, relative to the price, $u$.
+  From our perspective, each potential customer decides independently at random, with probability $\phi(u)$,
+  where $\phi$ is the known (for now) conversion model we've previously spent so long thinking about.
+  If the customer decides not to buy, the net profit is zero.
+  If the customer buys, that conversion generates $u - c$ net profit, for a known cost $c$.
+  So, if $K$ represents the random number of conversions, our random profit is $P = (u-c)K$.
+</p>
+<p>
+  According to the process we described above,
+  the random number of conversions is distributed like a binomial random variable,
+  $$K \sim \mathrm{Bin}(n, \phi(u)),$$
+  with expectation $n\phi(u)$.
+  This means that the expected profit accrued in our time interval is given by
+  $$\mathbf E(P) = (u-c) \mathbf E(K) = n(u-c)\phi(u).$$
+  The number of arrivals, $n$, does appear in this expression but only as a linear scaling.
+  The value of $u$ that optimises $\mathbf E(P)$ is independent of $n$. 
+</p>
+<p>
+  To reiterate: 
+  when maximising expected profit under a deterministic arrival process,
+  the optimal price is independent of the number of arrivals.
+  It only depends on the conversion model.
+</p>
+<h3>Random Arrivals</h3>
+<p>
+  Of course, if pricing based on a time interval, then the conclusion arrived at above is moot:
+  our assumption of a known, deterministic number of looks in our time unit is not very reasonable.
+  What if our number of arrivals is a random variable, which we can denote by $N$?
+</p>
+<p>
+  The law of total expectation is $\mathbf E(K) = \mathbf E(\mathbf E(K \mid N))$.
+  The inner conditional expectation is the random variable $N\phi(u)$,
+  following the example above.
+  The outer expectation is taken across the distribution of unknown $N$. 
+  So we can substitute this expression for $\mathbf E(K) = \phi(u)\mathbf E(N)$ to write
+  $$\mathbf E(P) = (u-c)\mathbf E(K) = \mu (u-c)\phi(u),$$
+  where we've replaced the known number of looks, $n$,
+  with the expectation of the unknown number of looks, $\mu = \mathbf E(N)$.
+  Here, $\mu$ scales the expected profit linearly,
+  but does not change the optimal price. 
+</p>
+<p>
+  So we arrive at a stronger conclusion: 
+  when maximising expected profit under any price-independent arrival process,
+  the optimal price is, conversely, independent of the arrival process.
+  It only depends on the conversion model.
+</p>
+<h2>Maximising Expected Profit</h2>
+<p>
+  The argument above means that we can recommend a price $u^\star$
+  to maximise expected profit in a single time unit as
+  $$u^\star = \arg \max_u \mu (u-c)\phi(u),$$
+  with an arbitrary scale $\mu$
+  representing the average number of looks in that time unit. 
+</p>
+<p>
+  Taking the logistic model as an exemplar of the conversion models
+  in our <a href="/01-parametric-conversion-models/">zoo</a>,
+  the figures below show that
+  we can easily compute the price to maximise expected profit
+  for any conversion model, cost, and expected number of looks.
+</p>
+<div id="conversion-model-curve-container"></div>
+<div id="conversion-model-spec-container"></div>
+<div id="expected-profit-curve-container"></div>
+<div id="expected-profit-spec-container"></div>
+<p>
+  As we play around with the conversion model specification
+  and with the inputs into expected profit,
+  we see the optimal price keep track with
+  the peak of the expected revenue curve,
+  noting in particular that this curve doesn't <em>move</em> with expected looks;
+  it only <em>scales</em>.
+  To reiterate: the optimal price is independent of the looks arrival process here.
+</p>
+<h2>Beyond Risk-Neutral Pricing</h2>
+<p>
+  Let's examine the curve representing expected profit at each price.
+  It's easy to get trapped looking for the peak, but it's worth a thought experiment here.
+  Suppose you could only choose between two prices,
+  one lower than the optimum and one higher,
+  such that the expected profit was equal at both prices.
+  In principle, by pricing according to this curve
+  (that is, to maximise expected profit),
+  we're effectively saying that there's no way to choose between two such prices.
+  This way of viewing our decision is known as <em>risk-neutral</em>.
+</p>
+<p>
+   In reality, is this actually the case?
+   Would we not prefer the increased likelihood of receiving a smaller amount
+   at the lower price,
+   given that, <em>on average</em>, the two prices will have the same result?  
+   In the next post, we will expand on this thought experiment
+   and consider how risk aversion will affect our definition of "optimal",
+   influencing not only the price we choose
+   but also significantly changing
+   the influence of the looks arrival process
+   on our decision-making.
+</p>
