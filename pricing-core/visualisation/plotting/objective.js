@@ -1,12 +1,14 @@
 import { range } from "d3";
 import { ruleY, ruleX, lineY, crosshair, tip, pointer } from "@observablehq/plot";
+import { BaseDemandModel } from "../../demand/base.js";
+import { BaseObjectiveFunction } from "../../optimisation/objectiveFunctions/base.js";
 
 /**
  * Plots an objective function curve against price.
  * Accepts either a single demand model or an array of named models for comparison.
  *
- * @param {import("../../demand/base.js").BaseDemandModel | Array<{model: import("../../demand/base.js").BaseDemandModel, name: string}>} demandModel
- * @param {import("../../optimisation/objectiveFunctions/base.js").BaseObjectiveFunction} objective
+ * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string}>} demandModel
+ * @param {BaseObjectiveFunction} objective
  * @param {number} [maxPrice=400]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
