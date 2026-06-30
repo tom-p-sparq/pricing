@@ -10,15 +10,16 @@ import { BaseObjectiveFunction } from "../../optimisation/objectiveFunctions/bas
  * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string}>} demandModel
  * @param {BaseObjectiveFunction} objective
  * @param {number} [maxPrice=400]
+ * @param {number} [minPrice=0]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function objectiveCurvePlot(demandModel, objective, maxPrice = 400) {
+export function objectiveCurvePlot(demandModel, objective, maxPrice = 400, minPrice = 0) {
   const isArray = Array.isArray(demandModel)
   const data = isArray
     ? demandModel.flatMap(({ model, name }) =>
-        range(0, maxPrice, 1).map(price => ({ price, name, objective: objective.J(model, price) }))
+        range(minPrice, maxPrice, 1).map(price => ({ price, name, objective: objective.J(model, price) }))
       )
-    : range(0, maxPrice, 1).map(price => ({ price, objective: objective.J(demandModel, price) }))
+    : range(minPrice, maxPrice, 1).map(price => ({ price, objective: objective.J(demandModel, price) }))
   return {
     marks: [
       ruleY([0]),

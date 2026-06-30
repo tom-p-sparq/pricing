@@ -38,7 +38,7 @@ function renderExpectedProfit() {
     const optimalProfit = objective.J(demandModel, optimalPrice)
     plotting.plot(
         expectedProfitCurveContainer,
-        plotting.objectiveCurvePlot(demandModel, objective, MAX_PRICE),
+        plotting.objectiveCurvePlot(demandModel, objective, MAX_PRICE, Math.max(0, cost - 10)),
         plotting.optimalPricePlot(optimalPrice, optimalProfit),
         { x: { label: 'Price' }, y: { grid: true, label: 'Expected profit' } },
         { 

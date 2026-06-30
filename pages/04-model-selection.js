@@ -104,7 +104,7 @@ function renderModelPlots() {
     }))
     plotting.plot(
         incrementalRevenueContainer,
-        plotting.objectiveCurvePlot(toDemandModels, objective),
+        plotting.objectiveCurvePlot(toDemandModels, objective, 400, Math.max(0, costSlider.value - 10)),
         { x: { label: 'Price' }, y: { grid: true, label: 'Incremental revenue', nice: true } },
         { color: { legend: true }, title: 'Modelled expected incremental revenue' },
     )
