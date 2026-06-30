@@ -9,7 +9,9 @@ const expectedProfitCurveContainer = requireElement('expected-profit-curve-conta
 const expectedProfitSpecContainer = requireElement('expected-profit-spec-container')
 
 const referenceForm = inputs.referenceForm(conversionSpecContainer)
-const profitForm = inputs.profitSpecForm(expectedProfitSpecContainer)
+expectedProfitSpecContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-around; gap: 1em;'
+const looksSlider = inputs.poissonLooksSlider(expectedProfitSpecContainer)
+const costSlider = inputs.costSlider(expectedProfitSpecContainer)
 
 function buildModel() {
     return conversion.LogisticConversionModel.fromReference(referenceForm.value)
@@ -27,7 +29,8 @@ function renderConversionCurve() {
 }
 
 function renderExpectedProfit() {
-    const { lambda, cost } = profitForm.value
+    const lambda = looksSlider.value
+    const cost = costSlider.value
     const model = buildModel()
     const demandModel = new demand.PoissonDemandModel({ parameters: { lambda }, conversionModel: model })
     const objective = new optimisation.objectiveFunctions.ExpectedRevenue({ cost })
@@ -45,7 +48,8 @@ referenceForm.addEventListener('input', () => {
     renderConversionCurve()
     renderExpectedProfit()
 })
-profitForm.addEventListener('input', renderExpectedProfit)
+looksSlider.addEventListener('input', renderExpectedProfit)
+costSlider.addEventListener('input', renderExpectedProfit)
 
 renderConversionCurve()
 renderExpectedProfit()

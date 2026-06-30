@@ -1,6 +1,6 @@
 export { costSlider } from './cost.js';
+export { poissonLooksSlider } from './looks.js';
 export { referenceForm } from './reference.js';
-export { profitSpecForm } from './profitSpec.js';
 export { interpolantsForm } from './interpolants.js';
 export { priorForm, interpolantsPriorForm } from './prior.js';
 import {
