@@ -12,8 +12,8 @@ import { logSumExp } from '../../utils.js'
 export class BaseObjectiveFunction {
     /**
      * @param {Object} args
-     * @param {{[paramName: string]: number}} args.parameters Objective function (hyper)parameters
-     * @param {number} args.cost Underlying cost defining incremental revenue
+     * @param {{[paramName: string]: number}} [args.parameters] Objective function (hyper)parameters
+     * @param {number} [args.cost] Underlying cost defining incremental revenue
      */
     constructor({parameters={}, cost=0}) {
         /**
