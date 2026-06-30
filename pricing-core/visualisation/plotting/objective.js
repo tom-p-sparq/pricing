@@ -39,8 +39,8 @@ export function objectiveCurvePlot(demandModel, objective, maxPrice = 400) {
 export function optimalPricePlot(optimalPrice, optimalObjective) {
   return {
     marks: [
-      ruleX([optimalPrice], { stroke: "steelblue", strokeDasharray: "4,3" }),
-      ruleY([optimalObjective], { stroke: "steelblue", strokeDasharray: "4,3" }),
+      ruleX([optimalPrice], { strokeOpacity: 0.3 }),
+      ruleY([optimalObjective], { strokeOpacity: 0.3 }),
     ]
   }
 }

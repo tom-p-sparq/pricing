@@ -41,7 +41,10 @@ function renderExpectedProfit() {
         plotting.objectiveCurvePlot(demandModel, objective, MAX_PRICE),
         plotting.optimalPricePlot(optimalPrice, optimalProfit),
         { x: { label: 'Price' }, y: { grid: true, label: 'Expected profit' } },
-        { title: 'Expected Profit by Price', subtitle: `Optimal price: ${optimalPrice.toFixed(2)}` },
+        { 
+            title: 'Expected Profit by Price', 
+            subtitle: `Optimal price: ${optimalPrice.toFixed(2)} for expected profit ${optimalProfit.toFixed(2)}`,
+        },
     )
 }
 
