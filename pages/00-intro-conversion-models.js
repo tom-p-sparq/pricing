@@ -1,4 +1,4 @@
-import { conversion, plotting, inputs } from '../pricing-core/index.js'
+import { conversion, plotting, inputs, optimisation, demand } from '../pricing-core/index.js'
 import { requireElement } from '../utils.js'
 
 // Interactive inputs
@@ -21,9 +21,14 @@ plotting.plot(
 // Interactive plot
 const incrementalRevenueContainer = requireElement('incremental-revenue-container');
 function render() {
+    const objective = new optimisation.objectiveFunctions.ExpectedRevenue({ cost: costSlider.value })
+    const demandModel = new demand.FixedDemandModel({ n: 1, conversionModel: model })
+    const optimalPrice = optimisation.optimisePrice(objective, demandModel, 1, 400)
+    const optimalObjective = objective.J(demandModel, optimalPrice)
     plotting.plot(
         incrementalRevenueContainer,
-        plotting.incrementalRevenueCurvePlot(model, costSlider.value),
+        plotting.objectiveCurvePlot(demandModel, objective),
+        plotting.optimalPricePlot(optimalPrice, optimalObjective),
         { x: { label: 'Price' }, y: { grid: true, label: 'Incremental revenue', nice: true } },
         { title: 'Modelled expected incremental revenue' },
     )
