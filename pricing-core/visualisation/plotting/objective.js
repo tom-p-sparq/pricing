@@ -5,10 +5,13 @@ import { BaseObjectiveFunction } from "../../optimisation/objectiveFunctions/bas
 
 /**
  * Plots an objective function curve against price.
- * Accepts either a single demand model or an array of named models for comparison.
+ * Accepts either a single demand model or an array of named `{model, name}`
+ * entries for comparison — each entry may optionally override `objective`,
+ * e.g. to overlay a risk-neutral reference curve alongside a risk-averse one
+ * for the same demand model.
  *
- * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string}>} demandModel
- * @param {BaseObjectiveFunction} objective
+ * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string, objective?: BaseObjectiveFunction}>} demandModel
+ * @param {BaseObjectiveFunction} objective Used directly in the single-model case; the default for array entries that don't specify their own.
  * @param {number} [maxPrice=400]
  * @param {number} [minPrice=0]
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
@@ -16,8 +19,8 @@ import { BaseObjectiveFunction } from "../../optimisation/objectiveFunctions/bas
 export function objectiveCurvePlot(demandModel, objective, maxPrice = 400, minPrice = 0) {
   const isArray = Array.isArray(demandModel)
   const data = isArray
-    ? demandModel.flatMap(({ model, name }) =>
-        range(minPrice, maxPrice, 1).map(price => ({ price, name, objective: objective.J(model, price) }))
+    ? demandModel.flatMap(({ model, name, objective: entryObjective = objective }) =>
+        range(minPrice, maxPrice, 1).map(price => ({ price, name, objective: entryObjective.J(model, price) }))
       )
     : range(minPrice, maxPrice, 1).map(price => ({ price, objective: objective.J(demandModel, price) }))
   return {
@@ -25,7 +28,7 @@ export function objectiveCurvePlot(demandModel, objective, maxPrice = 400, minPr
       ruleY([0]),
       lineY(data, { x: "price", y: "objective", stroke: isArray ? "name" : undefined }),
       crosshair(data, { x: "price", y: "objective" }),
-      tip(data, pointer({ x: "price", y: "objective" })),
+      tip(data, pointer({ x: "price", y: "objective", stroke: isArray ? "name" : undefined })),
     ]
   }
 }
