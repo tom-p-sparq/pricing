@@ -3,4 +3,5 @@ export { objectiveCurvePlot, optimalPricePlot, referencePricePlot } from "./obje
 export { logLikelihoodPlot } from "./likelihoods.js";
 export { distribution1DCurvePlot, distribution2DContourPlot } from "./distributions.js";
 export { sampleScatterPlot, sampleConversionCurves, sampleConversionDistribution } from "./samples.js";
+export { profitDistributionPlot } from "./profit.js";
 export { plot } from "./plot.js"
