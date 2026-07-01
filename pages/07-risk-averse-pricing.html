@@ -8,6 +8,97 @@ script: true
 <p>
   In our <a href="/06-risk-neutral-pricing/">previous post</a>,
   we looked at how to choose an optimal price for a given time unit.
-  The <em>optimality</em> of a price was defined by
-  maximising the expected profit accrued over that time unit.
+  There, the optimality of a price was defined by
+  maximising the expected profit achieved over that time unit.
+</p>
+<p>
+  That understanding of optimal is fairly typical of many revenue management applications.
+  In this post, we'll revisit that definition,
+  and think more carefully about whether
+  optimising <em>average</em> behaviour is adequate.
+</p>
+<hr>
+<h2>Aleatoric Uncertainty and Profit Volatility</h2>
+<p>
+  As in the <a href="/06-risk-neutral-pricing/">previous post</a>,
+  we will continue, for now, to assume that we know our conversion model:
+  there is no uncertainty in what $\phi(u)$ is.
+  However, the variable $P$,
+  representing the profit made in our single time unit,
+  is still uncertain.
+</p>
+<p>
+  There are two main sources of uncertainty,
+  known as aleatoric uncertainty.
+  First, a random number of looks, $N$, arrives in our time unit.
+  Second, the conversions are "at random",
+  in the sense that
+  each of the $N$ looks is a random draw from the population.
+  This means that the number of conversions, $K$,
+  is a random variable,
+  and therefore that profit, $P = (u-c)K$, is random.
+</p>
+<p>
+  In the figure below we take a known conversion rate model,
+  and assume we know exactly how many looks arrive in our time unit.
+  We find the two prices that achieve some percentage of the theoretical maximum expected profit:
+  the lower prioritises conversions,
+  while the higher prioritises profit per conversion,
+  but both will have the same expected total profit.
+  We plot the actual distribution of the possible values of $P$
+  under each of those two prices.
+</p>
+<div id="volatility-distribution-container"></div>
+<div id="volatility-spec-container"></div>
+<p>
+  The higher price clearly demonstrates a greater volatility in outcome.
+  At the higher price, we may receive much more or much less in any one time unit.
+  The lower price is significantly more predictable.
+</p>
+<p>
+  The argument in this post is that a firm should put a value on predictability.
+  And this doesn't just have consequences for comparing two prices with equal expected profit:
+  by placing value on the reliability of profit, this means that
+  we would prefer a slightly lower expected profit if it was more reliable.
+  Rather than a straight maximisation of expected profit,
+  we have a tradeoff to optimise.
+</p>
+<p>
+  Put succinctly: we are not typically risk-neutral.
+  We are risk-averse, and should price accordingly.
+</p>
+<h2>Mean-Variance Optimisation</h2>
+<p>
+  One classical approach to this trade-off is simply to penalise variance,
+  by setting the objective function
+  $$\mathbf E(P) - \rho \mathrm{Var}(P)$$
+  for the hyperparameter $\rho \geq 0$ quantifying our risk-aversion. 
+  We can think of this as the expected value of the utility function
+  $$U(P) = P - \rho(P - \mathbf E(P))^2,$$
+  where we apply a penalty to any realised profit deviating too far from our expectations.
+</p>
+<p>
+  Recall that our model for profit is $P=(u-c)K$,
+  for the uncertain number of conversions $K$
+  where $\left[ K \mid N=n \right] \sim \mathrm{Bin}(n, \phi(u))$.
+  Using the law of total expectation, we already found that
+  $$\mathbf E(P) = \mu (u-c) \phi(u)$$
+  for $\mu = \mathbf E(N)$.
+  Using the law of total variance we can similarly show that
+  $$\mathrm{Var}(P) = (u-c)^2 \left[ \mu \phi(u) \left( 1-\phi(u) \right) + \sigma^2 \phi(u)^2 \right],$$
+  where $\sigma^2 = \mathrm{Var}(N)$ is the variance of the looks random variable.
+</p>
+<p>
+  Below, we can examine the effect of risk aversion on our objective function
+  by playing with the slider setting the value of $\rho \geq 0$.
+  We're still assuming deterministic $N=n$, meaning that $\mu=n$ and $\sigma^2 = 0$
+  in the formulae above.
+  We can see how the optimal risk-averse price falls with increasing risk aversion.
+</p>
+<div id="meanVariance-plot-container"></div>
+<div id="meanVariance-spec-container"></div>
+<h2>Revisiting the Arrival Process</h2>
+<p>
+  <b>TODO</b>: Talk about deterministic, Poisson, overdispersed (negative binomial, equiv. Poisson with gamma rate)
+  and look at the different objective functions and prices.
 </p>
