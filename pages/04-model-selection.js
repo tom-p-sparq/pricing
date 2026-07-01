@@ -1,4 +1,4 @@
-import { conversion, plotting, inputs, fitting } from '../pricing-core/index.js'
+import { conversion, plotting, inputs, fitting, optimisation, demand } from '../pricing-core/index.js'
 import { requireElement } from '../utils.js'
 
 const modelSpecs = [
@@ -97,11 +97,16 @@ function renderModelPlots() {
         { color: { legend: true }, title: 'Maximum likelihood models' },
     )
     plotting.plot(likelihoodRatioContainer, _logLikelihoodPlot, { title: 'Selection via log-likelihood ratio' })
+    const objective = new optimisation.objectiveFunctions.ExpectedRevenue({ cost: costSlider.value })
+    const toDemandModels = modelSpecs.map(({ model, name }) => ({
+        model: new demand.FixedDemandModel({ parameters: { n: 1 }, conversionModel: model }),
+        name,
+    }))
     plotting.plot(
         incrementalRevenueContainer,
-        plotting.incrementalRevenueCurvePlot(modelSpecs, costSlider.value),
+        plotting.objectiveCurvePlot(toDemandModels, objective, 400, Math.max(0, costSlider.value - 10)),
         { x: { label: 'Price' }, y: { grid: true, label: 'Incremental revenue', nice: true } },
-        { title: 'Modelled expected incremental revenue' },
+        { color: { legend: true }, title: 'Modelled expected incremental revenue' },
     )
 }
 
