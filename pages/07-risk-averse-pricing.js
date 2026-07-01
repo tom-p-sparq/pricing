@@ -68,6 +68,33 @@ function logBinomialPmf(n, k, p) {
 }
 
 /**
+ * Maximises `objective.J` over `[pMin, pMax]` robustly to non-unimodal
+ * objectives: MeanVariance's quadratic-in-margin variance penalty can create
+ * a second local maximum near the domain boundary (where conversion → 0 kills
+ * both mean and variance), which plain Brent's-method optimisePrice can lock
+ * onto if it happens to bracket only that monotonically-rising tail — a
+ * documented limitation of optimisePrice's unimodality precondition, not a
+ * bug in it. A coarse grid sweep finds the correct basin first; optimisePrice
+ * then refines within a narrow window around the best grid point.
+ * @param {import('../pricing-core/optimisation/objectiveFunctions/base.js').BaseObjectiveFunction} objective
+ * @param {import('../pricing-core/demand/base.js').BaseDemandModel} demandModel
+ * @param {number} pMin
+ * @param {number} pMax
+ * @param {number} [gridStep=1]
+ * @returns {number}
+ */
+function robustOptimisePrice(objective, demandModel, pMin, pMax, gridStep = 1) {
+    let bestPrice = pMin, bestValue = -Infinity
+    for (let price = pMin; price <= pMax; price += gridStep) {
+        const value = objective.J(demandModel, price)
+        if (value > bestValue) { bestValue = value; bestPrice = price }
+    }
+    const lo = Math.max(pMin, bestPrice - gridStep)
+    const hi = Math.min(pMax, bestPrice + gridStep)
+    return optimisation.optimisePrice(objective, demandModel, lo, hi)
+}
+
+/**
  * @param {number} n
  * @param {number} p
  * @param {number} margin
@@ -114,15 +141,17 @@ function renderMeanVariance() {
     const rho = rhoSlider.value
     const meanVarObjective = new optimisation.objectiveFunctions.MeanVariance({ parameters: { rho }, cost })
     const riskNeutralObjective = new optimisation.objectiveFunctions.ExpectedRevenue({ cost })
-    const optimalPrice = optimisation.optimisePrice(meanVarObjective, demandModel, cost, MAX_PRICE)
+    const optimalPrice = robustOptimisePrice(meanVarObjective, demandModel, cost, MAX_PRICE)
     const optimalObjective = meanVarObjective.J(demandModel, optimalPrice)
     const riskNeutralPrice = optimisation.optimisePrice(riskNeutralObjective, demandModel, cost, MAX_PRICE)
+    const minPrice = Math.max(0, cost - 10)
     plotting.plot(
         meanVarPlotContainer,
-        plotting.objectiveCurvePlot(demandModel, meanVarObjective, MAX_PRICE, Math.max(0, cost - 10)),
+        plotting.objectiveCurvePlot(demandModel, riskNeutralObjective, MAX_PRICE, minPrice),
+        plotting.objectiveCurvePlot(demandModel, meanVarObjective, MAX_PRICE, minPrice),
         plotting.referencePricePlot(riskNeutralPrice),
         plotting.optimalPricePlot(optimalPrice, optimalObjective),
-        { x: { label: 'Price' }, y: { grid: true, label: 'Mean-variance objective' } },
+        { x: { label: 'Price' }, y: { grid: true, label: 'Objective value' } },
         {
             title: 'Mean-Variance Objective by Price',
             subtitle: `Optimal price: ${optimalPrice.toFixed(2)} (risk-neutral: ${riskNeutralPrice.toFixed(2)})`,
