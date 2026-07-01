@@ -42,8 +42,18 @@ export class BaseDemandModel {
     }
 
     /**
+     * Variance of converted looks at given price
+     * @param {number} price
+     * @returns {number}
+     */
+    varianceConversions(price) {
+        const phi = this.conversion(price)
+        return this._varianceConversions(phi)
+    }
+
+    /**
      * MGF of converted looks at given price
-     * @param {number} t 
+     * @param {number} t
      * @param {number} price
      * @returns {number}
      */
@@ -73,6 +83,18 @@ export class BaseDemandModel {
      */
     _expectedConversions(_conversionRate) {
         throw new Error("Subclasses of `BaseDemandModel` must implement `_expectedConversions`.")
+    }
+
+    /**
+     * Variance - private implementation
+     * @abstract
+     * @protected
+     * @param {number} _conversionRate Looks convert at this rate
+     * @returns {number}
+     * @throws {Error} Must be implemented by subclasses
+     */
+    _varianceConversions(_conversionRate) {
+        throw new Error("Subclasses of `BaseDemandModel` must implement `_varianceConversions`.")
     }
 
     /**
