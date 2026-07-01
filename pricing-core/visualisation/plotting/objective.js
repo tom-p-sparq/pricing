@@ -47,3 +47,19 @@ export function optimalPricePlot(optimalPrice, optimalObjective) {
     ]
   }
 }
+
+/**
+ * A dashed reference rule marking a comparison price — e.g. the risk-neutral
+ * optimum, for contrast against a risk-averse optimum. Compose with
+ * `objectiveCurvePlot`/`optimalPricePlot` via `plotting.plot()`.
+ *
+ * @param {number} price
+ * @returns {{ marks: import("@observablehq/plot").Markish[] }}
+ */
+export function referencePricePlot(price) {
+  return {
+    marks: [
+      ruleX([price], { strokeOpacity: 0.3, strokeDasharray: "4,4" }),
+    ]
+  }
+}
