@@ -14,16 +14,36 @@ const meanVarSpecContainer = requireElement('meanVariance-spec-container')
 // conversion curve behaves the same way under risk aversion).
 const conversionModel = conversion.LogisticConversionModel.fromReference({ price: 150, conversion: 0.5, elasticity: -2 })
 
-// Shared scenario (fixed looks, cost) — feeds both figures below.
+// Shared scenario (fixed looks, cost) — feeds both figures below. Mirrored into
+// meanVarSpecContainer as a second, kept-in-sync slider pair (see mirrorSliders)
+// so the scenario can be adjusted from either figure without scrolling back up.
 volatilitySpecContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-around; gap: 1em;'
+meanVarSpecContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-around; gap: 1em;'
 const nSlider = inputs.fixedLooksSlider(volatilitySpecContainer)
 const costSlider = inputs.costSlider(volatilitySpecContainer)
+const nSliderMirror = inputs.fixedLooksSlider(meanVarSpecContainer)
+const costSliderMirror = inputs.costSlider(meanVarSpecContainer)
 
 // Mean-variance figure's own control.
 const rhoSlider = inputs.riskAversionSlider(meanVarSpecContainer)
 
 function buildDemandModel() {
     return new demand.FixedDemandModel({ parameters: { n: nSlider.value }, conversionModel })
+}
+
+/**
+ * Keeps two Observable Input sliders showing the same value, as close as
+ * possible to rendering the same control twice: dragging either updates the
+ * other's displayed value via its `.value` setter — which updates the DOM
+ * without re-dispatching an `'input'` event, so this can't loop — then runs
+ * `onChange` once.
+ * @param {HTMLElement & {value: number}} a
+ * @param {HTMLElement & {value: number}} b
+ * @param {() => void} onChange
+ */
+function mirrorSliders(a, b, onChange) {
+    a.addEventListener('input', () => { b.value = a.value; onChange() })
+    b.addEventListener('input', () => { a.value = b.value; onChange() })
 }
 
 /**
@@ -139,8 +159,8 @@ function renderMeanVariance() {
     )
 }
 
-nSlider.addEventListener('input', () => { renderVolatility(); renderMeanVariance() })
-costSlider.addEventListener('input', () => { renderVolatility(); renderMeanVariance() })
+mirrorSliders(nSlider, nSliderMirror, () => { renderVolatility(); renderMeanVariance() })
+mirrorSliders(costSlider, costSliderMirror, () => { renderVolatility(); renderMeanVariance() })
 rhoSlider.addEventListener('input', renderMeanVariance)
 
 renderVolatility()
