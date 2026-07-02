@@ -9,19 +9,20 @@ const volatilitySpecContainer = requireElement('volatility-spec-container')
 const meanVarPlotContainer = requireElement('meanVariance-plot-container')
 const meanVarSpecContainer = requireElement('meanVariance-spec-container')
 
-// Shared scenario (conversion model, fixed looks, cost) — feeds both figures below.
-const referenceForm = inputs.referenceForm(volatilitySpecContainer)
-const scenarioRow = document.createElement('div')
-scenarioRow.style.cssText = 'display: flex; align-items: center; justify-content: space-around; gap: 1em;'
-volatilitySpecContainer.appendChild(scenarioRow)
-const nSlider = inputs.fixedLooksSlider(scenarioRow)
-const costSlider = inputs.costSlider(scenarioRow)
+// Fixed conversion model — kept out of the interactive scenario since varying
+// it doesn't change the qualitative story being told here (any downward-sloping
+// conversion curve behaves the same way under risk aversion).
+const conversionModel = conversion.LogisticConversionModel.fromReference({ price: 150, conversion: 0.5, elasticity: -2 })
+
+// Shared scenario (fixed looks, cost) — feeds both figures below.
+volatilitySpecContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-around; gap: 1em;'
+const nSlider = inputs.fixedLooksSlider(volatilitySpecContainer)
+const costSlider = inputs.costSlider(volatilitySpecContainer)
 
 // Mean-variance figure's own control.
 const rhoSlider = inputs.riskAversionSlider(meanVarSpecContainer)
 
 function buildDemandModel() {
-    const conversionModel = conversion.LogisticConversionModel.fromReference(referenceForm.value)
     return new demand.FixedDemandModel({ parameters: { n: nSlider.value }, conversionModel })
 }
 
@@ -65,33 +66,6 @@ function logBinomialPmf(n, k, p) {
     const logP = k === 0 ? 0 : k * Math.log(p)
     const logQ = k === n ? 0 : (n - k) * Math.log(1 - p)
     return logC + logP + logQ
-}
-
-/**
- * Maximises `objective.J` over `[pMin, pMax]` robustly to non-unimodal
- * objectives: MeanVariance's quadratic-in-margin variance penalty can create
- * a second local maximum near the domain boundary (where conversion → 0 kills
- * both mean and variance), which plain Brent's-method optimisePrice can lock
- * onto if it happens to bracket only that monotonically-rising tail — a
- * documented limitation of optimisePrice's unimodality precondition, not a
- * bug in it. A coarse grid sweep finds the correct basin first; optimisePrice
- * then refines within a narrow window around the best grid point.
- * @param {import('../pricing-core/optimisation/objectiveFunctions/base.js').BaseObjectiveFunction} objective
- * @param {import('../pricing-core/demand/base.js').BaseDemandModel} demandModel
- * @param {number} pMin
- * @param {number} pMax
- * @param {number} [gridStep=1]
- * @returns {number}
- */
-function robustOptimisePrice(objective, demandModel, pMin, pMax, gridStep = 1) {
-    let bestPrice = pMin, bestValue = -Infinity
-    for (let price = pMin; price <= pMax; price += gridStep) {
-        const value = objective.J(demandModel, price)
-        if (value > bestValue) { bestValue = value; bestPrice = price }
-    }
-    const lo = Math.max(pMin, bestPrice - gridStep)
-    const hi = Math.min(pMax, bestPrice + gridStep)
-    return optimisation.optimisePrice(objective, demandModel, lo, hi)
 }
 
 /**
@@ -141,9 +115,15 @@ function renderMeanVariance() {
     const rho = rhoSlider.value
     const meanVarObjective = new optimisation.objectiveFunctions.MeanVariance({ parameters: { rho }, cost })
     const riskNeutralObjective = new optimisation.objectiveFunctions.ExpectedRevenue({ cost })
-    const optimalPrice = robustOptimisePrice(meanVarObjective, demandModel, cost, MAX_PRICE)
-    const optimalObjective = meanVarObjective.J(demandModel, optimalPrice)
+    // Risk aversion can only ever pull the optimum below the risk-neutral one — at the
+    // risk-neutral optimum the variance penalty's derivative is strictly positive (variance
+    // is still climbing in margin there), so for any rho > 0 the mean-variance objective is
+    // already decreasing at that price. Bracketing to [1, riskNeutralPrice] both makes this
+    // economically legible and sidesteps a second, spurious local maximum that can otherwise
+    // appear near the domain's far boundary (where conversion, and so variance, vanishes).
     const riskNeutralPrice = optimisation.optimisePrice(riskNeutralObjective, demandModel, cost, MAX_PRICE)
+    const optimalPrice = optimisation.optimisePrice(meanVarObjective, demandModel, 1, riskNeutralPrice)
+    const optimalObjective = meanVarObjective.J(demandModel, optimalPrice)
     const minPrice = Math.max(0, cost - 10)
     plotting.plot(
         meanVarPlotContainer,
@@ -159,7 +139,6 @@ function renderMeanVariance() {
     )
 }
 
-referenceForm.addEventListener('input', () => { renderVolatility(); renderMeanVariance() })
 nSlider.addEventListener('input', () => { renderVolatility(); renderMeanVariance() })
 costSlider.addEventListener('input', () => { renderVolatility(); renderMeanVariance() })
 rhoSlider.addEventListener('input', renderMeanVariance)
