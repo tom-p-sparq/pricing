@@ -59,6 +59,7 @@ function mirrorSliders(a, b, onChange) {
  */
 function bisect(f, lo, hi, target, tol = 1e-6, maxIter = 100) {
     const increasing = f(hi) >= f(lo)
+    /** @type {(x: number) => number} */
     const sign = (x) => increasing ? Math.sign(f(x) - target) : -Math.sign(f(x) - target)
     if (sign(lo) > 0 || sign(hi) < 0) {
         throw new Error(`bisect: target ${target} is not bracketed by f(${lo})=${f(lo)}, f(${hi})=${f(hi)}`)
@@ -111,6 +112,7 @@ function renderVolatility() {
     const pStar = optimisation.optimisePrice(objective, demandModel, cost, MAX_PRICE)
     const optimalProfit = objective.J(demandModel, pStar)
     const target = ALPHA * optimalProfit
+    /** @type {(price: number) => number} */
     const f = price => objective.J(demandModel, price)
     const priceLow = bisect(f, cost, pStar, target)
     const priceHigh = bisect(f, pStar, MAX_PRICE, target)

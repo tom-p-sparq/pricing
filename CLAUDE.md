@@ -23,6 +23,15 @@ npm run build       # 11ty generates pages/ → _site/
 
 There is no test suite currently. Type-check via JSDoc annotations; `jsconfig.json` sets `checkJs: true` and `noImplicitAny: true` — IDE type-checking only, no separate `tsc` step.
 
+**Every function must carry inline JSDoc parameter and return types — this is a required coding standard, not just an IDE nicety.** For a function declaration, that's a `@param`/`@returns` block above it. For an arrow function assigned to a local `const` (including ones scoped inside another function), annotate it with a `@type` cast immediately above, e.g.:
+
+```js
+/** @type {(x: number) => number} */
+const sign = (x) => increasing ? Math.sign(f(x) - target) : -Math.sign(f(x) - target)
+```
+
+`noImplicitAny` doesn't reliably flag missing types on these inline arrow functions, so don't rely on the type checker to catch a missing annotation — add it whenever you introduce a new function, however small or short-lived.
+
 ## Architecture
 
 ### Static Site (11ty)
