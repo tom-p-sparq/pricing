@@ -56,35 +56,41 @@ script: true
   The lower price is significantly more predictable.
 </p>
 <p>
-  The argument in this post is that a firm should put a value on predictability.
-  And this doesn't just have consequences for comparing two prices with equal expected profit:
-  by placing value on the reliability of profit, this means that
-  we would prefer a slightly lower expected profit if it was more reliable.
-  Rather than a straight maximisation of expected profit,
+  The argument of this post is that a firm should put a value on predictability.
+  In the case above, if the distribution of outcomes of the lower price seem preferable,
+  then the risk-neutral objective function cannot be the objective function to use for pricing.
+  It treats the two distributions shown above as equally preferred, and that is not the case.
+  So, to define the objective function that should be used instead,
+  we need to quantify how much more preferable the profit distribution at the lower price is.
+</p>
+<p>
+  This doesn't just have consequences for comparing two prices with equal expected profit:
+  by placing monetary value on the reliability of profit, it follows that
+  we would prefer a slightly lower expected profit if it arrived with lower variance.
+  So, rather than a straight maximisation of expected profit,
   we have a tradeoff to optimise.
 </p>
 <p>
   Put succinctly: we are not typically risk-neutral.
-  We are risk-averse, and should price accordingly.
+  We are <em>risk-averse</em>, and should price accordingly.
 </p>
 <h2>Mean-Variance Optimisation</h2>
 <p>
-  One classical approach to this trade-off is simply to penalise variance,
+  One classical approach to this trade-off is to penalise variance,
   by setting the objective function
   $$\mathbf E(P) - \rho \mathrm{Var}(P)$$
   for the hyperparameter $\rho \geq 0$ quantifying our risk-aversion. 
-  We can think of this as the expected value of the utility function
-  $$U(P) = P - \rho(P - \mathbf E(P))^2,$$
-  where we apply a penalty to any realised profit deviating too far from our expectations.
 </p>
 <p>
   Recall that our model for profit is $P=(u-c)K$,
   for the uncertain number of conversions $K$
   where $\left[ K \mid N=n \right] \sim \mathrm{Bin}(n, \phi(u))$.
-  Using the law of total expectation, we already found that
+  Using the <a href="https://en.wikipedia.org/wiki/Law_of_total_expectation">law of total expectation</a>,
+  we already found that
   $$\mathbf E(P) = \mu (u-c) \phi(u)$$
   for $\mu = \mathbf E(N)$.
-  Using the law of total variance we can similarly show that
+  Using the <a href="https://en.wikipedia.org/wiki/Law_of_total_variance">law of total variance</a> 
+  we can similarly show that
   $$\mathrm{Var}(P) = (u-c)^2 \left[ \mu \phi(u) \left( 1-\phi(u) \right) + \sigma^2 \phi(u)^2 \right],$$
   where $\sigma^2 = \mathrm{Var}(N)$ is the variance of the looks random variable.
 </p>
@@ -93,12 +99,28 @@ script: true
   by playing with the slider setting the value of $\rho \geq 0$.
   We're still assuming deterministic $N=n$, meaning that $\mu=n$ and $\sigma^2 = 0$
   in the formulae above.
-  We can see how the optimal risk-averse price falls with increasing risk aversion.
 </p>
 <div id="meanVariance-plot-container"></div>
 <div id="meanVariance-spec-container"></div>
-<h2>Revisiting the Arrival Process</h2>
 <p>
-  <b>TODO</b>: Talk about deterministic, Poisson, overdispersed (negative binomial, equiv. Poisson with gamma rate)
-  and look at the different objective functions and prices.
+  Increased risk aversion leads to a reduction in the optimal price.
+  By controlling this tradeoff between expectation and variance,
+  we are effectively setting a reduction in expected profit that we are willing to incur
+  in order for the profit we do get to arrive more predictibly, and with less volatility.
+  Note also that, as in the risk-neutral case, the risk-averse optimal price is
+  independent of the level of demand, as set by the number of looks.
+</p>
+<h2>So How Do We Price?</h2>
+<p>
+  We've been holding some complexity back in this page.
+  The arrival process underlying our exploration was simply a deterministic known $n$;
+  we've plotted based on a fully known conversion model;
+  we've played around with a risk-aversion parameter $\rho$
+  but not thought too hard about how to set it.
+</p>
+<p>
+  Over the next few posts, we'll go into much more detail about risk aversion
+  and how aleatoric uncertainty (the results of random processes)
+  and empirical uncertainty (unknown characteristics of the system)
+  combine to influence our pricing decisions.
 </p>

@@ -8,7 +8,7 @@ import { range } from '@observablehq/inputs';
 export function riskAversionSlider(element) {
     const _slider = range([0, 0.05], {
         step: 0.0005,
-        value: 0,
+        value: 0.01,
         label: 'Risk aversion (ρ)',
     })
     if (!(element instanceof HTMLElement)) {
