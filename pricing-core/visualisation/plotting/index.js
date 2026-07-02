@@ -1,6 +1,7 @@
 export { conversionCurvePlot, specPointsPlot, fitPointsPlot } from "./conversion.js";
-export { objectiveCurvePlot, optimalPricePlot } from "./objective.js";
+export { objectiveCurvePlot, optimalPricePlot, referencePricePlot } from "./objective.js";
 export { logLikelihoodPlot } from "./likelihoods.js";
 export { distribution1DCurvePlot, distribution2DContourPlot } from "./distributions.js";
 export { sampleScatterPlot, sampleConversionCurves, sampleConversionDistribution } from "./samples.js";
+export { profitDistributionPlot } from "./profit.js";
 export { plot } from "./plot.js"

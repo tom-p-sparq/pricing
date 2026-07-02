@@ -28,8 +28,18 @@ export class FixedDemandModel extends BaseDemandModel {
 
     /**
      * @override
-     * @param {number} t 
-     * @param {number} conversionRate 
+     * @protected
+     * @param {number} conversionRate
+     * @returns {number}
+     */
+    _varianceConversions(conversionRate) {
+        return conversionRate * (1 - conversionRate) * this.parameters.n
+    }
+
+    /**
+     * @override
+     * @param {number} t
+     * @param {number} conversionRate
      * @returns {number}
      */
     _logMgfConversions(t, conversionRate) {
