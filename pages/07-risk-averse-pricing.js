@@ -121,7 +121,7 @@ function renderVolatility() {
     plotting.plot(
         volatilityDistContainer,
         plotting.profitDistributionPlot(data),
-        { x: { label: 'Profit' }, y: { grid: true, label: 'Probability' } },
+        { x: { label: 'Profit' }, y: { grid: true, label: 'Probability' }, color: { legend: true } },
         {
             title: 'Profit Distribution at Two Equal-Expected-Profit Prices',
             subtitle: `Both prices achieve ${(ALPHA * 100).toFixed(0)}% of the maximum expected profit (${optimalProfit.toFixed(2)})`,
@@ -147,11 +147,11 @@ function renderMeanVariance() {
     const minPrice = Math.max(0, cost - 10)
     plotting.plot(
         meanVarPlotContainer,
-        plotting.objectiveCurvePlot(demandModel, riskNeutralObjective, MAX_PRICE, minPrice),
-        plotting.objectiveCurvePlot(demandModel, meanVarObjective, MAX_PRICE, minPrice),
+        plotting.objectiveCurvePlot(demandModel, riskNeutralObjective, MAX_PRICE, minPrice, 'Risk-neutral'),
+        plotting.objectiveCurvePlot(demandModel, meanVarObjective, MAX_PRICE, minPrice, 'Risk-averse'),
         plotting.referencePricePlot(riskNeutralPrice),
         plotting.optimalPricePlot(optimalPrice, optimalObjective),
-        { x: { label: 'Price' }, y: { grid: true, label: 'Objective value' } },
+        { x: { label: 'Price' }, y: { grid: true, label: 'Objective value' }, color: { legend: true } },
         {
             title: 'Mean-Variance Objective by Price',
             subtitle: `Optimal price: ${optimalPrice.toFixed(2)} (risk-neutral: ${riskNeutralPrice.toFixed(2)})`,

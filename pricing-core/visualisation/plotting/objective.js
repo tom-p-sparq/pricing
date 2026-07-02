@@ -6,26 +6,31 @@ import { BaseObjectiveFunction } from "../../optimisation/objectiveFunctions/bas
 /**
  * Plots an objective function curve against price.
  * Accepts either a single demand model or an array of named models for comparison.
+ * In the single-model case, an optional `name` gives the curve a colour/legend
+ * entry too — useful when overlaying it with another named curve (e.g. from a
+ * different objective) via `plotting.plot()`.
  *
  * @param {BaseDemandModel | Array<{model: BaseDemandModel, name: string}>} demandModel
  * @param {BaseObjectiveFunction} objective
  * @param {number} [maxPrice=400]
  * @param {number} [minPrice=0]
+ * @param {string} [name] Display name for the single-model case.
  * @returns {{ marks: import("@observablehq/plot").Markish[] }}
  */
-export function objectiveCurvePlot(demandModel, objective, maxPrice = 400, minPrice = 0) {
+export function objectiveCurvePlot(demandModel, objective, maxPrice = 400, minPrice = 0, name) {
   const isArray = Array.isArray(demandModel)
+  const named = isArray || name !== undefined
   const data = isArray
     ? demandModel.flatMap(({ model, name }) =>
         range(minPrice, maxPrice, 1).map(price => ({ price, name, objective: objective.J(model, price) }))
       )
-    : range(minPrice, maxPrice, 1).map(price => ({ price, objective: objective.J(demandModel, price) }))
+    : range(minPrice, maxPrice, 1).map(price => ({ price, name, objective: objective.J(demandModel, price) }))
   return {
     marks: [
       ruleY([0]),
-      lineY(data, { x: "price", y: "objective", stroke: isArray ? "name" : undefined }),
+      lineY(data, { x: "price", y: "objective", stroke: named ? "name" : undefined }),
       crosshair(data, { x: "price", y: "objective" }),
-      tip(data, pointer({ x: "price", y: "objective" })),
+      tip(data, pointer({ x: "price", y: "objective", stroke: named ? "name" : undefined })),
     ]
   }
 }
