@@ -72,6 +72,14 @@ For fitting convergence animation, pages drive a `requestAnimationFrame` loop ov
 
 `utils.js` exports a single helper — `requireElement(id)` — for asserting DOM element existence with a clear error.
 
+## Design Principles
+
+Beyond the specific decisions recorded in `docs/decisions/`, a few recurring judgement calls guide day-to-day changes:
+
+- **Keep `pricing-core` narrow.** Promote something into `pricing-core` only when it's genuinely reused, or needed *polymorphically* (e.g. an objective function calling a method on an arbitrary demand model without knowing its concrete type) — not because it looks mathematically similar to something already there. A one-off computation used by a single chart (e.g. a Binomial PMF for one page's figure) belongs in the page script as a small, dependency-free helper, even if `pricing-core` already has comparable-looking maths elsewhere.
+- **Prefer composition over widened signatures.** When a function needs to do a second, related thing, check whether calling it twice (or more) and combining the results via an existing composition point — e.g. `plotting.plot(container, ...markSets)`, which flattens `.marks` from every argument — is simpler than teaching that function a second axis of variation. Don't add parameters to accommodate a use case composition already covers.
+- **Prefer analytical fixes over numerical workarounds.** When an optimiser or root-finder misbehaves outside its documented preconditions (e.g. `optimisePrice`'s assumed unimodality — see `docs/decisions/price-optimiser.md`), look for a closed-form bound derived from the objective's own structure before reaching for a generic numerical safety net like a grid search. A tighter, provably-correct bracket is simpler and cheaper than defending against the general case.
+
 ## Architecture Decisions
 
 `docs/decisions/` contains ADRs explaining key design choices:
