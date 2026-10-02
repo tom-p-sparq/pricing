@@ -39,15 +39,18 @@ export class BaseObjectiveFunction {
      * Objective value at a given price — **higher is better**.
      * Accepts either a single demand model (known parameters) or an array of
      * weighted posterior samples `{model, logWeight}[]` (uncertain parameters).
+     * Sample weights need not be normalised; they are normalised here, in log
+     * space, before being passed to `_J`.
      * @param {BaseDemandModel | {model: BaseDemandModel, logWeight: number}[]} demandModel
      * @param {number} price
      * @returns {number}
      */
     J(demandModel, price) {
-        const samples = Array.isArray(demandModel)
-            ? demandModel
-            : [{ model: demandModel, logWeight: 0 }]
-        return this._J(samples, price)
+        if (!Array.isArray(demandModel)) {
+            return this._J([{ model: demandModel, logWeight: 0 }], price)
+        }
+        const logNorm = logSumExp(demandModel.map(s => s.logWeight))
+        return this._J(demandModel.map(({ model, logWeight }) => ({ model, logWeight: logWeight - logNorm })), price)
     }
 
     /**

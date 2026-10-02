@@ -234,17 +234,16 @@ describe('posterior aggregation over weighted samples', () => {
         assert.equal(erm.J(models[0], 80), erm.J([{ model: models[0], logWeight: 0 }], 80))
     })
 
-    /** @type {{name: string, objective: BaseObjectiveFunction, todo?: string}[]} */
+    /** @type {{name: string, objective: BaseObjectiveFunction}[]} */
     const OBJECTIVES = [
         { name: 'ExpectedRevenue', objective: expectedRevenue },
         { name: 'MeanVariance', objective: new MeanVariance({ parameters: { rho: 0.01 }, cost: COST }) },
-        { name: 'CARA', objective: new CARA({ parameters: { rho: 0.01 }, cost: COST }),
-            todo: 'Bug: CARA._J assumes normalised weights but BaseObjectiveFunction.J does not normalise' },
-        { name: 'EntropicRiskMeasure', objective: new EntropicRiskMeasure({ parameters: { rho: 0.01 }, cost: COST }),
-            todo: 'Bug: EntropicRiskMeasure._J assumes normalised weights but BaseObjectiveFunction.J does not normalise' },
+        { name: 'CARA', objective: new CARA({ parameters: { rho: 0.01 }, cost: COST }) },
+        { name: 'EntropicRiskMeasure', objective: new EntropicRiskMeasure({ parameters: { rho: 0.01 }, cost: COST }) },
     ]
-    for (const { name, objective, todo } of OBJECTIVES) {
-        test(`${name} is invariant to shifting every logWeight by a constant`, { todo }, () => {
+    // Regression: CARA and ERM previously assumed normalised weights, which J did not ensure.
+    for (const { name, objective } of OBJECTIVES) {
+        test(`${name} is invariant to shifting every logWeight by a constant`, () => {
             for (const shift of [Math.log(2), -5, 3]) {
                 const shifted = samples.map(({ model, logWeight }) => ({ model, logWeight: logWeight + shift }))
                 assertClose(objective.J(shifted, 80), objective.J(samples, 80), 1e-12)

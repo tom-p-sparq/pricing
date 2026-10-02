@@ -143,9 +143,8 @@ describe('logSumExp', () => {
         assert.equal(logSumExp([-Infinity, 0]), 0)
     })
 
-    test('of all −∞ is −∞ (log of an empty sum)', {
-        todo: 'Bug: returns NaN, because exp(−∞ − (−∞)) = exp(NaN)',
-    }, () => {
+    // Regression: previously returned NaN, because exp(−∞ − (−∞)) = exp(NaN).
+    test('of all −∞ is −∞ (log of an empty sum)', () => {
         assert.equal(logSumExp([-Infinity, -Infinity]), -Infinity)
     })
 })

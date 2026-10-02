@@ -1,6 +1,5 @@
 import { BaseObjectiveFunction } from './base.js'
 import { BaseDemandModel } from '../../demand/base.js'
-import { logSumExp } from '../../utils.js'
 
 /**
  * Mean-variance objective: `E[P] − ρ·Var[P]`, for profit `P = m·K` where
@@ -37,9 +36,8 @@ export class MeanVariance extends BaseObjectiveFunction {
      */
     _J(samples, price) {
         const margin = this.incrementalRevenue(price)
-        const logNorm = logSumExp(samples.map(s => s.logWeight))
         const weighted = samples.map(({ model, logWeight }) => ({
-            w: Math.exp(logWeight - logNorm),
+            w: Math.exp(logWeight),
             mu: margin * model.expectedConversions(price),
             varP: margin * margin * model.varianceConversions(price),
         }))
