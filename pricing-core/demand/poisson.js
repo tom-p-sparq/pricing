@@ -27,6 +27,17 @@ export class PoissonDemandModel extends BaseDemandModel {
     }
 
     /**
+     * Thinned Poisson: converted looks are Poisson(λφ), so the variance equals the mean.
+     * @override
+     * @protected
+     * @param {number} conversionRate
+     * @returns {number}
+     */
+    _varianceConversions(conversionRate) {
+        return conversionRate * this.parameters.lambda
+    }
+
+    /**
      * @override
      * @param {number} t 
      * @param {number} conversionRate 

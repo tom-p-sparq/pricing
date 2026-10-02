@@ -12,7 +12,7 @@ const PHI = 0.3  // conversion at PRICE
 
 /**
  * Cases with analytic mean and variance of converted looks K at conversion φ.
- * @type {{name: string, model: BaseDemandModel, mean: number, variance: number, todo?: string}[]}
+ * @type {{name: string, model: BaseDemandModel, mean: number, variance: number}[]}
  */
 const CASES = [
     {
@@ -26,18 +26,16 @@ const CASES = [
         model: new PoissonDemandModel({ parameters: { lambda: 50 }, conversionModel }),
         mean: 50 * PHI,
         variance: 50 * PHI,
-        todo: 'Bug: PoissonDemandModel does not implement _varianceConversions',
     },
     {
         name: 'Negative binomial',
         model: new NegativeBinomialDemandModel({ parameters: { lambda: 50, r: 4 }, conversionModel }),
         mean: 50 * PHI,
         variance: 50 * PHI + (50 * PHI) ** 2 / 4,
-        todo: 'Bug: NegativeBinomialDemandModel does not implement _varianceConversions',
     },
 ]
 
-for (const { name, model, mean, variance, todo } of CASES) {
+for (const { name, model, mean, variance } of CASES) {
     describe(name, () => {
         /** @type {(t: number) => number} */
         const K = t => model.logMgfConversions(t, PRICE)
@@ -62,7 +60,9 @@ for (const { name, model, mean, variance, todo } of CASES) {
             assertClose((K(h) - 2 * K(0) + K(-h)) / (h * h), variance, 1e-4)
         })
 
-        test('varianceConversions matches the analytic variance', { todo }, () => {
+        // Regression: Poisson and negative binomial previously did not implement
+        // _varianceConversions, so MeanVariance threw for them.
+        test('varianceConversions matches the analytic variance', () => {
             assertClose(model.varianceConversions(PRICE), variance, 1e-12)
         })
     })
