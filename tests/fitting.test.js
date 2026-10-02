@@ -75,27 +75,43 @@ describe('fit', () => {
         assertClose(model.conversion(120), 0.2, 1e-12)
     })
 
-    /** @type {{Model: typeof LogisticConversionModel, todo?: string}[]} */
-    const RECOVERY_CASES = [
-        { Model: LogisticConversionModel },
-        { Model: WeibullConversionModel },
-        {
-            Model: LogLogisticConversionModel,
-            todo: 'Bug: after the flat-model fallback, fit() keeps the discarded start model\'s log-likelihood as its '
-                + 'convergence baseline, so it stops after one batch and returns a worse model than it was given',
-        },
+    // Regression: the fallback threshold was applied per point, so with 1000 looks per point
+    // even the true model (≈ −570 per point, −0.57 per look) was discarded for the flat model.
+    test('keeps a plausible start instead of falling back to the flat model', () => {
+        const truth = LogLogisticConversionModel.fromReference({ price: 100, conversion: 0.3, elasticity: -2 })
+        const data = [60, 80, 100, 120, 140].map(price => ({ price, looks: 1000, books: 1000 * truth.conversion(price) }))
+        const startModel = LogLogisticConversionModel.fromReference({ price: 100, conversion: 0.5, elasticity: -1 })  // b = −2
+        const [first] = runFit(startModel, data)
+        // One batch is 100 Adam steps of size ≲ learningRate = 0.001, so b moves by ≲ 0.1
+        // from −2; the flat model has b = 0.
+        assertClose(first.parameters.b, startModel.parameters.b, 0.5)
+    })
+
+    const RECOVERY_MODELS = [LogisticConversionModel, LogLogisticConversionModel, WeibullConversionModel]
+    // Starting points: a plausible guess (Adam runs from it directly), and one giving each
+    // booked look ~1e-20 probability, whose per-look log-likelihood (≈ −7) is below the
+    // −5 threshold, so fit() first falls back to the flat model at the average conversion.
+    const STARTS = [
+        { name: 'from a plausible start', reference: { price: 100, conversion: 0.5, elasticity: -1 } },
+        { name: 'via the flat-model fallback from a very poor start', reference: { price: 100, conversion: 1e-20, elasticity: -1 } },
     ]
-    for (const { Model, todo } of RECOVERY_CASES) {
-        test(`${Model.name}: recovers the generating curve from noise-free data`, { todo }, () => {
-            const truth = Model.fromReference({ price: 100, conversion: 0.3, elasticity: -2 })
-            // Expected (non-integer) bookings, so the MLE is exactly the generating model.
-            const data = [60, 80, 100, 120, 140].map(price => ({ price, looks: 1000, books: 1000 * truth.conversion(price) }))
-            const fitted = runFit(Model.fromReference({ price: 100, conversion: 0.5, elasticity: -1 }), data).at(-1)
-            assert.ok(fitted)
-            // fit() stops when a batch of 100 Adam steps improves ℓ by < 1e-5, which leaves
-            // the conversion curve within ~1e-3 of the truth here; 5e-3 is a wide margin.
-            for (const { price } of data) {
-                assertClose(fitted.conversion(price), truth.conversion(price), 5e-3, `C(${price})`)
+    for (const { name, reference } of STARTS) {
+        // Regression: fit() previously applied its fallback threshold per *point* (so it fired
+        // for almost any data with many looks) and then kept the discarded start model's
+        // log-likelihood as its convergence baseline, so it could stop after one batch with a
+        // worse model than it was given (seen with log-logistic).
+        test(`recovers the generating curve from noise-free data ${name}`, () => {
+            for (const Model of RECOVERY_MODELS) {
+                const truth = Model.fromReference({ price: 100, conversion: 0.3, elasticity: -2 })
+                // Expected (non-integer) bookings, so the MLE is exactly the generating model.
+                const data = [60, 80, 100, 120, 140].map(price => ({ price, looks: 1000, books: 1000 * truth.conversion(price) }))
+                const fitted = runFit(Model.fromReference(reference), data).at(-1)
+                assert.ok(fitted)
+                // fit() stops when a batch of 100 Adam steps improves ℓ by < 1e-5, which leaves
+                // the conversion curve within ~6e-4 of the truth in these cases; 5e-3 is a wide margin.
+                for (const { price } of data) {
+                    assertClose(fitted.conversion(price), truth.conversion(price), 5e-3, `${Model.name} C(${price})`)
+                }
             }
         })
     }

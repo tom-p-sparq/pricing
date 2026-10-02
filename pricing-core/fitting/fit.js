@@ -34,12 +34,16 @@ export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }
         yield modelClass.interpolate(points[0], points[1]);
     } else {
         optimiser.reset(model)
-        const LLH = logLikelihood(model, data);
-        if (LLH/numPoints < -5) {
+        // Fall back to a flat model if the start is extremely poor: an average log-likelihood
+        // below −5 *per look* (the observed outcome given < 1% probability on average).
+        // Normalising by looks rather than points keeps the threshold independent of traffic volume.
+        const totalLooks = data.reduce((total, point) => total + point.looks, 0);
+        if (logLikelihood(model, data) / totalLooks < -5) {
             model = makeFlatModel(modelClass, data);
         }
         let oldLLH;
-        let newLLH = LLH;
+        // Baseline is the model actually being optimised, i.e. after any fallback.
+        let newLLH = logLikelihood(model, data);
         do {
             oldLLH = newLLH;
             model = optimiser.batchRun(model, data, batchSize);
