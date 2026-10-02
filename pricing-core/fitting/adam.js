@@ -5,7 +5,7 @@ export class Adam {
     /**
      * 
      * @param {object} [params={}]
-     * @param {number} [params.learningRate=0.005] Learning rate
+     * @param {number} [params.learningRate=0.001] Learning rate
      * @param {number} [params.beta1=0.9] Adam's beta1
      * @param {number} [params.beta2=0.999] Adam's beta2
      * @param {number} [params.epsilon=1e-8] Prevent division by zero
