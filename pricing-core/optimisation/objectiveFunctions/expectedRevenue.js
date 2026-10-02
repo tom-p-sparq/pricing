@@ -1,5 +1,4 @@
 import { BaseObjectiveFunction } from './base.js'
-import { logSumExp } from '../../utils.js'
 import { BaseDemandModel } from '../../demand/base.js'
 
 /**
@@ -20,8 +19,7 @@ export class ExpectedRevenue extends BaseObjectiveFunction {
      */
     _J(samples, price) {
         const margin = this.incrementalRevenue(price)
-        const logNorm = logSumExp(samples.map(s => s.logWeight))
         return margin * samples.reduce((sum, { model, logWeight }) =>
-            sum + Math.exp(logWeight - logNorm) * model.expectedConversions(price), 0)
+            sum + Math.exp(logWeight) * model.expectedConversions(price), 0)
     }
 } 

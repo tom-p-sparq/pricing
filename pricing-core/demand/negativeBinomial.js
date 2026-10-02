@@ -26,6 +26,19 @@ export class NegativeBinomialDemandModel extends BaseDemandModel {
     }
 
     /**
+     * Thinned negative binomial: converted looks are NB with mean μ = λφ and the same
+     * dispersion r, so the variance is μ + μ²/r.
+     * @override
+     * @protected
+     * @param {number} conversionRate
+     * @returns {number}
+     */
+    _varianceConversions(conversionRate) {
+        const mu = conversionRate * this.parameters.lambda
+        return mu + mu * mu / this.parameters.r
+    }
+
+    /**
      * @override
      * @protected
      * @param {number} t
