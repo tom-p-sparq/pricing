@@ -18,8 +18,7 @@ export function* fit(model, optimiser, data, { epsilon = 1e-5, batchSize = 100 }
     const modelClass = Object.getPrototypeOf(model).constructor
     if (numPoints == 0) {
         yield model
-    }
-    if (numPoints == 1) {
+    } else if (numPoints == 1) {
         const { price, looks, books } = data[0]
         const referencePoint = {
             price: price,

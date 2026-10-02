@@ -56,9 +56,8 @@ describe('logLikelihood', () => {
 describe('fit', () => {
     const start = LogisticConversionModel.fromReference({ price: 100, conversion: 0.5, elasticity: -1 })
 
-    test('with 0 points yields the input model exactly once', {
-        todo: 'Bug: missing `else` after the 0-point branch, so it falls through to the Adam loop and yields 3 times',
-    }, () => {
+    // Regression: a missing `else` previously let 0 points fall through to the Adam loop (3 yields).
+    test('with 0 points yields the input model exactly once', () => {
         const yielded = runFit(start, [])
         assert.equal(yielded.length, 1)
         assert.equal(yielded[0], start)
