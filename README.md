@@ -39,8 +39,8 @@ the code:
 Stochastic tests use a fixed seed, which `TEST_SEED=<n>` overrides.
 
 The suite does **not** cover the plotting and input components in
-`pricing-core/visualisation/` or the page scripts. Two known bugs are recorded as
-`todo` tests. See [`docs/decisions/test-suite.md`](docs/decisions/test-suite.md) for
+`pricing-core/visualisation/` or the page scripts. One known bug, in the price
+optimiser with the linear model, is recorded as a `todo` test. See [`docs/decisions/test-suite.md`](docs/decisions/test-suite.md) for
 exactly what is and isn't covered.
 
 ## Production build

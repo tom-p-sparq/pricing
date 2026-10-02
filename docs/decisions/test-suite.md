@@ -75,7 +75,8 @@ What is tested:
 - `fitting/`:
   - `logLikelihood` and `gradLogLikelihood`;
   - `fit()`'s special cases for 0, 1 and 2 points;
-  - parameter recovery for the logistic and Weibull models.
+  - parameter recovery for the logistic, log-logistic and Weibull models, from a
+    plausible start and through the flat-model fallback.
 - `sampling/`: the RNG, `Prior` with `Beta`, `Proposal` with `NormalStep`,
   `iidSampler`, `mh`, `ParticleFilterState`.
 - `utils.js` (`logSumExp`).
@@ -100,19 +101,37 @@ non-visualisation files. It gives roughly 68% of `pricing-core` if `visualisatio
 counts as 0%. No coverage threshold is enforced: line coverage measures what ran, not
 what was checked.
 
-## Known bugs still open
+## Bugs found by the suite
 
-Each one has a `todo` test:
+Fixed. Each fix has its own commit, and its test is kept as a regression guard.
+
+- `PoissonDemandModel` and `NegativeBinomialDemandModel` lacked
+  `_varianceConversions`, so `MeanVariance` threw for them.
+- `BaseObjectiveFunction.J` did not normalise posterior weights, although `_J` is
+  documented to receive them normalised. `CARA` and `EntropicRiskMeasure` were wrong
+  for unnormalised weights.
+- `logSumExp` of all −∞ returned NaN, not −∞.
+- `fit()` with 0 points fell through to the Adam loop (a missing `else`).
+- `fit()`'s flat-model fallback had two defects:
+  - The threshold `LLH / numPoints < −5` was not scaled by `looks`, so it fired for
+    almost any realistic data and discarded the caller's starting model. It is now an
+    average of −5 per look.
+  - After falling back, the convergence baseline was the discarded model's
+    log-likelihood, so `fit()` could stop after one batch with a worse model than its
+    input (seen with log-logistic).
+
+  The threshold half has its own regression test: a plausible start is kept. The
+  baseline half has no separately observable effect now that the threshold is scaled.
+  The fallback then fires only for a start below −5 per look, so a stale baseline
+  could at worst add one extra batch. It is covered only in combination, by the
+  fallback-path recovery test.
+
+Still open, recorded as a `todo` test:
 
 - `optimisePrice` with a linear conversion model when `pMax` lies beyond the root of
   C. Above the root, profit is identically zero. Brent's first probe can land on that
   plateau and never leave it. Callers can avoid this by capping `pMax` at the root.
   No page is affected today.
-- `fit()` after the flat-model fallback. It keeps the discarded starting model's
-  log-likelihood as its convergence baseline, so it can stop after one batch with a
-  model worse than its input (seen with log-logistic). Separately, the fallback
-  threshold `LLH / numPoints < −5` is not scaled by `looks`, so it fires for almost
-  any realistic dataset.
 
 ## Trade-offs
 
